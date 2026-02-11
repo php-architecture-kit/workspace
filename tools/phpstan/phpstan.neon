@@ -1,0 +1,6 @@
+includes:
+    - baseline.neon
+
+parameters:
+    level: 8
+    treatPhpDocTypesAsCertain: false

@@ -1,0 +1,56 @@
+{
+    "name": "php-architecture-kit/workspace",
+    "type": "project",
+    "description": "Workspace for PHP Architecture Kit.",
+    "keywords": [
+        "php-architecture-kit",
+        "workspace"
+    ],
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {}
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\PhpArchitecture\\Uuid\\": "tests/uuid/",
+            "Tests\\PhpArchitecture\\Clock\\": "tests/clock/",
+            "Benchmarks\\PhpArchitecture\\Uuid\\": "benchmarks/uuid/"
+        }
+    },
+    "repositories": [
+        {
+            "type": "path",
+            "url": "packages/*",
+            "options": {
+                "symlink": true
+            }
+        }
+    ],
+    "require": {
+        "php": "*",
+        "psr/clock": "^1.0",
+        "php-architecture-kit/clock": "@dev",
+        "php-architecture-kit/uuid": "@dev"
+    },
+    "require-dev": {
+        "friendsofphp/php-cs-fixer": "*",
+        "phpmd/phpmd": "*",
+        "phpstan/phpstan": "*",
+        "phpunit/phpunit": "*",
+        "symfony/uid": "^7.4",
+        "ramsey/uuid": "^4.9",
+        "phpbench/phpbench": "^1.4"
+    },
+    "scripts": {
+        "benchmark:uuid": "vendor/bin/phpbench run benchmarks/uuid --config=tools/phpbench/phpbench.json --report=by_method",
+        "code:fix": "vendor/bin/php-cs-fixer --config=tools/php-cs-fixer/php-cs-fixer.php fix",
+        "code:fix:dry": "vendor/bin/php-cs-fixer --config=tools/php-cs-fixer/php-cs-fixer.php check --diff",
+        "code:analyse": "vendor/bin/phpstan analyse packages -c tools/phpstan/phpstan.neon",
+        "code:analyse:b": "vendor/bin/phpstan analyse packages -c tools/phpstan/phpstan.neon --generate-baseline tools/phpstan/baseline.neon --allow-empty-baseline",
+        "phpunit": "php vendor/bin/phpunit --colors=always --configuration tools/phpunit/phpunit.xml --display-warnings --display-errors --display-notices --display-deprecations --fail-on-warning --fail-on-risky",
+        "phpunit:coverage": [
+            "@putenv XDEBUG_MODE=coverage",
+            "@phpunit --do-not-cache-result --log-junit var/coverage/phpunit-report.xml --coverage-cobertura var/coverage/phpunit-coverage.xml --coverage-html var/coverage/html"
+        ]
+    }
+}

@@ -1,0 +1,26 @@
+{
+    "runner.bootstrap": "../../vendor/autoload.php",
+    "runner.path": "../../benchmarks",
+    "storage.driver": "xml",
+    "storage.xml_storage_path": "../../var/phpbench",
+    "report.generators": {
+        "by_method": {
+            "generator": "expression",
+            "break": [
+                "subject"
+            ],
+            "cols": {
+                "subject": null,
+                "benchmark": null,
+                "set": null,
+                "mem_peak": null,
+                "worst": null,
+                "best": null,
+                "mean": null,
+                "stdev": null,
+                "rstdev": null,
+                "mode": null
+            }
+        }
+    }
+}
