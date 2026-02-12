@@ -1,0 +1,15 @@
+[submodule "clock"]
+	path = packages/clock
+	url = https://github.com/php-architecture-kit/clock.git
+
+[submodule "domain-core"]
+	path = packages/domain-core
+	url = https://github.com/php-architecture-kit/domain-core.git
+
+[submodule "graph"]
+	path = packages/graph
+	url = https://github.com/php-architecture-kit/graph.git
+
+[submodule "uuid"]
+	path = packages/uuid
+	url = https://github.com/php-architecture-kit/uuid.git
