@@ -30,7 +30,6 @@ class UuidCreationBench extends Contract
     {
         yield 'ramsey' => ['mode' => 'ramsey'];
     }
-
     private static string $lastMode = '';
 
     public function setUpIteration(array $params): void

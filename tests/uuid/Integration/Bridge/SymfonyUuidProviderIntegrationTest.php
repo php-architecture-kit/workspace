@@ -38,7 +38,7 @@ class SymfonyUuidProviderIntegrationTest extends TestCase
 
         $this->assertMatchesRegularExpression(
             '/^[0-9a-f]{8}-[0-9a-f]{4}-1[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i',
-            $uuid
+            $uuid,
         );
     }
 
@@ -110,7 +110,7 @@ class SymfonyUuidProviderIntegrationTest extends TestCase
 
         $this->assertMatchesRegularExpression(
             '/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i',
-            $uuid
+            $uuid,
         );
     }
 
@@ -145,7 +145,7 @@ class SymfonyUuidProviderIntegrationTest extends TestCase
 
         $this->assertMatchesRegularExpression(
             '/^[0-9a-f]{8}-[0-9a-f]{4}-6[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i',
-            $uuid
+            $uuid,
         );
     }
 
@@ -173,7 +173,7 @@ class SymfonyUuidProviderIntegrationTest extends TestCase
 
         $this->assertMatchesRegularExpression(
             '/^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i',
-            $uuid
+            $uuid,
         );
     }
 

@@ -71,7 +71,7 @@ class ProviderRegistryIntegrationTest extends TestCase
         $this->assertNotNull($provider);
         // Both providers support v4, so either is acceptable
         $this->assertTrue(
-            $provider instanceof RamseyUuidProvider || $provider instanceof SymfonyUuidProvider
+            $provider instanceof RamseyUuidProvider || $provider instanceof SymfonyUuidProvider,
         );
     }
 
