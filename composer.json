@@ -12,6 +12,7 @@
     },
     "autoload-dev": {
         "psr-4": {
+            "Tests\\PhpArchitecture\\Actor\\": "tests/actor/",
             "Tests\\PhpArchitecture\\Clock\\": "tests/clock/",
             "Tests\\PhpArchitecture\\DomainCore\\": "tests/domain-core/",
             "Tests\\PhpArchitecture\\Uuid\\": "tests/uuid/",
@@ -30,6 +31,7 @@
     "require": {
         "php": "*",
         "psr/clock": "^1.0",
+        "php-architecture-kit/actor": "@dev",
         "php-architecture-kit/clock": "@dev",
         "php-architecture-kit/domain-core": "@dev",
         "php-architecture-kit/uuid": "@dev"

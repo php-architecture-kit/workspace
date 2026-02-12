@@ -1,3 +1,7 @@
+[submodule "actor"]
+	path = packages/actor
+	url = https://github.com/php-architecture-kit/actor.git
+
 [submodule "clock"]
 	path = packages/clock
 	url = https://github.com/php-architecture-kit/clock.git

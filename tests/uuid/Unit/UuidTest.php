@@ -241,4 +241,29 @@ class UuidTest extends TestCase
         $this->assertSame('6ba7b812-9dad-11d1-80b4-00c04fd430c8', Uuid::NAMESPACE_OID);
         $this->assertSame('6ba7b814-9dad-11d1-80b4-00c04fd430c8', Uuid::NAMESPACE_X500);
     }
+
+    #[Test]
+    public function fromUuidCreatesNewInstanceWithSameValue(): void
+    {
+        $original = Uuid::fromString('df516cba-fb13-4f45-8335-00252f1b87e2');
+        $copy = Uuid::fromUuid($original);
+
+        $this->assertNotSame($original, $copy);
+        $this->assertTrue($original->equals($copy));
+        $this->assertSame($original->value(), $copy->value());
+    }
+
+    #[Test]
+    public function fromUuidWorksWithSubclasses(): void
+    {
+        $baseUuid = Uuid::fromString('df516cba-fb13-4f45-8335-00252f1b87e2');
+        $subclassUuid = TestUuidSubclass::fromUuid($baseUuid);
+
+        $this->assertInstanceOf(TestUuidSubclass::class, $subclassUuid);
+        $this->assertSame($baseUuid->value(), $subclassUuid->value());
+    }
+}
+
+class TestUuidSubclass extends Uuid
+{
 }

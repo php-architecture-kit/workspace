@@ -4,15 +4,60 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "28978cd7526b24bfa778b5813d00ad02",
+    "content-hash": "537197df3d60aa9b61842d1a779453c8",
     "packages": [
+        {
+            "name": "php-architecture-kit/actor",
+            "version": "dev-main",
+            "dist": {
+                "type": "path",
+                "url": "packages/actor",
+                "reference": "d72c5f91fb64d44a6cb6dfcae6b005c1787b1217"
+            },
+            "require": {
+                "php": "^7.4 || ^8.0",
+                "php-architecture-kit/uuid": "^1.0 || @dev"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "PhpArchitecture\\Actor\\": "src/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "email": "patryk.baszak@gmail.com",
+                    "name": "Patryk Baszak",
+                    "homepage": "https://patrykbaszak.com/"
+                }
+            ],
+            "description": "Actor abstraction for PHP applications - represents who performs actions in the system.",
+            "homepage": "https://github.com/php-architecture-kit/actor",
+            "keywords": [
+                "actor",
+                "ddd",
+                "framework-agnostic",
+                "identity"
+            ],
+            "support": {
+                "issues": "https://github.com/php-architecture-kit/actor/issues",
+                "source": "https://github.com/php-architecture-kit/actor"
+            },
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
+        },
         {
             "name": "php-architecture-kit/clock",
             "version": "dev-main",
             "dist": {
                 "type": "path",
                 "url": "packages/clock",
-                "reference": "d0b2a31302ad4346c9bbc82ad5fca69489b645fc"
+                "reference": "77aac0e70345c3bac15aae54963cb2b412828b7d"
             },
             "require": {
                 "php": "^7.4 || ^8.0",
@@ -56,7 +101,7 @@
             "dist": {
                 "type": "path",
                 "url": "packages/domain-core",
-                "reference": "70d150c78c76faa70270d14f24ac16b373be9979"
+                "reference": "e6edb8bc5c5494a74ca7ab3c4ac580120c9644ed"
             },
             "require": {
                 "php": "^7.4 || ^8.0"
@@ -100,7 +145,7 @@
             "dist": {
                 "type": "path",
                 "url": "packages/uuid",
-                "reference": "04fb5496fe04e77da945ac5258cf46ca7ee91f36"
+                "reference": "41ec0efdd9d3195a66c09be54be717749e674038"
             },
             "require": {
                 "php": "^7.4 || ^8.0",
@@ -5861,6 +5906,7 @@
     "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": {
+        "php-architecture-kit/actor": 20,
         "php-architecture-kit/clock": 20,
         "php-architecture-kit/domain-core": 20,
         "php-architecture-kit/uuid": 20
