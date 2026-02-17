@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "537197df3d60aa9b61842d1a779453c8",
+    "content-hash": "84b8a1fd0bbf03c8de8369cd4efe310b",
     "packages": [
         {
             "name": "php-architecture-kit/actor",
@@ -12,7 +12,7 @@
             "dist": {
                 "type": "path",
                 "url": "packages/actor",
-                "reference": "d72c5f91fb64d44a6cb6dfcae6b005c1787b1217"
+                "reference": "8fdec3c5fd4c701f4313f1664b067686f68c9428"
             },
             "require": {
                 "php": "^7.4 || ^8.0",
@@ -140,12 +140,56 @@
             }
         },
         {
+            "name": "php-architecture-kit/event-dispatcher",
+            "version": "dev-main",
+            "dist": {
+                "type": "path",
+                "url": "packages/event-dispatcher",
+                "reference": "bbc02b590cb425fc1e85db67c0fb065da2784750"
+            },
+            "require": {
+                "php": "^7.4 || ^8.0",
+                "psr/event-dispatcher": "^1.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "PhpArchitecture\\Events\\": "src/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "email": "patryk.baszak@gmail.com",
+                    "name": "Patryk Baszak",
+                    "homepage": "https://patrykbaszak.com/"
+                }
+            ],
+            "description": "PSR-14 Event Dispatcher bridge for Laravel and Symfony frameworks for framework-agnostic architecture.",
+            "homepage": "https://github.com/php-architecture-kit/event-dispatcher",
+            "keywords": [
+                "ddd",
+                "event-dispatcher",
+                "framework-agnostic"
+            ],
+            "support": {
+                "issues": "https://github.com/php-architecture-kit/event-dispatcher/issues",
+                "source": "https://github.com/php-architecture-kit/event-dispatcher"
+            },
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
+        },
+        {
             "name": "php-architecture-kit/uuid",
             "version": "dev-main",
             "dist": {
                 "type": "path",
                 "url": "packages/uuid",
-                "reference": "41ec0efdd9d3195a66c09be54be717749e674038"
+                "reference": "4f44bc7d5532649ad2128619459d76652fe0c466"
             },
             "require": {
                 "php": "^7.4 || ^8.0",
@@ -235,6 +279,56 @@
                 "source": "https://github.com/php-fig/clock/tree/1.0.0"
             },
             "time": "2022-11-25T14:36:26+00:00"
+        },
+        {
+            "name": "psr/event-dispatcher",
+            "version": "1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/php-fig/event-dispatcher.git",
+                "reference": "dbefd12671e8a14ec7f180cab83036ed26714bb0"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/php-fig/event-dispatcher/zipball/dbefd12671e8a14ec7f180cab83036ed26714bb0",
+                "reference": "dbefd12671e8a14ec7f180cab83036ed26714bb0",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.2.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.0.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Psr\\EventDispatcher\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "PHP-FIG",
+                    "homepage": "http://www.php-fig.org/"
+                }
+            ],
+            "description": "Standard interfaces for event handling.",
+            "keywords": [
+                "events",
+                "psr",
+                "psr-14"
+            ],
+            "support": {
+                "issues": "https://github.com/php-fig/event-dispatcher/issues",
+                "source": "https://github.com/php-fig/event-dispatcher/tree/1.0.0"
+            },
+            "time": "2019-01-08T18:20:26+00:00"
         }
     ],
     "packages-dev": [
@@ -2092,56 +2186,6 @@
                 "source": "https://github.com/php-fig/container/tree/2.0.2"
             },
             "time": "2021-11-05T16:47:00+00:00"
-        },
-        {
-            "name": "psr/event-dispatcher",
-            "version": "1.0.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/php-fig/event-dispatcher.git",
-                "reference": "dbefd12671e8a14ec7f180cab83036ed26714bb0"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/php-fig/event-dispatcher/zipball/dbefd12671e8a14ec7f180cab83036ed26714bb0",
-                "reference": "dbefd12671e8a14ec7f180cab83036ed26714bb0",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=7.2.0"
-            },
-            "type": "library",
-            "extra": {
-                "branch-alias": {
-                    "dev-master": "1.0.x-dev"
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Psr\\EventDispatcher\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "PHP-FIG",
-                    "homepage": "http://www.php-fig.org/"
-                }
-            ],
-            "description": "Standard interfaces for event handling.",
-            "keywords": [
-                "events",
-                "psr",
-                "psr-14"
-            ],
-            "support": {
-                "issues": "https://github.com/php-fig/event-dispatcher/issues",
-                "source": "https://github.com/php-fig/event-dispatcher/tree/1.0.0"
-            },
-            "time": "2019-01-08T18:20:26+00:00"
         },
         {
             "name": "psr/log",
@@ -5909,6 +5953,7 @@
         "php-architecture-kit/actor": 20,
         "php-architecture-kit/clock": 20,
         "php-architecture-kit/domain-core": 20,
+        "php-architecture-kit/event-dispatcher": 20,
         "php-architecture-kit/uuid": 20
     },
     "prefer-stable": false,

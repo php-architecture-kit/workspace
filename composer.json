@@ -8,13 +8,16 @@
     ],
     "license": "MIT",
     "autoload": {
-        "psr-4": {}
+        "psr-4": {
+            "PhpArchitecture\\Graph\\": "packages/graph/src/"
+        }
     },
     "autoload-dev": {
         "psr-4": {
             "Tests\\PhpArchitecture\\Actor\\": "tests/actor/",
             "Tests\\PhpArchitecture\\Clock\\": "tests/clock/",
             "Tests\\PhpArchitecture\\DomainCore\\": "tests/domain-core/",
+            "Tests\\PhpArchitecture\\Graph\\": "tests/graph/",
             "Tests\\PhpArchitecture\\Uuid\\": "tests/uuid/",
             "Benchmarks\\PhpArchitecture\\Uuid\\": "benchmarks/uuid/"
         }
@@ -34,6 +37,7 @@
         "php-architecture-kit/actor": "@dev",
         "php-architecture-kit/clock": "@dev",
         "php-architecture-kit/domain-core": "@dev",
+        "php-architecture-kit/event-dispatcher": "@dev",
         "php-architecture-kit/uuid": "@dev"
     },
     "require-dev": {
@@ -43,7 +47,8 @@
         "phpunit/phpunit": "*",
         "symfony/uid": "^7.4",
         "ramsey/uuid": "^4.9",
-        "phpbench/phpbench": "^1.4"
+        "phpbench/phpbench": "^1.4",
+        "psr/event-dispatcher": "^1.0"
     },
     "scripts": {
         "benchmark:uuid": "vendor/bin/phpbench run benchmarks/uuid --config=tools/phpbench/phpbench.json --report=by_method",
