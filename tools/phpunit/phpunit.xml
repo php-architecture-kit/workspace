@@ -15,8 +15,23 @@
     </php>
 
     <testsuites>
-        <testsuite name="Project Test Suite">
-            <directory>../../tests</directory>
+        <testsuite name="Actor Package Test Suite">
+            <directory>../../packages/actor/tests</directory>
+        </testsuite>
+        <testsuite name="Clock Package Test Suite">
+            <directory>../../packages/clock/tests</directory>
+        </testsuite>
+        <testsuite name="Domain Core Package Test Suite">
+            <directory>../../packages/domain-core/tests</directory>
+        </testsuite>
+        <testsuite name="Event Dispatcher Package Test Suite">
+            <directory>../../packages/event-dispatcher/tests</directory>
+        </testsuite>
+        <testsuite name="Graph Package Test Suite">
+            <directory>../../packages/graph/tests</directory>
+        </testsuite>
+        <testsuite name="UUID Package Test Suite">
+            <directory>../../packages/uuid/tests</directory>
         </testsuite>
     </testsuites>
 

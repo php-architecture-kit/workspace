@@ -1,0 +1,35 @@
+{
+    "name": "php-architecture-kit/domain-constraint",
+    "description": "Domain Validation classes, interfaces and categorized exceptions.",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "email": "patryk.baszak@gmail.com",
+            "name": "Patryk Baszak",
+            "homepage": "https://patrykbaszak.com/"
+        }
+    ],
+    "keywords": [
+        "aggregate",
+        "domain-constraint",
+        "domain-validation",
+        "ddd",
+        "framework-agnostic"
+    ],
+    "homepage": "https://github.com/php-architecture-kit/domain-constraint",
+    "support": {
+        "issues": "https://github.com/php-architecture-kit/domain-constraint/issues",
+        "source": "https://github.com/php-architecture-kit/domain-constraint"
+    },
+    "require": {
+        "php": "^7.4 || ^8.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "PhpArchitecture\\DomainConstraint\\": "src/"
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}

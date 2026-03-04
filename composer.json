@@ -14,11 +14,12 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Tests\\PhpArchitecture\\Actor\\": "tests/actor/",
-            "Tests\\PhpArchitecture\\Clock\\": "tests/clock/",
-            "Tests\\PhpArchitecture\\DomainCore\\": "tests/domain-core/",
-            "Tests\\PhpArchitecture\\Graph\\": "tests/graph/",
-            "Tests\\PhpArchitecture\\Uuid\\": "tests/uuid/",
+            "PhpArchitecture\\Actor\\Tests\\": "packages/actor/tests/",
+            "PhpArchitecture\\Clock\\Tests\\": "packages/clock/tests/",
+            "PhpArchitecture\\EventDispatcher\\Tests\\": "packages/event-dispatcher/tests/",
+            "PhpArchitecture\\DomainCore\\Tests\\": "packages/domain-core/tests/",
+            "PhpArchitecture\\Graph\\Tests\\": "packages/graph/tests/",
+            "PhpArchitecture\\Uuid\\Tests\\": "packages/uuid/tests/",
             "Benchmarks\\PhpArchitecture\\Uuid\\": "benchmarks/uuid/"
         }
     },
