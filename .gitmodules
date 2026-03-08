@@ -1,23 +1,23 @@
 [submodule "actor"]
 	path = packages/actor
-	url = https://github.com/php-architecture-kit/actor.git
+	url = git@github.com:php-architecture-kit/actor.git
 
 [submodule "clock"]
 	path = packages/clock
-	url = https://github.com/php-architecture-kit/clock.git
+	url = git@github.com:php-architecture-kit/clock.git
 
 [submodule "domain-core"]
 	path = packages/domain-core
-	url = https://github.com/php-architecture-kit/domain-core.git
+	url = git@github.com:php-architecture-kit/domain-core.git
 
 [submodule "event-dispatcher"]
 	path = packages/event-dispatcher
-	url = https://github.com/php-architecture-kit/event-dispatcher.git
+	url = git@github.com:php-architecture-kit/event-dispatcher.git
 
 [submodule "graph"]
 	path = packages/graph
-	url = https://github.com/php-architecture-kit/graph.git
+	url = git@github.com:php-architecture-kit/graph.git
 
 [submodule "uuid"]
 	path = packages/uuid
-	url = https://github.com/php-architecture-kit/uuid.git
+	url = git@github.com:php-architecture-kit/uuid.git
