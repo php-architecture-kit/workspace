@@ -1,0 +1,33 @@
+{
+    "name": "php-architecture-kit/parser",
+    "description": "Parser",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "email": "patryk.baszak@gmail.com",
+            "name": "Patryk Baszak",
+            "homepage": "https://patrykbaszak.com/"
+        }
+    ],
+    "keywords": [
+        "parser",
+        "framework-agnostic"
+    ],
+    "homepage": "https://github.com/php-architecture-kit/parser",
+    "support": {
+        "issues": "https://github.com/php-architecture-kit/parser/issues",
+        "source": "https://github.com/php-architecture-kit/parser"
+    },
+    "require": {
+        "php": "^8.0",
+        "php-architecture-kit/uuid": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "PhpArchitecture\\Parser\\": "src/"
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}
