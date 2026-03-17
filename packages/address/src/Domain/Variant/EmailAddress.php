@@ -8,5 +8,5 @@ use PhpArchitecture\Address\Domain\Address;
 
 class EmailAddress extends Address
 {
-
+    
 }

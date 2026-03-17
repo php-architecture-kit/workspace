@@ -2,11 +2,9 @@
 
 declare(strict_types=1);
 
-namespace PhpArchitecture\Parser;
+namespace PhpArchitecture\Parser\Parser;
 
-final class Parser
+class Parser
 {
-    public function __construct() {}
 
-    
 }

@@ -9,7 +9,8 @@
     "license": "MIT",
     "autoload": {
         "psr-4": {
-            "PhpArchitecture\\Graph\\": "packages/graph/src/"
+            "PhpArchitecture\\Graph\\": "packages/graph/src/",
+            "PhpArchitecture\\Parser\\": "packages/parser/src/"
         }
     },
     "autoload-dev": {
@@ -20,6 +21,7 @@
             "PhpArchitecture\\DomainCore\\Tests\\": "packages/domain-core/tests/",
             "PhpArchitecture\\Graph\\Tests\\": "packages/graph/tests/",
             "PhpArchitecture\\Uuid\\Tests\\": "packages/uuid/tests/",
+            "Tests\\PhpArchitecture\\Parser\\": "packages/parser/tests/",
             "Benchmarks\\PhpArchitecture\\Uuid\\": "benchmarks/uuid/"
         }
     },

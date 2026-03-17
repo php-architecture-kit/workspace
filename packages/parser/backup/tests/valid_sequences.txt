@@ -1,0 +1,387 @@
+token
+member
+identifier
+keyword
+
+token|member
+identifier|keyword|literal
+ws|tab|newline
+
+?token
+?member
+?ws
+
+token*
+member*
+ws*
+
+token+
+member+
+identifier+
+
+>token
+>member
+>lookahead
+
+<token
+<member
+<lookbehind
+
+token[anchor]
+member[name]
+identifier[varName]
+
+token/s
+member/t
+identifier/v
+
+token/st
+member/abc
+identifier/xyz
+
+token[anchor]/s
+member[name]/t
+identifier[varName]/st
+
+token+[anchor]
+member+[name]
+identifier*[list]
+
+token+[anchor]/s
+member*[items]/t
+identifier+[names]/v
+
+?token[opt]
+?member[optional]
+?ws[space]
+
+?token[opt]/s
+?member[optional]/t
+?ws[space]/x
+
+token*[many]
+member*[list]
+ws*[spaces]
+
+token*[many]/s
+member*[list]/t
+ws*[spaces]/x
+
+token+[required]
+member+[items]
+identifier+[names]
+
+token+[required]/s
+member+[items]/t
+identifier+[names]/v
+
+>token[ahead]
+>member[next]
+>lookahead[check]
+
+<token[behind]
+<member[prev]
+<lookbehind[check]
+
+identifier|keyword|literal
+token|member|value
+ws|tab|newline|space
+
+?identifier|keyword
+?token|member
+?ws|space
+
+identifier|keyword*
+token|member+
+ws|space*
+
+identifier|keyword[name]
+token|member[item]
+ws|space[sep]
+
+identifier|keyword[name]/t
+token|member[item]/s
+ws|space[sep]/x
+
+identifier|keyword+[names]
+token|member*[items]
+ws|space+[seps]
+
+identifier|keyword+[names]/t
+token|member*[items]/s
+ws|space+[seps]/x
+
+(token)
+(member)
+(ws identifier)
+
+(token member)
+(ws identifier ws)
+(keyword ws value)
+
+?(token)
+
+(token)*
+(identifier ws)+
+
+(token)+
+(ws identifier)+
+(keyword ws value)+
+
+(token)|(member)
+(seq1)|(seq2)
+(ws token)|(tab token)
+
+(token member)|(value)
+(ws identifier ws)|(identifier)
+(keyword ws value)|(value)
+
+(token)/s
+(ws member)/t
+(identifier ws)/x
+
+(token member)/s
+(ws identifier ws)/t
+(keyword ws value)/st
+
+?(token)/s
+
+(token)*/s
+(identifier ws)+/x
+
+(token)+/s
+(ws identifier)+/t
+
+(token)|(member)/s
+(seq1)|(seq2)/t
+(ws token)|(tab token)/x
+
+(token member)|(value)/s
+(ws identifier ws)|(identifier)/t
+(keyword ws value)|(value)/st
+
+>(token)
+
+<(token)
+
+>(token)/s
+
+<(token)/s
+
+?(token)|(member)
+
+((token))
+((ws member))
+((identifier ws value))
+
+((token) (member))
+((ws identifier) ws)
+((keyword ws) value)
+
+((token)|(member))
+((seq1)|(seq2))
+((ws token)|(tab token))
+
+
+((keyword ws) value)+
+
+((token) (member))+
+((ws identifier) ws)+
+
+((token)|(member))*
+((seq1)|(seq2))+
+
+((token) (member))/s
+((ws identifier) ws)/t
+((keyword ws) value)/st
+
+((token)|(member))/s
+((seq1)|(seq2))/t
+((ws token)|(tab token))/x
+
+?((token)|(member))/s
+?((seq1)|(seq2))/t
+
+((ws identifier) ws)+/t
+
+((token)|(member))+/s
+((seq1)|(seq2))*/t
+((ws token)|(tab token))+/x
+
+token member
+ws identifier ws
+keyword ws value ws
+
+token ?member
+ws ?identifier ws
+keyword ?value
+
+token member*
+ws identifier+ ws
+keyword ws* value
+
+token member+
+ws identifier* ws
+keyword+ ws value
+
+token|keyword member
+ws identifier|literal ws
+begin|end ws value
+
+?token member
+?ws identifier
+?keyword ws value
+
+token* member
+ws identifier+ ws*
+keyword* ws value+
+
+token+ member*
+ws* identifier+ ws
+keyword+ ws* value
+
+token member ?value
+ws identifier ?ws
+keyword ?ws value ?ws
+
+token ?member value
+ws ?identifier ?ws
+keyword ws ?value ws
+
+token member* value
+ws identifier+ ws*
+keyword ws* value+
+
+token+ member* value+
+ws* identifier+ ws*
+keyword+ ws* value*
+
+token[t] member[m]
+ws[space] identifier[id] ws[space]
+keyword[kw] ws[sep] value[val]
+
+token[t]/s member[m]/t
+ws[space]/x identifier[id]/v ws[space]/x
+keyword[kw]/k ws[sep]/s value[val]/v
+
+token[t] ?member[m]
+ws[space] ?identifier[id]
+keyword[kw] ?value[val]
+
+
+token[t]/s member[m]/t value[v]/v
+ws[space]/x identifier[id]/i ws[space]/x
+keyword[kw]/k ws[sep]/s value[val]/v
+
+token (ws member)
+identifier (ws value ws)
+keyword (ws value)+
+
+token ?(ws member)
+identifier ?(ws value)
+keyword ?(ws value ws)
+
+token (ws member)*
+identifier (ws value)+
+keyword (ws value ws)*
+
+token (ws member)+
+identifier (ws value)*
+keyword (ws value ws)+
+
+token (ws member)|(member)
+identifier (ws value)|(value)
+keyword (ws value ws)|(value ws)
+
+token[t] (ws member)
+identifier[id] (ws value ws)
+keyword[kw] (ws value)+
+
+token[t]/s (ws member)/t
+identifier[id]/i (ws value ws)/v
+keyword[kw]/k (ws value)+/v
+
+token (ws member[m])
+identifier (ws value[val] ws)
+keyword (ws value[v])+
+
+token (ws member[m])/t
+identifier (ws value[val] ws)/v
+keyword (ws value[v])+/v
+
+token (ws member[m]/t)
+identifier (ws value[val]/v ws)
+keyword (ws value[v]/v)+
+
+token[t] (ws member[m])/s
+identifier[id]/i (ws value[val] ws)/v
+keyword[kw]/k (ws value[v]/v)+/x
+
+token ?member (ws value)
+identifier (ws value) ?ws
+keyword ?ws (value ws)+
+
+token member* (ws value)+
+identifier+ (ws value)* ws
+keyword (ws value)+ member*
+
+token (ws member)* value
+identifier (ws value)+ ws*
+keyword+ (ws value ws)* value
+
+token ((ws member))
+identifier ((ws value ws))
+keyword ((ws value)+)
+
+token ((ws member) value)
+identifier ((ws value) ws)
+keyword ((ws value ws) member)
+
+token ((ws member)|(member))
+identifier ((ws value)|(value))
+keyword ((ws value ws)|(value ws))
+
+token ((ws member))* value
+identifier ((ws value))+ ws
+keyword ((ws value ws))* member
+
+token[t] ((ws member[m]))/s
+identifier[id]/i ((ws value[val] ws))/v
+keyword[kw]/k ((ws value[v]/v)+)/x
+
+>token member
+token >member
+identifier ws >value
+
+<token member
+<ws identifier
+
+>token[ahead] member
+token >member[next]
+identifier ws >value[check]
+
+<token[behind] member
+<ws[prev] identifier
+
+token member >value
+ws identifier >ws
+keyword ws value >end
+
+<begin ws identifier
+
+<begin identifier ws >end
+
+token member >(ws value)
+identifier ws >(value ws)
+keyword >(ws value ws)
+
+<(begin ws) identifier
+
+token[t]/s ws[sep]/x member[m]/t
+begin[lb]/s ws[space]/x ?members[items] ws[space]/x end[rb]/s
+
+begin[lb]/s ws[space]/x ?(member[item] (?separator[comma]/s ws[space]/x member[item])*) ws[space]/x end[rb]/s
+
+ws[space]/x string[key]/v ws[space]/x colon[sep]/s ws[space]/x value[val]/v
+
+begin[lb]/s ws ?(ws string[key] ws colon[sep]/s ws value (?comma[sep]/s ws ws string[key] ws colon[sep]/s ws value)*) ws end[rb]/s
