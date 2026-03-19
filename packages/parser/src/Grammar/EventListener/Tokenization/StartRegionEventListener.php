@@ -9,6 +9,7 @@ use PhpArchitecture\Parser\Grammar\Rule;
 use PhpArchitecture\Parser\Grammar\Region;
 use PhpArchitecture\Parser\Tokenization\Event\Contract\TokenizationEvent;
 use PhpArchitecture\Parser\Tokenization\Event\Contract\TokenizationEventListener;
+use PhpArchitecture\Parser\Tokenization\Event\TokenAddedEvent;
 use PhpArchitecture\Parser\Tokenization\Event\TokenMatchedEvent;
 use PhpArchitecture\Parser\Tokenization\Model\TokenRegion;
 use PhpArchitecture\Parser\Tokenization\Tokenization;
@@ -22,7 +23,7 @@ final class StartRegionEventListener implements TokenizationEventListener, RuleM
 
     public function handle(TokenizationEvent $event, Tokenization $context): void
     {
-        if (!$event instanceof TokenMatchedEvent) {
+        if (!$event instanceof TokenMatchedEvent && !$event instanceof TokenAddedEvent) {
             return;
         }
 

@@ -15,6 +15,11 @@ class TokenStream
         $this->tokens[] = $token;
     }
 
+    public function first(): null|Token|TokenRegion
+    {
+        return $this->tokens[0] ?? null;
+    }
+
     public function has(int $offset): bool
     {
         return isset($this->tokens[$offset]);
@@ -24,6 +29,11 @@ class TokenStream
     {
         $peekedToken = $this->peek($offset);
         return $peekedToken !== null && $peekedToken->name === $token;
+    }
+
+    public function last(): null|Token|TokenRegion
+    {
+        return $this->tokens[count($this->tokens) - 1] ?? null;
     }
 
     /**

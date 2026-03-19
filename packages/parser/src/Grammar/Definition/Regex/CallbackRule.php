@@ -12,8 +12,19 @@ use PhpArchitecture\Parser\Tokenization\Model\Token;
 
 final class CallbackRule implements RuleDefinition
 {
+    public const LISTEN_IN_ALL_REGIONS = '*';
+    public const GLOBAL_REGION = '__global__';
+    public const PARENT_REGION = '__parent__';
+    public const ROOT_REGION = '__root__';
+    public const SAME_REGION = '__self__';
+
+    /**
+     * @param string[] $listenInRegions
+     */
     public function __construct(
         public readonly Closure $callback,
+        public readonly string $triggerRule,
+        public readonly array $listenInRegions = [self::SAME_REGION],
     ) {}
 
     public function toTokenRule(Rule $rule, Token $trigger): Rule

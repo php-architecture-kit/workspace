@@ -16,6 +16,8 @@ class RegionConfig
         // inside
         public bool $includeAncestorRules = true,
         public bool $includeAncestorEventSubscribers = true,
+        public bool $includeGlobalRules = true,
+        public bool $includeGlobalEventSubscribers = true,
 
         // inside grammar
         public ?Grammar $insideGrammar = null,

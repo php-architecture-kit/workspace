@@ -8,4 +8,7 @@ use PhpArchitecture\Parser\Tokenization\Event\Contract\TokenizationEvent;
 
 class TokenizationFinishedEvent implements TokenizationEvent
 {
+    public function __construct(
+        public readonly bool $forced
+    ) {}
 }

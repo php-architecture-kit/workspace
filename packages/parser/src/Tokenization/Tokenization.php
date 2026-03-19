@@ -25,6 +25,13 @@ class Tokenization
     public TokenRegion $currentRegion;
     public TokenizationEventDispatcher $dispatcher;
     public PatternLibrary $patternLibrary;
+    public bool $forceTokenizationEnd = false;
+
+    /** @var array<string,PatternLibrary> */
+    public array $regionToPatternLibraryMap = [];
+
+    /** @var array<string,TokenizationEventDispatcher> */
+    public array $regionToEventDispatcherMap = [];
 
     public readonly TokenRegion $output;
 
@@ -48,6 +55,8 @@ class Tokenization
     public function addRegion(TokenRegion $region): void
     {
         $this->currentRegion->stream->add($region);
+        $this->patternLibrary = $this->regionToPatternLibraryMap[$region->name] ?? $this->patternLibrary;
+        $this->dispatcher = $this->regionToEventDispatcherMap[$region->name] ?? $this->dispatcher;
         $this->dispatcher->dispatchEvent(new TokenRegionStartedEvent($region));
     }
 
@@ -55,7 +64,15 @@ class Tokenization
     {
         $this->dispatcher->dispatchEvent(new TokenRegionEndedEvent($this->currentRegion));
         $this->currentRegion = $region;
+        $this->patternLibrary = $this->regionToPatternLibraryMap[$region->name] ?? $this->patternLibrary;
+        $this->dispatcher = $this->regionToEventDispatcherMap[$region->name] ?? $this->dispatcher;
         $this->dispatcher->dispatchEvent(new TokenRegionReturnEvent($this->currentRegion));
+    }
+
+    public function forceEscape(): void
+    {
+        $this->dispatcher->dispatchEvent(new TokenRegionEndedEvent($this->currentRegion));
+        $this->forceTokenizationEnd = true;
     }
 
     public function markTokenizationStarted(): void
@@ -65,6 +82,6 @@ class Tokenization
 
     public function markTokenizationFinished(): void
     {
-        $this->dispatcher->dispatchEvent(new TokenizationFinishedEvent());
+        $this->dispatcher->dispatchEvent(new TokenizationFinishedEvent($this->forceTokenizationEnd));
     }
 }

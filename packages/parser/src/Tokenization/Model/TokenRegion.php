@@ -15,12 +15,37 @@ final class TokenRegion implements Stringable
 
     public function __construct(
         public readonly string $name,
-        public readonly TokenStream $stream,
+        public private(set) TokenStream $stream,
     ) {}
 
     public static function new(string $name): self
     {
         return new self($name, new TokenStream());
+    }
+
+    public function firstToken(): null|Token
+    {
+        $first = $this->stream->first();
+        if ($first instanceof TokenRegion) {
+            return $first->firstToken();
+        }
+
+        return $first;
+    }
+
+    public function lastToken(): null|Token
+    {
+        $last = $this->stream->last();
+        if ($last instanceof TokenRegion) {
+            return $last->lastToken();
+        }
+
+        return $last;
+    }
+
+    public function replaceTokenStream(TokenStream $stream): void
+    {
+        $this->stream = $stream;
     }
 
     public function __toString(): string

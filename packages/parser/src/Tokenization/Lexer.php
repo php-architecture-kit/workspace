@@ -6,6 +6,7 @@ namespace PhpArchitecture\Parser\Tokenization;
 
 use PhpArchitecture\Parser\Tokenization\Model\StringStream;
 use PhpArchitecture\Parser\Tokenization\Model\Token;
+use PhpArchitecture\Parser\Tokenization\Model\TokenRegion;
 
 final class Lexer
 {
@@ -13,7 +14,7 @@ final class Lexer
         private readonly Tokenization $context
     ) {}
 
-    public function process(StringStream $stream): void
+    public function process(StringStream $stream): TokenRegion
     {
         $this->context->markTokenizationStarted();
 
@@ -23,16 +24,18 @@ final class Lexer
 
         $this->tokenizeContent($stream);
 
-        if ($this->context->applyBofEof) {
+        if ($this->context->applyBofEof && $stream->isEof()) {
             $this->context->addToken(Token::eof($stream->position()));
         }
 
         $this->context->markTokenizationFinished();
+
+        return $this->context->output;
     }
 
     private function tokenizeContent(StringStream $stream): void
     {
-        while (!$stream->isEof()) {
+        while (!$stream->isEof() && !$this->context->forceTokenizationEnd) {
             $content = $stream->getChunk($this->context->chunkSize);
             $contentSize = strlen($content);
             $pos = 0;

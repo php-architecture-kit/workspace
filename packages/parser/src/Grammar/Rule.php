@@ -9,6 +9,8 @@ use PhpArchitecture\Parser\Grammar\Definition\RuleType;
 
 class Rule
 {
+    public private(set) int $priority = 0;
+
     /**
      * @param string[] $tags
      */
@@ -18,4 +20,10 @@ class Rule
         public RuleDefinition $definition,
         public array $tags = []
     ) {}
+
+    public function priority(int $priority): self
+    {
+        $this->priority = $priority;
+        return $this;
+    }
 }
