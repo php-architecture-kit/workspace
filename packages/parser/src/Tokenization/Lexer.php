@@ -53,17 +53,18 @@ final class Lexer
                     $tokenName = $bestMatch['name'];
                     $value = $bestMatch['value'];
                     $length = strlen($value);
-                    $stream->advance($length);
-                    $pos += $length;
 
                     $this->context->addToken(
                         Token::default(
                             name: $tokenName,
                             raw: $value,
                             startPosition: $currentPos + $pos,
-                            endPosition: $currentPos + $pos + $length - 1
+                            endPosition: $currentPos + $pos + $length
                         )
                     );
+
+                    $stream->advance($length);
+                    $pos += $length;
 
                     continue;
                 }
@@ -75,10 +76,11 @@ final class Lexer
                     break;
                 }
 
+                $this->context->addToken(
+                    Token::unknown(character: $char, position: $currentPos)
+                );
                 $stream->advance($charLen);
                 $pos += $charLen;
-
-                $this->context->addToken(Token::unknown(character: $char, position: $currentPos));
             } while ($pos < $endPos);
         }
     }

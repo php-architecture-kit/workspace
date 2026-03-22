@@ -15,9 +15,14 @@ class TokenizationEventDispatcher
     /** @var array<string,array<class-string<TokenizationEvent>,array<TokenizationEventListener>>> */
     private array $listeners = [];
 
+    /** @var array{event:TokenizationEvent,listeners:TokenizationEventListener[]}[] */
+    private array $handledEvents = [];
+
     public function __construct(
         private readonly Tokenization $context
-    ) {}
+    ) {
+        $this->listeners[self::NS_SHARED] = [];
+    }
 
     /** @param class-string<TokenizationEvent> $eventClassName */
     public function registerEventListener(
@@ -52,6 +57,8 @@ class TokenizationEventDispatcher
         foreach ($listeners as $listener) {
             $listener->handle($event, $this->context);
         }
+
+        $this->handledEvents[] = ['event' => $event, 'listeners' => $listeners];
     }
 
     /** @return TokenizationEventListener[] */
@@ -60,11 +67,11 @@ class TokenizationEventDispatcher
         $eventClassName = $event::class;
         $namespace = $event instanceof TokenBasedEvent ? $event->name() : self::NS_SHARED;
 
-        return $this->listeners[$namespace][$eventClassName] ?? [];
+        return $this->listeners[$namespace][$eventClassName] ?? $this->listeners[self::NS_SHARED][$eventClassName] ?? [];
     }
 
-    /** 
-     * @param TokenizationEventListener[]
+    /**
+     * @param TokenizationEventListener[] $listeners
      */
     private function sortListenersByPriority(array &$listeners): void
     {

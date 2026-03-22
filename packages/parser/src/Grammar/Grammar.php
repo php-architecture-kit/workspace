@@ -6,25 +6,29 @@ namespace PhpArchitecture\Parser\Grammar;
 
 class Grammar
 {
+    public readonly Region $global;
     public private(set) Region $rootRegion;
     public private(set) bool $compiled = false;
     public bool $requireBofEof = true;
 
     public function __construct(
         public readonly string $name,
-        public readonly Region $global,
         public readonly ?string $variant = null,
-    ) {}
+    ) {
+        $this->global = new Region('global');
+    }
 
-    public function compile(): void
+    public function compile(): self
     {
         if ($this->compiled) {
-            return;
+            return $this;
         }
 
         $this->global->compileDownTopRecursively($this->global);
         $this->global->compileTopDownRecursively($this, $this->global);
         $this->compiled = true;
+
+        return $this;
     }
 
     /**

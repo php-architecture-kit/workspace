@@ -16,6 +16,8 @@ use PhpArchitecture\Parser\Tokenization\Tokenization;
 
 final class StartRegionEventListener implements TokenizationEventListener, RuleMatchedEventListener
 {
+    public const KEY_STARTED_REGION = 'startedRegion';
+
     public function __construct(
         public readonly Region $region,
         public readonly Rule $rule,
@@ -27,9 +29,11 @@ final class StartRegionEventListener implements TokenizationEventListener, RuleM
             return;
         }
 
+        $token = $event->token;
         $newRegion = TokenRegion::new($this->region->name);
         $newRegion->setMeta(TokenRegion::KEY_PARENT, $context->currentRegion);
         $context->addRegion($newRegion);
+        $token->setMeta(self::KEY_STARTED_REGION, $newRegion);
     }
 
     public function priority(): int

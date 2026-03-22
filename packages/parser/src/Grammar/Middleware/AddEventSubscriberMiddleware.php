@@ -24,7 +24,7 @@ final class AddEventSubscriberMiddleware implements GrammarMiddleware
 
     public function method(): string
     {
-        return self::ADD_EVENT_HANDLER;
+        return self::ADD_EVENT_SUBSCRIBER;
     }
 
     public function priority(): int

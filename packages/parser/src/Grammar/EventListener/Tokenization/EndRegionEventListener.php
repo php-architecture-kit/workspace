@@ -17,7 +17,8 @@ final class EndRegionEventListener implements TokenizationEventListener, RuleMat
 {
     public function __construct(
         public readonly Rule $rule,
-        public readonly bool $negated = false
+        public readonly bool $negated = false,
+        public readonly bool $allowedForTokenWhichStartedRegion = false
     ) {}
 
     public function handle(TokenizationEvent $event, Tokenization $context): void
@@ -30,7 +31,16 @@ final class EndRegionEventListener implements TokenizationEventListener, RuleMat
             return;
         }
 
+
         $parentRegion = $context->currentRegion->getMeta(TokenRegion::KEY_PARENT);
+        $token = $event->token;
+        if (
+            !$this->allowedForTokenWhichStartedRegion &&
+            $token->hasMeta(StartRegionEventListener::KEY_STARTED_REGION) &&
+            $token->getMeta(StartRegionEventListener::KEY_STARTED_REGION)->name === $context->currentRegion->name
+        ) {
+            return;
+        }
 
         if ($parentRegion !== null) {
             $context->escapeToRegion($parentRegion);

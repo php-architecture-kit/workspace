@@ -11,6 +11,7 @@ use PhpArchitecture\Parser\Grammar\EventListener\Tokenization\EndRegionEventList
 use PhpArchitecture\Parser\Grammar\EventListener\Tokenization\RetokenizeRegionEventListener;
 use PhpArchitecture\Parser\Grammar\EventListener\Tokenization\StartRegionEventListener;
 use PhpArchitecture\Parser\Grammar\Middleware\GrammarMiddleware;
+use PhpArchitecture\Parser\Shared\Meta\MetaTrait;
 use PhpArchitecture\Parser\Tokenization\Event\TokenAddedEvent;
 use PhpArchitecture\Parser\Tokenization\Event\TokenMatchedEvent;
 use PhpArchitecture\Parser\Tokenization\Event\TokenRegionEndedEvent;
@@ -18,6 +19,8 @@ use RuntimeException;
 
 class Region
 {
+    use MetaTrait;
+
     /** @var array<string,Rule> */
     public private(set) array $rules = [];
 
@@ -74,6 +77,21 @@ class Region
     public function includeGlobalEventSubscribers(bool $include = true): self
     {
         $this->config->includeAncestorEventSubscribers = $include;
+        return $this;
+    }
+
+    public function excludeInheritance(bool $ancestor = true, bool $global = true): self
+    {
+        if ($ancestor) {
+            $this->config->includeAncestorRules = false;
+            $this->config->includeAncestorEventSubscribers = false;
+        }
+
+        if ($global) {
+            $this->config->includeGlobalRules = false;
+            $this->config->includeGlobalEventSubscribers = false;
+        }
+
         return $this;
     }
 
@@ -151,7 +169,7 @@ class Region
         $this->applyCloseRule(true);
 
         foreach ($this->regions as $region) {
-            $region->compileRecursively($grammar->global, $this);
+            $region->compileTopDownRecursively($grammar, $this);
         }
     }
 
@@ -262,7 +280,7 @@ class Region
             $this->addEventSubscriber(
                 EventSubscriber::on(
                     TokenAddedEvent::class,
-                    new EndRegionEventListener($openRule)
+                    new EndRegionEventListener($openRule, false, true)
                 )
             );
         }
@@ -389,7 +407,7 @@ class Region
         $this->add(
             EventSubscriber::on(
                 $this->config->includeCloseRuleMatch ? TokenAddedEvent::class : TokenMatchedEvent::class,
-                new EndRegionEventListener($closeRule, $this->config->closeWhenCloseRuleNotMatch)
+                new EndRegionEventListener($closeRule, $this->config->closeWhenCloseRuleNotMatch, false)
             )
         );
     }
@@ -405,6 +423,12 @@ class Region
 
             /** @var CallbackRule $callbackDefinition */
             $callbackDefinition = $rule->definition;
+            $dynamicTokenKey = 'dynamic_token_' . $ruleName . '_from_' . $this->name;
+            $eventSubscriber = EventSubscriber::on(
+                TokenAddedEvent::class,
+                new DynamicTokenInitEventListener($callbackDefinition->triggerRule, $rule, $this)
+            );
+
             foreach ($callbackDefinition->listenInRegions as $regionName) {
                 $targetRegion = match ($regionName) {
                     CallbackRule::GLOBAL_REGION => [$grammar->global],
@@ -420,14 +444,26 @@ class Region
                         throw new RuntimeException("Region `{$regionName}` not found for rule `{$ruleName}`");
                     }
 
-                    $region->add(
-                        EventSubscriber::on(
-                            TokenAddedEvent::class,
-                            new DynamicTokenInitEventListener($callbackDefinition->triggerRule, $rule, $region)
-                        )
-                    );
+                    if (!$region->hasMeta($dynamicTokenKey)) {
+                        $region->add($eventSubscriber);
+                        $region->setMeta($dynamicTokenKey, true);
+                    }
                 }
             }
         }
     }
+
+    // private function applyDelayedEventSubscribers(): void
+    // {
+    //     foreach ($this->eventSubscribers as $eventSubscriber) {
+    //         if ($eventSubscriber->delayUntilEvent !== null) {
+    //             // $this->add(
+    //             //     EventSubscriber::on(
+    //             //         $eventSubscriber->delayUntilEvent,
+    //             //         $eventSubscriber->listener
+    //             //     )
+    //             // );
+    //         }
+    //     }
+    // }
 }

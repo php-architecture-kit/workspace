@@ -32,7 +32,7 @@ final class RetokenizeRegionEventListener implements TokenizationEventListener
         $compiler = new TokenizationContextCompiler();
         $context = $compiler->compile(
             $this->region->config->insideGrammar,
-            $isPositioningActive,
+            applyRowColTracking: $isPositioningActive,
         );
 
         if ($isPositioningActive) {

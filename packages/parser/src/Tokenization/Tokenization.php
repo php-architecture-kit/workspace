@@ -55,6 +55,7 @@ class Tokenization
     public function addRegion(TokenRegion $region): void
     {
         $this->currentRegion->stream->add($region);
+        $this->currentRegion = $region;
         $this->patternLibrary = $this->regionToPatternLibraryMap[$region->name] ?? $this->patternLibrary;
         $this->dispatcher = $this->regionToEventDispatcherMap[$region->name] ?? $this->dispatcher;
         $this->dispatcher->dispatchEvent(new TokenRegionStartedEvent($region));

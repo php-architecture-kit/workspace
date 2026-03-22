@@ -34,7 +34,7 @@ final class PositionEventListener implements TokenizationEventListener
 
     public function priority(): int
     {
-        return 0;
+        return 9999;
     }
 
     private function handleToken(Token $token, Tokenization $context): void
