@@ -11,6 +11,7 @@ use PhpArchitecture\Parser\Grammar\Compiled\Compiler\InnerGrammarEventListenerCo
 use PhpArchitecture\Parser\Grammar\Compiled\Compiler\InnerGrammarInheritanceCompiler;
 use PhpArchitecture\Parser\Grammar\Compiled\Compiler\InRuleDeclaredEventSubscribersCompiler;
 use PhpArchitecture\Parser\Grammar\Compiled\Compiler\RegionInheritanceCompiler;
+use PhpArchitecture\Parser\Grammar\Compiled\Compiler\RegionOpenerCloserCompiler;
 use PhpArchitecture\Parser\Grammar\Compiled\Compiler\RegionPrecompilerInterface;
 use PhpArchitecture\Parser\Grammar\Compiled\Compiler\RuleCompilerInterface;
 use PhpArchitecture\Parser\Grammar\Compiled\Compiler\RuleToPatternCompiler;
@@ -64,6 +65,7 @@ class GrammarCompiler
 
         $this->grammarCompilers = [
             $regionInheritanceCompiler,
+            new RegionOpenerCloserCompiler(),
         ];
 
         $this->ruleCompilers = [
@@ -89,13 +91,14 @@ class GrammarCompiler
             $grammar->name,
             $grammar->variant,
             $grammar->requireBofEof,
+            $grammar->rootRegion->name,
             $compiledRegions,
         );
     }
 
     public function precompile(Grammar $definition): Grammar
     {
-        $grammar = clone $definition;
+        $grammar = $this->deepCloneGrammar($definition);
 
         foreach ($this->grammarPrecompilers as $precompiler) {
             $precompiler->precompileGrammar($grammar);
@@ -106,6 +109,54 @@ class GrammarCompiler
         }
 
         return $grammar;
+    }
+
+    private function deepCloneGrammar(Grammar $grammar): Grammar
+    {
+        $cloned = new Grammar($grammar->name, $grammar->variant);
+        $cloned->requireBofEof = $grammar->requireBofEof;
+        
+        $this->copyRegionContents($grammar->global, $cloned->global);
+        
+        if (isset($grammar->rootRegion)) {
+            $allRegions = $cloned->getAllRegions();
+            foreach ($allRegions as $region) {
+                if ($region->name === $grammar->rootRegion->name) {
+                    $cloned->setRootRegion($region);
+                    break;
+                }
+            }
+        }
+        
+        return $cloned;
+    }
+
+    private function copyRegionContents(Region $source, Region $target): void
+    {
+        foreach ($source->rules as $rule) {
+            $target->add($rule);
+        }
+        
+        foreach ($source->eventSubscribers as $subscriber) {
+            $target->add($subscriber);
+        }
+        
+        foreach ($source->regions as $childRegion) {
+            $clonedChild = new Region(
+                $childRegion->name,
+                clone $childRegion->config
+            );
+            $this->copyRegionContents($childRegion, $clonedChild);
+            $target->add($clonedChild);
+        }
+        
+        foreach ($source->getMetaAll() as $key => $value) {
+            $target->setMeta($key, $value);
+        }
+        
+        foreach ($source->getAllTags() as $tag) {
+            $target->addTag($tag);
+        }
     }
 
     private function precompileRegion(Region $region): void

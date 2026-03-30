@@ -152,6 +152,6 @@ class JsonRfc8259Test extends TestCase
         echo "Total regions: " . count(array_filter($allTokens, fn($item) => isset($item['region_start']))) . "\n\n";
 
         $this->assertGreaterThan(0, count($output->stream->tokens), 'Should tokenize JSON file and produce tokens');
-        $this->assertSame('json', $output->name);
+        $this->assertSame('global', $context->rootName);
     }
 }

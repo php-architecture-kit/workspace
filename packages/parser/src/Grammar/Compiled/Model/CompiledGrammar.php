@@ -13,6 +13,7 @@ final readonly class CompiledGrammar
         public string $name,
         public ?string $variant,
         public bool $requireBofEof,
+        public string $rootRegionName,
         public array $regions,
     ) {}
 }

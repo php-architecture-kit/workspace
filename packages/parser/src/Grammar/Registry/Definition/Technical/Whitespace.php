@@ -35,7 +35,7 @@ class Whitespace implements GrammarDefinitionInterface
                     Rule::token("tab", "\t", ['_ws']),
                     Rule::token("cr", "\r", ['_ws']),
                     Rule::token("newline", "\n", ['_ws'])
-                        ->closeRegion(true, true),
+                        ->closeRegion(true, true, true),
 
                     EventSubscriber::on(
                         TokenRegionEndedEvent::class,

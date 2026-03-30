@@ -22,7 +22,7 @@ final class TokenizationContextCompiler
         }
 
         $context = new DefaultTokenizationContext(
-            rootName: $grammar->name,
+            rootName: $grammar->rootRegionName,
             applyBofEof: $grammar->requireBofEof,
             regionToPatternLibraryMap: $patternLibraries,
             regionToEventDispatcherMap: [],
@@ -46,7 +46,7 @@ final class TokenizationContextCompiler
         $reflection->setValue($context, $eventDispatchers);
         
         $dispatcherReflection = new \ReflectionProperty($context, 'dispatcher');
-        $rootDispatcher = $eventDispatchers[$grammar->name] ?? reset($eventDispatchers);
+        $rootDispatcher = $eventDispatchers[$grammar->rootRegionName] ?? reset($eventDispatchers);
         $dispatcherReflection->setValue($context, $rootDispatcher);
 
         if ($applyRowColTracking) {

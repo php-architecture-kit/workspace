@@ -31,7 +31,7 @@ class RuleToPatternCompiler implements RuleCompilerInterface
             $rule->name,
             $regexRule->regex,
             $rule->priority,
-            $rule->tags,
+            $rule->getAllTags(),
         );
     }
 }

@@ -20,6 +20,7 @@ class JsonRfc8259 extends Whitespace
         $grammar->global->add(
             Rule::token("begin-array", "[")
                 ->startRegion('array')
+                ->enableInheritanceFromGlobal()
                 ->add(
                     Rule::token("value-separator", ","),
                 )
@@ -29,6 +30,7 @@ class JsonRfc8259 extends Whitespace
                 ->addTag("value"),
             Rule::token("begin-object", "{")
                 ->startRegion('object')
+                ->enableInheritanceFromGlobal()
                 ->add(
                     Rule::token("name-separator", ":"),
                     Rule::token("value-separator", ","),
