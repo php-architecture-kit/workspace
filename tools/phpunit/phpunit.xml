@@ -33,6 +33,9 @@
         <testsuite name="UUID Package Test Suite">
             <directory>../../packages/uuid/tests</directory>
         </testsuite>
+        <testsuite name="Parser Package Test Suite">
+            <directory>../../packages/parser/tests</directory>
+        </testsuite>
     </testsuites>
 
     <source restrictNotices="true" restrictWarnings="true">

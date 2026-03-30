@@ -11,9 +11,9 @@ trait MetaTrait
      */
     private array $meta = [];
 
-    public function getMeta(string $key): mixed
+    public function getMeta(string $key, mixed $default = null): mixed
     {
-        return $this->meta[$key] ?? null;
+        return $this->meta[$key] ?? $default;
     }
 
     public function setMeta(string $key, mixed $value): void

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace PhpArchitecture\Parser\Model\Grammar;
 
 use PhpArchitecture\Parser\Event\EventDispatcher;
-use PhpArchitecture\Parser\Grammar;
+use PhpArchitecture\Parser\Grammar\Definition;
 use PhpArchitecture\Parser\Model\Grammar\Event\RegionAddedEvent;
 use PhpArchitecture\Parser\Model\Grammar\Event\RuleAddedEvent;
 

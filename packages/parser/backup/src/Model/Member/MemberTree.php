@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace PhpArchitecture\Parser\Model\Member;
 
-use PhpArchitecture\Parser\Grammar;
+use PhpArchitecture\Parser\Grammar\Definition;
 use PhpArchitecture\Parser\Model\MetaTrait;
 use PhpArchitecture\Parser\Model\Token\TokenInterface;
 use Stringable;

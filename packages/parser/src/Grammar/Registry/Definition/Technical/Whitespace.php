@@ -1,0 +1,82 @@
+<?php
+
+declare(strict_types=1);
+
+namespace PhpArchitecture\Parser\Grammar\Registry\Definition\Technical;
+
+use PhpArchitecture\Parser\Grammar\Definition\EventListener\Tokenization\StartRegionEventListener;
+use PhpArchitecture\Parser\Grammar\Definition\EventSubscriber;
+use PhpArchitecture\Parser\Grammar\Definition\Grammar;
+use PhpArchitecture\Parser\Grammar\Definition\Rule;
+use PhpArchitecture\Parser\Grammar\Registry\GrammarDefinitionInterface;
+use PhpArchitecture\Parser\Processing\Context\TokenizationContext;
+use PhpArchitecture\Parser\Processing\Event\Tokenization\TokenRegionEndedEvent;
+use PhpArchitecture\Parser\Processing\Model\Tokenization\Token;
+
+class Whitespace implements GrammarDefinitionInterface
+{
+    public const FORMAT = "technical";
+    public const VARIANT = "whitespace";
+
+    public function grammar(): Grammar
+    {
+        $grammar = new Grammar(static::FORMAT, static::VARIANT);
+
+        $grammar->global->add(
+            Rule::token("space", " ", ['_ws']),
+            Rule::token("tab", "\t", ['_ws']),
+            Rule::token("cr", "\r", ['_ws']),
+            Rule::token("newline", "\n", ['_ws']),
+
+            Rule::taggedWith('_ws')
+                ->startRegion('whitespace_region', true)
+                ->add(
+                    Rule::token("space", " ", ['_ws']),
+                    Rule::token("tab", "\t", ['_ws']),
+                    Rule::token("cr", "\r", ['_ws']),
+                    Rule::token("newline", "\n", ['_ws'])
+                        ->closeRegion(true, true),
+
+                    EventSubscriber::on(
+                        TokenRegionEndedEvent::class,
+                        static function (TokenRegionEndedEvent $event, TokenizationContext $context): void {
+                            /** @var ?Token $startedBy */
+                            $startedBy = $event->region->getMeta(StartRegionEventListener::KEY_STARTED_BY, null);
+                            $firstToken = $event->region->firstToken();
+                            $lastToken = $event->region->lastToken();
+
+                            $isLastTokenNewLine = $lastToken?->name === 'newline';
+                            $isStartedByNewLine = $startedBy?->name === 'newline';
+                            $isTriggerTokenIncluded = $startedBy === $firstToken;
+
+                            $previousEndedWithNewline = $context->getMeta('_ws_prev_ended_with_newline', false);
+
+                            if ($isLastTokenNewLine) {
+                                if ($isStartedByNewLine && !$isTriggerTokenIncluded) {
+                                    $event->region->rename('empty-line');
+                                } else {
+                                    $event->region->rename('trailing_ws');
+                                }
+
+                                $context->setMeta('_ws_prev_ended_with_newline', true);
+                            } else {
+                                if ($isStartedByNewLine && !$isTriggerTokenIncluded) {
+                                    $event->region->rename('leading_ws');
+                                } elseif ($previousEndedWithNewline) {
+                                    $event->region->rename('leading_ws');
+                                } else {
+                                    $event->region->rename('inline_ws');
+                                }
+
+                                $context->setMeta('_ws_prev_ended_with_newline', false);
+                            }
+                        }
+                    )
+                )
+                ->closeWith(Rule::taggedWith("_ws"), true, false)
+                ->addTag('ws', 'whitespace'),
+        );
+
+        return $grammar;
+    }
+}

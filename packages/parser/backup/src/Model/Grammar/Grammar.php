@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace PhpArchitecture\Parser\Model\Grammar;
 
-use PhpArchitecture\Parser\Grammar as GrammarInterface;
+use PhpArchitecture\Parser\Grammar\Definition as GrammarInterface;
 use PhpArchitecture\Parser\Service\Contract\MemberGrammarInterface;
 use PhpArchitecture\Parser\Service\Contract\TokenGrammarInterface;
 

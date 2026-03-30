@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace PhpArchitecture\Parser\Model\Grammar;
 
-use PhpArchitecture\Parser\Grammar;
+use PhpArchitecture\Parser\Grammar\Definition;
 
 class RegionConfig
 {

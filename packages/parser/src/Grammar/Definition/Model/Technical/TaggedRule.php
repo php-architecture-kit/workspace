@@ -1,0 +1,22 @@
+<?php
+
+declare(strict_types=1);
+
+namespace PhpArchitecture\Parser\Grammar\Definition\Model\Technical;
+
+use PhpArchitecture\Parser\Grammar\Definition\Model\RuleDefinition;
+use PhpArchitecture\Parser\Grammar\Definition\Region;
+
+final class TaggedRule implements RuleDefinition
+{
+    public private(set) Region $sourceRegionRef;
+
+    public function __construct(
+        public readonly string $tag,
+    ) {}
+
+    public function setTaggedRulesSourceRegion(Region $region): void
+    {
+        $this->sourceRegionRef = $region;
+    }
+}
