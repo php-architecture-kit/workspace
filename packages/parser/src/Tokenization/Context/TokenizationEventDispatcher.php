@@ -9,6 +9,7 @@ use PhpArchitecture\Parser\Processing\Event\Tokenization\Contract\RemovableEvent
 use PhpArchitecture\Parser\Processing\Event\Tokenization\Contract\TokenBasedEvent;
 use PhpArchitecture\Parser\Processing\Event\Tokenization\Contract\TokenizationEvent;
 use PhpArchitecture\Parser\Processing\Event\Tokenization\Contract\TokenizationEventListener;
+use PhpArchitecture\Parser\Processing\Event\Tokenization\Contract\TokenRegionBasedEvent;
 
 class TokenizationEventDispatcher
 {
@@ -55,6 +56,7 @@ class TokenizationEventDispatcher
     {
         /** @var TokenizationEventListener[] $listeners */
         $listeners = $this->eventListenersForEvent($event);
+        $this->handledEvents[] = ['event' => $event, 'listeners' => $listeners];
 
         foreach ($listeners as $listener) {
             $listener->handle($event, $this->context);
@@ -63,15 +65,17 @@ class TokenizationEventDispatcher
                 $this->removeListener($listener);
             }
         }
-
-        $this->handledEvents[] = ['event' => $event, 'listeners' => $listeners];
     }
 
     /** @return TokenizationEventListener[] */
     private function eventListenersForEvent(TokenizationEvent $event): array
     {
         $eventClassName = $event::class;
-        $namespace = $event instanceof TokenBasedEvent ? $event->name() : self::NS_SHARED;
+        $namespace = match (true) {
+            $event instanceof TokenBasedEvent => $event->name(),
+            $event instanceof TokenRegionBasedEvent => $event->name(),
+            default => self::NS_SHARED,
+        };
 
         return $this->listeners[$namespace][$eventClassName] ?? $this->listeners[self::NS_SHARED][$eventClassName] ?? [];
     }

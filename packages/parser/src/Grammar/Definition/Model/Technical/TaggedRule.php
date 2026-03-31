@@ -6,6 +6,7 @@ namespace PhpArchitecture\Parser\Grammar\Definition\Model\Technical;
 
 use PhpArchitecture\Parser\Grammar\Definition\Model\RuleDefinition;
 use PhpArchitecture\Parser\Grammar\Definition\Region;
+use PhpArchitecture\Parser\Grammar\Definition\Rule;
 
 final class TaggedRule implements RuleDefinition
 {
@@ -18,5 +19,14 @@ final class TaggedRule implements RuleDefinition
     public function setTaggedRulesSourceRegion(Region $region): void
     {
         $this->sourceRegionRef = $region;
+    }
+
+    /** @return array<string,Rule> */
+    public function getTaggedRules(): array
+    {
+        return array_filter(
+            $this->sourceRegionRef->rules,
+            fn(Rule $rule) => in_array($this->tag, $rule->tags)
+        );
     }
 }

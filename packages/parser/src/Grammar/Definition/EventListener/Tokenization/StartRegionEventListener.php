@@ -33,9 +33,11 @@ final class StartRegionEventListener implements TokenizationEventListener, RuleM
         $token = $event->token;
         $newRegion = TokenRegion::new($this->region->name);
         $newRegion->setMeta(TokenRegion::KEY_PARENT, $context->getCurrentRegion());
-        $context->addRegion($newRegion);
+
         $token->setMeta(self::KEY_STARTED_REGION, $newRegion);
-        $context->setMeta(self::KEY_STARTED_BY, $token);
+        $newRegion->setMeta(self::KEY_STARTED_BY, $token);
+
+        $context->addRegion($newRegion);
     }
 
     public function priority(): int

@@ -16,6 +16,7 @@ use PhpArchitecture\Parser\Grammar\Compiled\Compiler\RegionPrecompilerInterface;
 use PhpArchitecture\Parser\Grammar\Compiled\Compiler\RuleCompilerInterface;
 use PhpArchitecture\Parser\Grammar\Compiled\Compiler\RuleToPatternCompiler;
 use PhpArchitecture\Parser\Grammar\Compiled\Compiler\RuleToSequenceCompiler;
+use PhpArchitecture\Parser\Grammar\Compiled\Compiler\TaggedRuleBasedEventSubscribersCompiler;
 use PhpArchitecture\Parser\Grammar\Compiled\Model\CompiledEventSubscriber;
 use PhpArchitecture\Parser\Grammar\Compiled\Model\CompiledGrammar;
 use PhpArchitecture\Parser\Grammar\Compiled\Model\CompiledRegion;
@@ -64,8 +65,9 @@ class GrammarCompiler
         ];
 
         $this->grammarCompilers = [
-            $regionInheritanceCompiler,
             new RegionOpenerCloserCompiler(),
+            $regionInheritanceCompiler,
+            new TaggedRuleBasedEventSubscribersCompiler(),
         ];
 
         $this->ruleCompilers = [
@@ -115,9 +117,9 @@ class GrammarCompiler
     {
         $cloned = new Grammar($grammar->name, $grammar->variant);
         $cloned->requireBofEof = $grammar->requireBofEof;
-        
+
         $this->copyRegionContents($grammar->global, $cloned->global);
-        
+
         if (isset($grammar->rootRegion)) {
             $allRegions = $cloned->getAllRegions();
             foreach ($allRegions as $region) {
@@ -127,7 +129,7 @@ class GrammarCompiler
                 }
             }
         }
-        
+
         return $cloned;
     }
 
@@ -136,11 +138,11 @@ class GrammarCompiler
         foreach ($source->rules as $rule) {
             $target->add($rule);
         }
-        
+
         foreach ($source->eventSubscribers as $subscriber) {
             $target->add($subscriber);
         }
-        
+
         foreach ($source->regions as $childRegion) {
             $clonedChild = new Region(
                 $childRegion->name,
@@ -149,11 +151,11 @@ class GrammarCompiler
             $this->copyRegionContents($childRegion, $clonedChild);
             $target->add($clonedChild);
         }
-        
+
         foreach ($source->getMetaAll() as $key => $value) {
             $target->setMeta($key, $value);
         }
-        
+
         foreach ($source->getAllTags() as $tag) {
             $target->addTag($tag);
         }

@@ -11,6 +11,34 @@ class RegionInheritanceCompiler implements GrammarPrecompilerInterface, GrammarC
 {
     private const INHERIT_FROM = 'inheritFrom';
 
+    public function compileGrammar(Grammar $grammar): void
+    {
+        $allRegions = $grammar->getAllRegions();
+
+        foreach ($allRegions as $region) {
+            /** @var array<string,int> $inheritFrom */
+            $inheritFrom = $region->getMeta(self::INHERIT_FROM, []);
+
+            foreach ($inheritFrom as $sourceRegionName => $scope) {
+                if ($scope === Region::NONE) {
+                    continue;
+                }
+
+                $sourceRegion = $allRegions[$sourceRegionName] ?? null;
+                if ($sourceRegion === null) {
+                    continue;
+                }
+
+                $region->merge(
+                    $sourceRegion,
+                    $scope & ~Region::REGIONS,
+                    Region::NONE,
+                    Region::MERGE_DEFAULT_OVERRIDE
+                );
+            }
+        }
+    }
+
     public function precompileGrammar(Grammar $grammar): void
     {
         $this->addInheritanceMetaRecursively($grammar->global, null);
@@ -41,34 +69,6 @@ class RegionInheritanceCompiler implements GrammarPrecompilerInterface, GrammarC
             $region->setMeta(self::INHERIT_FROM, $inheritance);
 
             $this->addInheritanceMetaRecursively($globalRegion, $region);
-        }
-    }
-
-    public function compileGrammar(Grammar $grammar): void
-    {
-        $allRegions = $grammar->getAllRegions();
-
-        foreach ($allRegions as $region) {
-            /** @var array<string,int> $inheritFrom */
-            $inheritFrom = $region->getMeta(self::INHERIT_FROM, []);
-
-            foreach ($inheritFrom as $sourceRegionName => $scope) {
-                if ($scope === Region::NONE) {
-                    continue;
-                }
-
-                $sourceRegion = $allRegions[$sourceRegionName] ?? null;
-                if ($sourceRegion === null) {
-                    continue;
-                }
-
-                $region->merge(
-                    $sourceRegion,
-                    $scope,
-                    Region::MERGE_DEFAULT_MIDDLEWARES,
-                    Region::MERGE_DEFAULT_OVERRIDE
-                );
-            }
         }
     }
 }

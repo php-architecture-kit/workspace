@@ -17,8 +17,7 @@ class Grammar
         public readonly ?string $variant = null,
         string $globalRegionName = 'global',
     ) {
-        $this->global = (new Region($globalRegionName))
-            ->setInheritanceFromGlobal(Region::RULES | Region::REGIONS | Region::EVENT_SUBSCRIBERS);
+        $this->global = (new Region($globalRegionName));
         $this->rootRegion = $this->global;
     }
 

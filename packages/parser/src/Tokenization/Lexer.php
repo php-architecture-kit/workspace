@@ -69,7 +69,7 @@ final class Lexer
                     if (!$added) {
                         while ($this->addingRetryCount < $this->context->getAddingRetryLimit()) {
                             $this->addingRetryCount++;
-                            continue;
+                            continue 2;
                         }
                     }
 
@@ -94,7 +94,7 @@ final class Lexer
                 if (!$added) {
                     while ($this->addingRetryCount < $this->context->getAddingRetryLimit()) {
                         $this->addingRetryCount++;
-                        continue;
+                        continue 2;
                     }
                 }
 

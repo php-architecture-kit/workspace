@@ -30,7 +30,6 @@ class DefaultTokenizationContext implements TokenizationContext
     private PatternLibrary $patternLibrary;
     private bool $forceTokenizationEnd = false;
     private bool $retryLastTokenTokenization = false;
-    private ?Token $tokenToRemove = null;
     private readonly TokenRegion $output;
 
     /** 
@@ -62,21 +61,6 @@ class DefaultTokenizationContext implements TokenizationContext
         $this->dispatcher->dispatchEvent(new TokenMatchedEvent($token));
         $this->currentRegion->stream->add($token);
         $this->dispatcher->dispatchEvent(new TokenAddedEvent($token));
-        
-        // Check if this token should be removed after being added
-        if ($this->tokenToRemove !== null && $this->tokenToRemove === $token) {
-            $lastOffset = $this->currentRegion->stream->lastOffset();
-            if ($lastOffset !== null) {
-                $lastToken = $this->currentRegion->stream->get($lastOffset);
-                if ($lastToken === $token) {
-                    $this->currentRegion->stream->remove($lastOffset);
-                    $this->dispatcher->dispatchEvent(new TokenRemovedEvent($token));
-                    // Request lexer to retry tokenization from the same position
-                    $this->retryLastTokenTokenization();
-                }
-            }
-            $this->tokenToRemove = null;
-        }
 
         return !$this->retryLastTokenTokenization;
     }
@@ -88,15 +72,13 @@ class DefaultTokenizationContext implements TokenizationContext
             $lastToken = $this->currentRegion->stream->get($lastOffset);
 
             if ($lastToken === $token) {
-                // Token found in current region - remove it immediately
+                $this->retryLastTokenTokenization = true;
                 $this->currentRegion->stream->remove($lastOffset);
                 $this->dispatcher->dispatchEvent(new TokenRemovedEvent($lastToken));
                 return true;
             }
         }
 
-        // Token not found in current region - mark it for removal after it's added
-        $this->tokenToRemove = $token;
         return false;
     }
 

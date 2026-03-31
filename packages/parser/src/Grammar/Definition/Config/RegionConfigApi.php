@@ -84,6 +84,8 @@ trait RegionConfigApi
             )
         );
 
+        $this->addRule($closeRule);
+
         return $this;
     }
 
@@ -95,7 +97,7 @@ trait RegionConfigApi
 
     public function enableInheritanceFromGlobal(int $scopeToEnable = Region::RULES | Region::REGIONS | Region::EVENT_SUBSCRIBERS): self
     {
-        $this->config->inheritanceFromGlobal &= $scopeToEnable;
+        $this->config->inheritanceFromGlobal |= $scopeToEnable;
         return $this;
     }
 
@@ -113,7 +115,7 @@ trait RegionConfigApi
 
     public function enableInheritanceFromAncestor(int $scopeToEnable = Region::RULES | Region::REGIONS | Region::EVENT_SUBSCRIBERS): self
     {
-        $this->config->inheritanceFromAncestor &= $scopeToEnable;
+        $this->config->inheritanceFromAncestor |= $scopeToEnable;
         return $this;
     }
 

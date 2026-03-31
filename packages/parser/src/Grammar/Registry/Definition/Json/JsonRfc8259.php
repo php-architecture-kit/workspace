@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace PhpArchitecture\Parser\Grammar\Registry\Definition\Json;
 
 use PhpArchitecture\Parser\Grammar\Definition\Grammar;
+use PhpArchitecture\Parser\Grammar\Definition\Region;
 use PhpArchitecture\Parser\Grammar\Definition\Rule;
 use PhpArchitecture\Parser\Grammar\Registry\Definition\Technical\Whitespace;
 
@@ -30,7 +31,7 @@ class JsonRfc8259 extends Whitespace
                 ->addTag("value"),
             Rule::token("begin-object", "{")
                 ->startRegion('object')
-                ->enableInheritanceFromGlobal()
+                ->setInheritanceFromGlobal(Region::RULES | Region::EVENT_SUBSCRIBERS)
                 ->add(
                     Rule::token("name-separator", ":"),
                     Rule::token("value-separator", ","),

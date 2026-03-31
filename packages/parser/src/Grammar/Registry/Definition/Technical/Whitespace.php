@@ -12,6 +12,7 @@ use PhpArchitecture\Parser\Grammar\Registry\GrammarDefinitionInterface;
 use PhpArchitecture\Parser\Processing\Context\TokenizationContext;
 use PhpArchitecture\Parser\Processing\Event\Tokenization\TokenRegionEndedEvent;
 use PhpArchitecture\Parser\Processing\Model\Tokenization\Token;
+use PhpArchitecture\Parser\Processing\Model\Tokenization\TokenRegion;
 
 class Whitespace implements GrammarDefinitionInterface
 {
@@ -35,7 +36,7 @@ class Whitespace implements GrammarDefinitionInterface
                     Rule::token("tab", "\t", ['_ws']),
                     Rule::token("cr", "\r", ['_ws']),
                     Rule::token("newline", "\n", ['_ws'])
-                        ->closeRegion(true, true, true),
+                        ->closeRegion(true, true, false),
 
                     EventSubscriber::on(
                         TokenRegionEndedEvent::class,
@@ -49,7 +50,18 @@ class Whitespace implements GrammarDefinitionInterface
                             $isStartedByNewLine = $startedBy?->name === 'newline';
                             $isTriggerTokenIncluded = $startedBy === $firstToken;
 
-                            $previousEndedWithNewline = $context->getMeta('_ws_prev_ended_with_newline', false);
+                            $currentRegionPlacementInParent = $context->getCurrentRegion()->getMeta("parentRegion")?->stream->lastOffset();
+                            $previousEndedWithNewline = false;
+                            if ($currentRegionPlacementInParent !== null && $currentRegionPlacementInParent > 0) {
+                                $previousTokenOrRegion = $context->getCurrentRegion()->getMeta("parentRegion")?->stream->get($currentRegionPlacementInParent - 1);
+                                if ($previousTokenOrRegion instanceof Token && $previousTokenOrRegion->name === 'newline') {
+                                    $previousEndedWithNewline = true;
+                                }
+
+                                if ($previousTokenOrRegion instanceof TokenRegion && $previousTokenOrRegion->lastToken()?->name === 'newline') {
+                                    $previousEndedWithNewline = true;
+                                }
+                            }
 
                             if ($isLastTokenNewLine) {
                                 if ($isStartedByNewLine && !$isTriggerTokenIncluded) {
