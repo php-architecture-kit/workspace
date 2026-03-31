@@ -16,6 +16,11 @@ abstract class AbstractMiddleware implements GrammarMiddleware
         protected int $priority = 0,
     ) {}
 
+    public static function fromCallable(callable $callback, int $priority = 0): static
+    {
+        return new static(Closure::fromCallable($callback), $priority);
+    }
+
     public function hash(): string
     {
         return hash('xxh128', implode('|', [

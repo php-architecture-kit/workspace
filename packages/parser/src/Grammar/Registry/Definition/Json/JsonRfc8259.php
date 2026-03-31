@@ -24,22 +24,27 @@ class JsonRfc8259 extends Whitespace
                 ->enableInheritanceFromGlobal()
                 ->add(
                     Rule::token("value-separator", ","),
+                    Rule::seq("items", "value (value-separator value)*")
                 )
                 ->closeWith(
                     Rule::token("end-array", "]"),
                 )
                 ->addTag("value"),
+
             Rule::token("begin-object", "{")
                 ->startRegion('object')
                 ->setInheritanceFromGlobal(Region::RULES | Region::EVENT_SUBSCRIBERS)
                 ->add(
                     Rule::token("name-separator", ":"),
                     Rule::token("value-separator", ","),
+                    Rule::seq("member", "string[identifier] name-separator value"),
+                    Rule::seq("members", "member (value-separator member)*")
                 )
                 ->closeWith(
                     Rule::token("end-object", "}"),
                 )
                 ->addTag("value"),
+
             Rule::token("double-quote", "\"")
                 ->startRegion("string", true)
                 ->add(
@@ -49,9 +54,7 @@ class JsonRfc8259 extends Whitespace
                 )
                 ->closeWith(Rule::token("double-quote", "\""))
                 ->addTag("value"),
-            Rule::keyword("null", tags: ["value"]),
-            Rule::keyword("false", tags: ["value"]),
-            Rule::keyword("true", tags: ["value"]),
+
             Rule::token("decimal-point", ".", tags: ["_number_part"]),
             Rule::token("plus", "+", tags: ["_number_part"]),
             Rule::token("minus", "-", tags: ["_number_part"]),
@@ -70,6 +73,10 @@ class JsonRfc8259 extends Whitespace
                 )
                 ->closeWith(Rule::taggedWith("_number_part"), true, false)
                 ->addTag("value"),
+
+            Rule::keyword("null", tags: ["value"]),
+            Rule::keyword("false", tags: ["value"]),
+            Rule::keyword("true", tags: ["value"]),
         );
 
         $grammar->setRootRegion($grammar->global);
