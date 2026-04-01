@@ -16,7 +16,7 @@ final class TechnicalTokenRule implements RuleDefinition
     public function __construct(
         public readonly string $name,
     ) {
-        if (in_array($name, [self::BOF, self::EOF, self::UNKNOWN])) {
+        if (!in_array($name, [self::BOF, self::EOF, self::UNKNOWN])) {
             throw new InvalidArgumentException(__CLASS__ . " must represents only predefined technical tokens: bof, eof, unknown.");
         }
     }

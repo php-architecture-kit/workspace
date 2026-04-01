@@ -6,6 +6,7 @@ namespace PhpArchitecture\Parser\Grammar\Definition\Config;
 
 use PhpArchitecture\Parser\Grammar\Definition\EventSubscriber;
 use PhpArchitecture\Parser\Grammar\Definition\Grammar;
+use PhpArchitecture\Parser\Grammar\Definition\Model\Sequence\SequenceRule;
 use PhpArchitecture\Parser\Grammar\Definition\Region;
 
 class RegionConfig
@@ -16,6 +17,9 @@ class RegionConfig
 
         // close
         public ?EventSubscriber $closer = null,
+
+        // root sequence
+        public ?SequenceRule $rootSequence = null,
 
         // inheritance
         public int $inheritanceFromGlobal = Region::NONE,

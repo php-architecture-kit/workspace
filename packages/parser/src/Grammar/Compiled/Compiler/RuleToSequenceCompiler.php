@@ -45,7 +45,7 @@ class RuleToSequenceCompiler implements RuleCompilerInterface
         return new CompiledSequence(
             $name,
             array_map(
-                static fn(NestedSequence|SequenceNode $node): CompiledNestedSequence|CompiledSequenceNode => $node instanceof NestedSequence
+                fn(NestedSequence|SequenceNode $node): CompiledNestedSequence|CompiledSequenceNode => $node instanceof NestedSequence
                     ? $this->compileNestedSequence($node)
                     : $this->compileSequenceNode($node),
                 $definition->nodes,
@@ -63,8 +63,8 @@ class RuleToSequenceCompiler implements RuleCompilerInterface
                  * @param array<NestedSequence|SequenceNode> $alternatives 
                  * @return array<CompiledNestedSequence|CompiledSequenceNode>
                  */
-                static fn(array $alternatives): array => array_map(
-                    static fn(NestedSequence|SequenceNode $def): CompiledNestedSequence|CompiledSequenceNode => $def instanceof NestedSequence
+                fn(array $alternatives): array => array_map(
+                    fn(NestedSequence|SequenceNode $def): CompiledNestedSequence|CompiledSequenceNode => $def instanceof NestedSequence
                         ? $this->compileNestedSequence($def)
                         : $this->compileSequenceNode($def),
                     $alternatives,

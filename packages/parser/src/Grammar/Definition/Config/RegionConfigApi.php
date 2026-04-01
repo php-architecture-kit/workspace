@@ -8,6 +8,8 @@ use PhpArchitecture\Parser\Grammar\Definition\EventListener\Tokenization\EndRegi
 use PhpArchitecture\Parser\Grammar\Definition\EventListener\Tokenization\StartRegionEventListener;
 use PhpArchitecture\Parser\Grammar\Definition\EventSubscriber;
 use PhpArchitecture\Parser\Grammar\Definition\Grammar;
+use PhpArchitecture\Parser\Grammar\Definition\Middleware\GrammarMiddleware;
+use PhpArchitecture\Parser\Grammar\Definition\Model\Sequence\SequenceRule;
 use PhpArchitecture\Parser\Grammar\Definition\Region;
 use PhpArchitecture\Parser\Grammar\Definition\Rule;
 use PhpArchitecture\Parser\Processing\Event\Tokenization\TokenAddedEvent;
@@ -39,35 +41,6 @@ trait RegionConfigApi
         return $this;
     }
 
-    public function retokenizedByInnerGrammar(
-        Grammar $grammar
-    ): self {
-        $this->config->innerGrammar = $grammar;
-        $this->config->retokenizeWithInnerGrammar = true;
-
-        $this->config->innerGrammarMergeOverrideSource = null;
-        $this->config->innerGrammarMergeScope = null;
-        $this->config->innerGrammarMergeMiddlewaresScope = null;
-
-        return $this;
-    }
-
-    public function withMergedInnerGrammar(
-        Grammar $grammar,
-        bool $overrideSourceGrammar = Region::MERGE_DEFAULT_OVERRIDE,
-        int $mergeScope = Region::MERGE_DEFAULT_SCOPE,
-        int $mergeMiddlewares = Region::MERGE_DEFAULT_MIDDLEWARES,
-    ): self {
-        $this->config->innerGrammar = $grammar;
-        $this->config->innerGrammarMergeOverrideSource = $overrideSourceGrammar;
-        $this->config->innerGrammarMergeScope = $mergeScope;
-        $this->config->innerGrammarMergeMiddlewaresScope = $mergeMiddlewares;
-
-        $this->config->retokenizeWithInnerGrammar = false;
-
-        return $this;
-    }
-
     public function closeWith(
         Rule $closeRule,
         bool $negated = false,
@@ -85,6 +58,30 @@ trait RegionConfigApi
         );
 
         $this->addRule($closeRule);
+
+        return $this;
+    }
+
+    public function withRootSequence(false|string $sequence, bool $applyAddRuleMiddlewares = true): self
+    {
+        if ($sequence === false) {
+            $this->config->rootSequence = null;
+            return $this;
+        }
+
+        if ($applyAddRuleMiddlewares === false) {
+            $this->config->rootSequence = SequenceRule::fromString($sequence);
+            return $this;
+        }
+
+        $rule = Rule::seq($this->name, $sequence);
+        foreach ($this->middlewares[GrammarMiddleware::ADD_RULE] ?? [] as $middleware) {
+            /** @var Rule $rule */
+            $rule = $middleware->handle($rule);
+        }
+
+        assert($rule->definition instanceof SequenceRule);
+        $this->config->rootSequence = $rule->definition;
 
         return $this;
     }
@@ -122,6 +119,35 @@ trait RegionConfigApi
     public function disableInheritanceFromAncestor(?int $scopeToDisable = null): self
     {
         $this->config->inheritanceFromAncestor = $scopeToDisable ? $this->config->inheritanceFromAncestor & ~$scopeToDisable : Region::NONE;
+        return $this;
+    }
+
+    public function retokenizedByInnerGrammar(
+        Grammar $grammar
+    ): self {
+        $this->config->innerGrammar = $grammar;
+        $this->config->retokenizeWithInnerGrammar = true;
+
+        $this->config->innerGrammarMergeOverrideSource = null;
+        $this->config->innerGrammarMergeScope = null;
+        $this->config->innerGrammarMergeMiddlewaresScope = null;
+
+        return $this;
+    }
+
+    public function withMergedInnerGrammar(
+        Grammar $grammar,
+        bool $overrideSourceGrammar = Region::MERGE_DEFAULT_OVERRIDE,
+        int $mergeScope = Region::MERGE_DEFAULT_SCOPE,
+        int $mergeMiddlewares = Region::MERGE_DEFAULT_MIDDLEWARES,
+    ): self {
+        $this->config->innerGrammar = $grammar;
+        $this->config->innerGrammarMergeOverrideSource = $overrideSourceGrammar;
+        $this->config->innerGrammarMergeScope = $mergeScope;
+        $this->config->innerGrammarMergeMiddlewaresScope = $mergeMiddlewares;
+
+        $this->config->retokenizeWithInnerGrammar = false;
+
         return $this;
     }
 }
