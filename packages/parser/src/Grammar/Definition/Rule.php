@@ -14,7 +14,7 @@ use PhpArchitecture\Parser\Grammar\Definition\Model\RuleType;
 use PhpArchitecture\Parser\Grammar\Definition\Model\Sequence\SequenceRule;
 use PhpArchitecture\Parser\Grammar\Definition\Model\Technical\TaggedRule;
 use PhpArchitecture\Parser\Grammar\Definition\Model\Technical\TechnicalTokenRule;
-use PhpArchitecture\Parser\Matching\Event\Contract\ParsingEventListener;
+use PhpArchitecture\Parser\Processing\Event\Matching\Contract\MatchingEventListener;
 use PhpArchitecture\Parser\Processing\Event\Tokenization\Contract\TokenizationEventListener;
 use PhpArchitecture\Parser\Processing\Event\Tokenization\TokenAddedEvent;
 use PhpArchitecture\Parser\Processing\Event\Tokenization\TokenMatchedEvent;
@@ -183,9 +183,9 @@ class Rule
     }
 
     /**
-     * @param TokenizationEventListener|ParsingEventListener|callable(TokenizationEvent $event, TokenizationContext $context):void $listener
+     * @param TokenizationEventListener|MatchingEventListener|callable(TokenizationEvent $event, TokenizationContext $context):void $listener
      */
-    public function onEvent(string $eventClassName, TokenizationEventListener|ParsingEventListener|callable $listener, int $priority = 0): self
+    public function onEvent(string $eventClassName, TokenizationEventListener|MatchingEventListener|callable $listener, int $priority = 0): self
     {
         $this->eventSubscribers[] = EventSubscriber::on($eventClassName, $listener)
             ->priority(

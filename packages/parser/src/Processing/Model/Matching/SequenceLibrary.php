@@ -12,12 +12,16 @@ final class SequenceLibrary
     /** @var array<string,int> */
     public array $sequenceIndexMap = [];
 
+    public ?Sequence $rootSequence = null;
+
     /** 
      * @param Sequence[] $sequences
      */
     public function __construct(
         array $sequences,
+        ?Sequence $rootSequence = null,
     ) {
+        $this->rootSequence = $rootSequence;
         $this->compileSequences($sequences);
     }
 

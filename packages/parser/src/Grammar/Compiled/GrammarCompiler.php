@@ -22,7 +22,7 @@ use PhpArchitecture\Parser\Grammar\Compiled\Model\CompiledGrammar;
 use PhpArchitecture\Parser\Grammar\Compiled\Model\CompiledRegion;
 use PhpArchitecture\Parser\Grammar\Definition\Grammar;
 use PhpArchitecture\Parser\Grammar\Definition\Region;
-use PhpArchitecture\Parser\Matching\Event\Contract\ParsingEventListener;
+use PhpArchitecture\Parser\Processing\Event\Matching\Contract\MatchingEventListener;
 use PhpArchitecture\Parser\Processing\Context\TokenizationContext;
 use PhpArchitecture\Parser\Processing\Event\Tokenization\Contract\TokenizationEvent;
 use PhpArchitecture\Parser\Processing\Event\Tokenization\Contract\TokenizationEventListener;
@@ -172,6 +172,7 @@ class GrammarCompiler
     {
         $patterns = [];
         $sequences = [];
+        $rootSequence = null;
 
         foreach ($region->rules as $rule) {
             foreach ($this->ruleCompilers as $compiler) {
@@ -189,6 +190,15 @@ class GrammarCompiler
 
                 break;
             }
+        }
+
+        if ($region->config->rootSequence) {
+            $rootSequence = (new RuleToSequenceCompiler())->compileSequence(
+                $region->name,
+                $region->config->rootSequence,
+                0,
+                $region->tags
+            );
         }
 
         $compiledEventSubscribers = [];
@@ -214,7 +224,7 @@ class GrammarCompiler
                 };
             }
 
-            if ($listener instanceof TokenizationEventListener || $listener instanceof ParsingEventListener) {
+            if ($listener instanceof TokenizationEventListener || $listener instanceof MatchingEventListener) {
                 $compiledEventSubscribers[$subscriber->hash()] = new CompiledEventSubscriber(
                     $subscriber->eventClassName,
                     $listener,
@@ -228,7 +238,7 @@ class GrammarCompiler
             $region->name,
             $compiledEventSubscribers,
             new PatternLibrary($patterns),
-            new SequenceLibrary($sequences),
+            new SequenceLibrary($sequences, $rootSequence),
         );
     }
 }

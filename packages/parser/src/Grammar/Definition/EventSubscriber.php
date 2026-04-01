@@ -6,8 +6,8 @@ namespace PhpArchitecture\Parser\Grammar\Definition;
 
 use Closure;
 use PhpArchitecture\Parser\Grammar\Definition\EventListener\RuleMatchedEventListener;
-use PhpArchitecture\Parser\Matching\Event\Contract\ParsingEvent;
-use PhpArchitecture\Parser\Matching\Event\Contract\ParsingEventListener;
+use PhpArchitecture\Parser\Processing\Event\Matching\Contract\MatchingEvent;
+use PhpArchitecture\Parser\Processing\Event\Matching\Contract\MatchingEventListener;
 use PhpArchitecture\Parser\Processing\Event\Tokenization\Contract\TokenizationEvent;
 use PhpArchitecture\Parser\Processing\Event\Tokenization\Contract\TokenizationEventListener;
 use PhpArchitecture\Parser\Shared\Hash\HashClosure;
@@ -17,19 +17,19 @@ class EventSubscriber
     use HashClosure;
 
     /** 
-     * @param class-string<TokenizationEvent|ParsingEvent> $eventClassName
+     * @param class-string<TokenizationEvent|MatchingEvent> $eventClassName
      */
     public function __construct(
         public readonly string $eventClassName,
-        public readonly Closure|TokenizationEventListener|ParsingEventListener $listener,
+        public readonly Closure|TokenizationEventListener|MatchingEventListener $listener,
         public ?string $onlyForRuleName = null,
         public int $priority = 0,
     ) {}
 
     /**
-     * @param TokenizationEventListener|ParsingEventListener|callable(TokenizationEvent $event, TokenizationContext $context):void $listener
+     * @param TokenizationEventListener|MatchingEventListener|callable(TokenizationEvent $event, TokenizationContext $context):void $listener
      */
-    public static function on(string $eventClassName, TokenizationEventListener|ParsingEventListener|callable $listener): self
+    public static function on(string $eventClassName, TokenizationEventListener|MatchingEventListener|callable $listener): self
     {
         if (is_callable($listener)) {
             $listener = Closure::fromCallable($listener);
@@ -42,7 +42,7 @@ class EventSubscriber
             $onlyForRuleName = $listener->rule();
         }
 
-        if ($listener instanceof TokenizationEventListener || $listener instanceof ParsingEventListener) {
+        if ($listener instanceof TokenizationEventListener || $listener instanceof MatchingEventListener) {
             $priority = $listener->priority();
         }
 
@@ -74,7 +74,7 @@ class EventSubscriber
     {
         $listenerHash = match (true) {
             $this->listener instanceof TokenizationEventListener,
-            $this->listener instanceof ParsingEventListener => spl_object_hash($this->listener),
+            $this->listener instanceof MatchingEventListener => spl_object_hash($this->listener),
             $this->listener instanceof Closure => $this->hashClosure($this->listener),
             default => 'unknown',
         };
