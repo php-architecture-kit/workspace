@@ -53,7 +53,8 @@
         "phpbench/phpbench": "^1.4",
         "psr/event-dispatcher": "^1.0",
         "illuminate/events": "^12.53",
-        "symfony/event-dispatcher": "^7.4"
+        "symfony/event-dispatcher": "^7.4",
+        "symfony/console": "^7.4"
     },
     "scripts": {
         "benchmark:uuid": "vendor/bin/phpbench run benchmarks/uuid --config=tools/phpbench/phpbench.json --report=by_method",

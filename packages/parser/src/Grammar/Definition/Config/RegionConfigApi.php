@@ -14,6 +14,7 @@ use PhpArchitecture\Parser\Grammar\Definition\Region;
 use PhpArchitecture\Parser\Grammar\Definition\Rule;
 use PhpArchitecture\Parser\Processing\Event\Tokenization\TokenAddedEvent;
 use PhpArchitecture\Parser\Processing\Event\Tokenization\TokenMatchedEvent;
+use PhpArchitecture\Parser\Processing\Model\Parsing\NodeType;
 
 /**
  * @mixin Region
@@ -147,6 +148,13 @@ trait RegionConfigApi
         $this->config->innerGrammarMergeMiddlewaresScope = $mergeMiddlewares;
 
         $this->config->retokenizeWithInnerGrammar = false;
+
+        return $this;
+    }
+
+    public function setNodeType(NodeType $type): self
+    {
+        $this->config->nodeType = $type;
 
         return $this;
     }

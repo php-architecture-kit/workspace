@@ -8,6 +8,7 @@ use PhpArchitecture\Parser\Grammar\Definition\EventSubscriber;
 use PhpArchitecture\Parser\Grammar\Definition\Grammar;
 use PhpArchitecture\Parser\Grammar\Definition\Model\Sequence\SequenceRule;
 use PhpArchitecture\Parser\Grammar\Definition\Region;
+use PhpArchitecture\Parser\Processing\Model\Parsing\NodeType;
 
 class RegionConfig
 {
@@ -31,5 +32,8 @@ class RegionConfig
         public ?bool $innerGrammarMergeOverrideSource = null,
         public ?int $innerGrammarMergeScope = null,
         public ?int $innerGrammarMergeMiddlewaresScope = null,
+
+        // parsing
+        public NodeType $nodeType = NodeType::Node,
     ) {}
 }

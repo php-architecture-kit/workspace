@@ -1,0 +1,23 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+require __DIR__ . '/../vendor/autoload.php';
+
+use PhpArchitecture\Parser\Grammar\Creation\Controller\CLI\ViewGrammarCommand;
+use PhpArchitecture\Parser\Grammar\Creation\Controller\CLI\ViewCompiledGrammarCommand;
+use PhpArchitecture\Parser\Grammar\Creation\Controller\CLI\TokenizeCommand;
+use PhpArchitecture\Parser\Grammar\Creation\Controller\CLI\ParseCommand;
+use Symfony\Component\Console\Application;
+
+$application = new Application('PHP Architecture Kit - Parser CLI', '1.0.0');
+
+$application->addCommands([
+    new ViewGrammarCommand(),
+    new ViewCompiledGrammarCommand(),
+    new TokenizeCommand(),
+    new ParseCommand(),
+]);
+
+$application->run();

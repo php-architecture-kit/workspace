@@ -16,6 +16,15 @@ trait MetaTrait
         return $this->meta[$key] ?? $default;
     }
 
+    /**
+     * @param array<string,mixed> $meta
+     */
+    public function initMeta(array $meta): static
+    {
+        $this->meta = $meta;
+        return $this;
+    }
+
     public function setMeta(string $key, mixed $value): void
     {
         $this->meta[$key] = $value;

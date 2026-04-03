@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace PhpArchitecture\Parser\Processing\Model\Tokenization;
 
 use PhpArchitecture\Parser\Shared\Meta\MetaTrait;
+use PhpArchitecture\Parser\Shared\Tags\TagsTrait;
 use Stringable;
 
 final class TokenRegion implements Stringable
 {
     use MetaTrait;
+    use TagsTrait;
 
     public const KEY_PARENT = 'parentRegion';
 

@@ -11,6 +11,7 @@ use PhpArchitecture\Parser\Grammar\Definition\Rule;
 use PhpArchitecture\Parser\Grammar\Registry\GrammarDefinitionInterface;
 use PhpArchitecture\Parser\Processing\Context\TokenizationContext;
 use PhpArchitecture\Parser\Processing\Event\Tokenization\TokenRegionEndedEvent;
+use PhpArchitecture\Parser\Processing\Model\Parsing\NodeType;
 use PhpArchitecture\Parser\Processing\Model\Tokenization\Token;
 use PhpArchitecture\Parser\Processing\Model\Tokenization\TokenRegion;
 
@@ -24,6 +25,8 @@ class Whitespace implements GrammarDefinitionInterface
         $grammar = new Grammar(static::FORMAT, static::VARIANT);
 
         $grammar->global->add(
+            Rule::technical("bof", ['_ws']),
+            Rule::technical("eof", ['_ws']),
             Rule::token("space", " ", ['_ws']),
             Rule::token("tab", "\t", ['_ws']),
             Rule::token("cr", "\r", ['_ws']),
@@ -32,6 +35,9 @@ class Whitespace implements GrammarDefinitionInterface
             Rule::taggedWith('_ws')
                 ->startRegion('whitespace_region', true)
                 ->add(
+                    Rule::technical("bof", ['_ws']),
+                    Rule::technical("eof", ['_ws'])
+                        ->closeRegion(true, true, false),
                     Rule::token("space", " ", ['_ws']),
                     Rule::token("tab", "\t", ['_ws']),
                     Rule::token("cr", "\r", ['_ws']),
@@ -46,12 +52,12 @@ class Whitespace implements GrammarDefinitionInterface
                             $firstToken = $event->region->firstToken();
                             $lastToken = $event->region->lastToken();
 
-                            $isLastTokenNewLine = $lastToken?->name === 'newline';
+                            $isLastTokenNewLine = $lastToken?->name === 'newline' || $lastToken?->name === 'eof';
                             $isStartedByNewLine = $startedBy?->name === 'newline';
                             $isTriggerTokenIncluded = $startedBy === $firstToken;
 
                             $currentRegionPlacementInParent = $context->getCurrentRegion()->getMeta("parentRegion")?->stream->lastOffset();
-                            $previousEndedWithNewline = false;
+                            $previousEndedWithNewline = $startedBy?->name === 'bof';
                             if ($currentRegionPlacementInParent !== null && $currentRegionPlacementInParent > 0) {
                                 $previousTokenOrRegion = $context->getCurrentRegion()->getMeta("parentRegion")?->stream->get($currentRegionPlacementInParent - 1);
                                 if ($previousTokenOrRegion instanceof Token && $previousTokenOrRegion->name === 'newline') {
@@ -69,8 +75,6 @@ class Whitespace implements GrammarDefinitionInterface
                                 } else {
                                     $event->region->rename('trailing_ws');
                                 }
-
-                                $context->setMeta('_ws_prev_ended_with_newline', true);
                             } else {
                                 if ($isStartedByNewLine && !$isTriggerTokenIncluded) {
                                     $event->region->rename('leading_ws');
@@ -79,13 +83,12 @@ class Whitespace implements GrammarDefinitionInterface
                                 } else {
                                     $event->region->rename('inline_ws');
                                 }
-
-                                $context->setMeta('_ws_prev_ended_with_newline', false);
                             }
                         }
                     )
                 )
                 ->closeWith(Rule::taggedWith("_ws"), true, false)
+                ->setNodeType(NodeType::Raw)
                 ->addTag('ws', 'whitespace'),
         );
 

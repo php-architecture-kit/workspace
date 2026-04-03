@@ -1,0 +1,1436 @@
+├─ Region: global
+  ├─ Token: bof = ""
+  ├─ Region: object
+    ├─ Token: begin-object = "{"
+    ├─ Region: trailing_ws
+      ├─ Token: newline = "\n"
+    ├─ Region: leading_ws
+      ├─ Token: space = " "
+      ├─ Token: space = " "
+      ├─ Token: space = " "
+      ├─ Token: space = " "
+    ├─ Region: string
+      ├─ Token: double-quote = "\""
+      ├─ Token: unescaped = "name"
+      ├─ Token: double-quote = "\""
+    ├─ Token: name-separator = ":"
+    ├─ Region: inline_ws
+      ├─ Token: space = " "
+    ├─ Region: string
+      ├─ Token: double-quote = "\""
+      ├─ Token: unescaped = "php-architecture-kit\/workspace"
+      ├─ Token: double-quote = "\""
+    ├─ Token: value-separator = ","
+    ├─ Region: trailing_ws
+      ├─ Token: newline = "\n"
+    ├─ Region: leading_ws
+      ├─ Token: space = " "
+      ├─ Token: space = " "
+      ├─ Token: space = " "
+      ├─ Token: space = " "
+    ├─ Region: string
+      ├─ Token: double-quote = "\""
+      ├─ Token: unescaped = "type"
+      ├─ Token: double-quote = "\""
+    ├─ Token: name-separator = ":"
+    ├─ Region: inline_ws
+      ├─ Token: space = " "
+    ├─ Region: string
+      ├─ Token: double-quote = "\""
+      ├─ Token: unescaped = "project"
+      ├─ Token: double-quote = "\""
+    ├─ Token: value-separator = ","
+    ├─ Region: trailing_ws
+      ├─ Token: newline = "\n"
+    ├─ Region: leading_ws
+      ├─ Token: space = " "
+      ├─ Token: space = " "
+      ├─ Token: space = " "
+      ├─ Token: space = " "
+    ├─ Region: string
+      ├─ Token: double-quote = "\""
+      ├─ Token: unescaped = "description"
+      ├─ Token: double-quote = "\""
+    ├─ Token: name-separator = ":"
+    ├─ Region: inline_ws
+      ├─ Token: space = " "
+    ├─ Region: string
+      ├─ Token: double-quote = "\""
+      ├─ Token: unescaped = "Workspace for PHP Architecture Kit."
+      ├─ Token: double-quote = "\""
+    ├─ Token: value-separator = ","
+    ├─ Region: trailing_ws
+      ├─ Token: newline = "\n"
+    ├─ Region: leading_ws
+      ├─ Token: space = " "
+      ├─ Token: space = " "
+      ├─ Token: space = " "
+      ├─ Token: space = " "
+    ├─ Region: string
+      ├─ Token: double-quote = "\""
+      ├─ Token: unescaped = "keywords"
+      ├─ Token: double-quote = "\""
+    ├─ Token: name-separator = ":"
+    ├─ Region: inline_ws
+      ├─ Token: space = " "
+    ├─ Region: array
+      ├─ Token: begin-array = "["
+      ├─ Region: trailing_ws
+        ├─ Token: newline = "\n"
+      ├─ Region: leading_ws
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+      ├─ Region: string
+        ├─ Token: double-quote = "\""
+        ├─ Token: unescaped = "php-architecture-kit"
+        ├─ Token: double-quote = "\""
+      ├─ Token: value-separator = ","
+      ├─ Region: trailing_ws
+        ├─ Token: newline = "\n"
+      ├─ Region: leading_ws
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+      ├─ Region: string
+        ├─ Token: double-quote = "\""
+        ├─ Token: unescaped = "workspace"
+        ├─ Token: double-quote = "\""
+      ├─ Region: trailing_ws
+        ├─ Token: newline = "\n"
+      ├─ Region: leading_ws
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+      ├─ Token: end-array = "]"
+    ├─ Token: value-separator = ","
+    ├─ Region: trailing_ws
+      ├─ Token: newline = "\n"
+    ├─ Region: leading_ws
+      ├─ Token: space = " "
+      ├─ Token: space = " "
+      ├─ Token: space = " "
+      ├─ Token: space = " "
+    ├─ Region: string
+      ├─ Token: double-quote = "\""
+      ├─ Token: unescaped = "license"
+      ├─ Token: double-quote = "\""
+    ├─ Token: name-separator = ":"
+    ├─ Region: inline_ws
+      ├─ Token: space = " "
+    ├─ Region: string
+      ├─ Token: double-quote = "\""
+      ├─ Token: unescaped = "MIT"
+      ├─ Token: double-quote = "\""
+    ├─ Token: value-separator = ","
+    ├─ Region: trailing_ws
+      ├─ Token: newline = "\n"
+    ├─ Region: leading_ws
+      ├─ Token: space = " "
+      ├─ Token: space = " "
+      ├─ Token: space = " "
+      ├─ Token: space = " "
+    ├─ Region: string
+      ├─ Token: double-quote = "\""
+      ├─ Token: unescaped = "autoload"
+      ├─ Token: double-quote = "\""
+    ├─ Token: name-separator = ":"
+    ├─ Region: inline_ws
+      ├─ Token: space = " "
+    ├─ Region: object
+      ├─ Token: begin-object = "{"
+      ├─ Region: trailing_ws
+        ├─ Token: newline = "\n"
+      ├─ Region: leading_ws
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+      ├─ Region: string
+        ├─ Token: double-quote = "\""
+        ├─ Token: unescaped = "psr-4"
+        ├─ Token: double-quote = "\""
+      ├─ Token: name-separator = ":"
+      ├─ Region: inline_ws
+        ├─ Token: space = " "
+      ├─ Region: object
+        ├─ Token: begin-object = "{"
+        ├─ Region: trailing_ws
+          ├─ Token: newline = "\n"
+        ├─ Region: leading_ws
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+        ├─ Region: string
+          ├─ Token: double-quote = "\""
+          ├─ Token: unescaped = "PhpArchitecture"
+          ├─ Token: escape-char = "\\\\"
+          ├─ Token: unescaped = "Graph"
+          ├─ Token: escape-char = "\\\\"
+          ├─ Token: double-quote = "\""
+        ├─ Token: name-separator = ":"
+        ├─ Region: inline_ws
+          ├─ Token: space = " "
+        ├─ Region: string
+          ├─ Token: double-quote = "\""
+          ├─ Token: unescaped = "packages\/graph\/src\/"
+          ├─ Token: double-quote = "\""
+        ├─ Token: value-separator = ","
+        ├─ Region: trailing_ws
+          ├─ Token: newline = "\n"
+        ├─ Region: leading_ws
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+        ├─ Region: string
+          ├─ Token: double-quote = "\""
+          ├─ Token: unescaped = "PhpArchitecture"
+          ├─ Token: escape-char = "\\\\"
+          ├─ Token: unescaped = "Parser"
+          ├─ Token: escape-char = "\\\\"
+          ├─ Token: double-quote = "\""
+        ├─ Token: name-separator = ":"
+        ├─ Region: inline_ws
+          ├─ Token: space = " "
+        ├─ Region: string
+          ├─ Token: double-quote = "\""
+          ├─ Token: unescaped = "packages\/parser\/src\/"
+          ├─ Token: double-quote = "\""
+        ├─ Region: trailing_ws
+          ├─ Token: newline = "\n"
+        ├─ Region: leading_ws
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+        ├─ Token: end-object = "}"
+      ├─ Region: trailing_ws
+        ├─ Token: newline = "\n"
+      ├─ Region: leading_ws
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+      ├─ Token: end-object = "}"
+    ├─ Token: value-separator = ","
+    ├─ Region: trailing_ws
+      ├─ Token: newline = "\n"
+    ├─ Region: leading_ws
+      ├─ Token: space = " "
+      ├─ Token: space = " "
+      ├─ Token: space = " "
+      ├─ Token: space = " "
+    ├─ Region: string
+      ├─ Token: double-quote = "\""
+      ├─ Token: unescaped = "autoload-dev"
+      ├─ Token: double-quote = "\""
+    ├─ Token: name-separator = ":"
+    ├─ Region: inline_ws
+      ├─ Token: space = " "
+    ├─ Region: object
+      ├─ Token: begin-object = "{"
+      ├─ Region: trailing_ws
+        ├─ Token: newline = "\n"
+      ├─ Region: leading_ws
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+      ├─ Region: string
+        ├─ Token: double-quote = "\""
+        ├─ Token: unescaped = "psr-4"
+        ├─ Token: double-quote = "\""
+      ├─ Token: name-separator = ":"
+      ├─ Region: inline_ws
+        ├─ Token: space = " "
+      ├─ Region: object
+        ├─ Token: begin-object = "{"
+        ├─ Region: trailing_ws
+          ├─ Token: newline = "\n"
+        ├─ Region: leading_ws
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+        ├─ Region: string
+          ├─ Token: double-quote = "\""
+          ├─ Token: unescaped = "PhpArchitecture"
+          ├─ Token: escape-char = "\\\\"
+          ├─ Token: unescaped = "Actor"
+          ├─ Token: escape-char = "\\\\"
+          ├─ Token: unescaped = "Tests"
+          ├─ Token: escape-char = "\\\\"
+          ├─ Token: double-quote = "\""
+        ├─ Token: name-separator = ":"
+        ├─ Region: inline_ws
+          ├─ Token: space = " "
+        ├─ Region: string
+          ├─ Token: double-quote = "\""
+          ├─ Token: unescaped = "packages\/actor\/tests\/"
+          ├─ Token: double-quote = "\""
+        ├─ Token: value-separator = ","
+        ├─ Region: trailing_ws
+          ├─ Token: newline = "\n"
+        ├─ Region: leading_ws
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+        ├─ Region: string
+          ├─ Token: double-quote = "\""
+          ├─ Token: unescaped = "PhpArchitecture"
+          ├─ Token: escape-char = "\\\\"
+          ├─ Token: unescaped = "Clock"
+          ├─ Token: escape-char = "\\\\"
+          ├─ Token: unescaped = "Tests"
+          ├─ Token: escape-char = "\\\\"
+          ├─ Token: double-quote = "\""
+        ├─ Token: name-separator = ":"
+        ├─ Region: inline_ws
+          ├─ Token: space = " "
+        ├─ Region: string
+          ├─ Token: double-quote = "\""
+          ├─ Token: unescaped = "packages\/clock\/tests\/"
+          ├─ Token: double-quote = "\""
+        ├─ Token: value-separator = ","
+        ├─ Region: trailing_ws
+          ├─ Token: newline = "\n"
+        ├─ Region: leading_ws
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+        ├─ Region: string
+          ├─ Token: double-quote = "\""
+          ├─ Token: unescaped = "PhpArchitecture"
+          ├─ Token: escape-char = "\\\\"
+          ├─ Token: unescaped = "EventDispatcher"
+          ├─ Token: escape-char = "\\\\"
+          ├─ Token: unescaped = "Tests"
+          ├─ Token: escape-char = "\\\\"
+          ├─ Token: double-quote = "\""
+        ├─ Token: name-separator = ":"
+        ├─ Region: inline_ws
+          ├─ Token: space = " "
+        ├─ Region: string
+          ├─ Token: double-quote = "\""
+          ├─ Token: unescaped = "packages\/event-dispatcher\/tests\/"
+          ├─ Token: double-quote = "\""
+        ├─ Token: value-separator = ","
+        ├─ Region: trailing_ws
+          ├─ Token: newline = "\n"
+        ├─ Region: leading_ws
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+        ├─ Region: string
+          ├─ Token: double-quote = "\""
+          ├─ Token: unescaped = "PhpArchitecture"
+          ├─ Token: escape-char = "\\\\"
+          ├─ Token: unescaped = "DomainCore"
+          ├─ Token: escape-char = "\\\\"
+          ├─ Token: unescaped = "Tests"
+          ├─ Token: escape-char = "\\\\"
+          ├─ Token: double-quote = "\""
+        ├─ Token: name-separator = ":"
+        ├─ Region: inline_ws
+          ├─ Token: space = " "
+        ├─ Region: string
+          ├─ Token: double-quote = "\""
+          ├─ Token: unescaped = "packages\/domain-core\/tests\/"
+          ├─ Token: double-quote = "\""
+        ├─ Token: value-separator = ","
+        ├─ Region: trailing_ws
+          ├─ Token: newline = "\n"
+        ├─ Region: leading_ws
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+        ├─ Region: string
+          ├─ Token: double-quote = "\""
+          ├─ Token: unescaped = "PhpArchitecture"
+          ├─ Token: escape-char = "\\\\"
+          ├─ Token: unescaped = "Graph"
+          ├─ Token: escape-char = "\\\\"
+          ├─ Token: unescaped = "Tests"
+          ├─ Token: escape-char = "\\\\"
+          ├─ Token: double-quote = "\""
+        ├─ Token: name-separator = ":"
+        ├─ Region: inline_ws
+          ├─ Token: space = " "
+        ├─ Region: string
+          ├─ Token: double-quote = "\""
+          ├─ Token: unescaped = "packages\/graph\/tests\/"
+          ├─ Token: double-quote = "\""
+        ├─ Token: value-separator = ","
+        ├─ Region: trailing_ws
+          ├─ Token: newline = "\n"
+        ├─ Region: leading_ws
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+        ├─ Region: string
+          ├─ Token: double-quote = "\""
+          ├─ Token: unescaped = "PhpArchitecture"
+          ├─ Token: escape-char = "\\\\"
+          ├─ Token: unescaped = "Uuid"
+          ├─ Token: escape-char = "\\\\"
+          ├─ Token: unescaped = "Tests"
+          ├─ Token: escape-char = "\\\\"
+          ├─ Token: double-quote = "\""
+        ├─ Token: name-separator = ":"
+        ├─ Region: inline_ws
+          ├─ Token: space = " "
+        ├─ Region: string
+          ├─ Token: double-quote = "\""
+          ├─ Token: unescaped = "packages\/uuid\/tests\/"
+          ├─ Token: double-quote = "\""
+        ├─ Token: value-separator = ","
+        ├─ Region: trailing_ws
+          ├─ Token: newline = "\n"
+        ├─ Region: leading_ws
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+        ├─ Region: string
+          ├─ Token: double-quote = "\""
+          ├─ Token: unescaped = "Tests"
+          ├─ Token: escape-char = "\\\\"
+          ├─ Token: unescaped = "PhpArchitecture"
+          ├─ Token: escape-char = "\\\\"
+          ├─ Token: unescaped = "Parser"
+          ├─ Token: escape-char = "\\\\"
+          ├─ Token: double-quote = "\""
+        ├─ Token: name-separator = ":"
+        ├─ Region: inline_ws
+          ├─ Token: space = " "
+        ├─ Region: string
+          ├─ Token: double-quote = "\""
+          ├─ Token: unescaped = "packages\/parser\/tests\/"
+          ├─ Token: double-quote = "\""
+        ├─ Token: value-separator = ","
+        ├─ Region: trailing_ws
+          ├─ Token: newline = "\n"
+        ├─ Region: leading_ws
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+        ├─ Region: string
+          ├─ Token: double-quote = "\""
+          ├─ Token: unescaped = "Benchmarks"
+          ├─ Token: escape-char = "\\\\"
+          ├─ Token: unescaped = "PhpArchitecture"
+          ├─ Token: escape-char = "\\\\"
+          ├─ Token: unescaped = "Uuid"
+          ├─ Token: escape-char = "\\\\"
+          ├─ Token: double-quote = "\""
+        ├─ Token: name-separator = ":"
+        ├─ Region: inline_ws
+          ├─ Token: space = " "
+        ├─ Region: string
+          ├─ Token: double-quote = "\""
+          ├─ Token: unescaped = "benchmarks\/uuid\/"
+          ├─ Token: double-quote = "\""
+        ├─ Region: trailing_ws
+          ├─ Token: newline = "\n"
+        ├─ Region: leading_ws
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+        ├─ Token: end-object = "}"
+      ├─ Region: trailing_ws
+        ├─ Token: newline = "\n"
+      ├─ Region: leading_ws
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+      ├─ Token: end-object = "}"
+    ├─ Token: value-separator = ","
+    ├─ Region: trailing_ws
+      ├─ Token: newline = "\n"
+    ├─ Region: leading_ws
+      ├─ Token: space = " "
+      ├─ Token: space = " "
+      ├─ Token: space = " "
+      ├─ Token: space = " "
+    ├─ Region: string
+      ├─ Token: double-quote = "\""
+      ├─ Token: unescaped = "repositories"
+      ├─ Token: double-quote = "\""
+    ├─ Token: name-separator = ":"
+    ├─ Region: inline_ws
+      ├─ Token: space = " "
+    ├─ Region: array
+      ├─ Token: begin-array = "["
+      ├─ Region: trailing_ws
+        ├─ Token: newline = "\n"
+      ├─ Region: leading_ws
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+      ├─ Region: object
+        ├─ Token: begin-object = "{"
+        ├─ Region: trailing_ws
+          ├─ Token: newline = "\n"
+        ├─ Region: leading_ws
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+        ├─ Region: string
+          ├─ Token: double-quote = "\""
+          ├─ Token: unescaped = "type"
+          ├─ Token: double-quote = "\""
+        ├─ Token: name-separator = ":"
+        ├─ Region: inline_ws
+          ├─ Token: space = " "
+        ├─ Region: string
+          ├─ Token: double-quote = "\""
+          ├─ Token: unescaped = "path"
+          ├─ Token: double-quote = "\""
+        ├─ Token: value-separator = ","
+        ├─ Region: trailing_ws
+          ├─ Token: newline = "\n"
+        ├─ Region: leading_ws
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+        ├─ Region: string
+          ├─ Token: double-quote = "\""
+          ├─ Token: unescaped = "url"
+          ├─ Token: double-quote = "\""
+        ├─ Token: name-separator = ":"
+        ├─ Region: inline_ws
+          ├─ Token: space = " "
+        ├─ Region: string
+          ├─ Token: double-quote = "\""
+          ├─ Token: unescaped = "packages\/*"
+          ├─ Token: double-quote = "\""
+        ├─ Token: value-separator = ","
+        ├─ Region: trailing_ws
+          ├─ Token: newline = "\n"
+        ├─ Region: leading_ws
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+        ├─ Region: string
+          ├─ Token: double-quote = "\""
+          ├─ Token: unescaped = "options"
+          ├─ Token: double-quote = "\""
+        ├─ Token: name-separator = ":"
+        ├─ Region: inline_ws
+          ├─ Token: space = " "
+        ├─ Region: object
+          ├─ Token: begin-object = "{"
+          ├─ Region: trailing_ws
+            ├─ Token: newline = "\n"
+          ├─ Region: leading_ws
+            ├─ Token: space = " "
+            ├─ Token: space = " "
+            ├─ Token: space = " "
+            ├─ Token: space = " "
+            ├─ Token: space = " "
+            ├─ Token: space = " "
+            ├─ Token: space = " "
+            ├─ Token: space = " "
+            ├─ Token: space = " "
+            ├─ Token: space = " "
+            ├─ Token: space = " "
+            ├─ Token: space = " "
+            ├─ Token: space = " "
+            ├─ Token: space = " "
+            ├─ Token: space = " "
+            ├─ Token: space = " "
+          ├─ Region: string
+            ├─ Token: double-quote = "\""
+            ├─ Token: unescaped = "symlink"
+            ├─ Token: double-quote = "\""
+          ├─ Token: name-separator = ":"
+          ├─ Region: inline_ws
+            ├─ Token: space = " "
+          ├─ Token: true = "true"
+          ├─ Region: trailing_ws
+            ├─ Token: newline = "\n"
+          ├─ Region: leading_ws
+            ├─ Token: space = " "
+            ├─ Token: space = " "
+            ├─ Token: space = " "
+            ├─ Token: space = " "
+            ├─ Token: space = " "
+            ├─ Token: space = " "
+            ├─ Token: space = " "
+            ├─ Token: space = " "
+            ├─ Token: space = " "
+            ├─ Token: space = " "
+            ├─ Token: space = " "
+            ├─ Token: space = " "
+          ├─ Token: end-object = "}"
+        ├─ Region: trailing_ws
+          ├─ Token: newline = "\n"
+        ├─ Region: leading_ws
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+        ├─ Token: end-object = "}"
+      ├─ Region: trailing_ws
+        ├─ Token: newline = "\n"
+      ├─ Region: leading_ws
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+      ├─ Token: end-array = "]"
+    ├─ Token: value-separator = ","
+    ├─ Region: trailing_ws
+      ├─ Token: newline = "\n"
+    ├─ Region: leading_ws
+      ├─ Token: space = " "
+      ├─ Token: space = " "
+      ├─ Token: space = " "
+      ├─ Token: space = " "
+    ├─ Region: string
+      ├─ Token: double-quote = "\""
+      ├─ Token: unescaped = "require"
+      ├─ Token: double-quote = "\""
+    ├─ Token: name-separator = ":"
+    ├─ Region: inline_ws
+      ├─ Token: space = " "
+    ├─ Region: object
+      ├─ Token: begin-object = "{"
+      ├─ Region: trailing_ws
+        ├─ Token: newline = "\n"
+      ├─ Region: leading_ws
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+      ├─ Region: string
+        ├─ Token: double-quote = "\""
+        ├─ Token: unescaped = "php"
+        ├─ Token: double-quote = "\""
+      ├─ Token: name-separator = ":"
+      ├─ Region: inline_ws
+        ├─ Token: space = " "
+      ├─ Region: string
+        ├─ Token: double-quote = "\""
+        ├─ Token: unescaped = "*"
+        ├─ Token: double-quote = "\""
+      ├─ Token: value-separator = ","
+      ├─ Region: trailing_ws
+        ├─ Token: newline = "\n"
+      ├─ Region: leading_ws
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+      ├─ Region: string
+        ├─ Token: double-quote = "\""
+        ├─ Token: unescaped = "psr\/clock"
+        ├─ Token: double-quote = "\""
+      ├─ Token: name-separator = ":"
+      ├─ Region: inline_ws
+        ├─ Token: space = " "
+      ├─ Region: string
+        ├─ Token: double-quote = "\""
+        ├─ Token: unescaped = "^1.0"
+        ├─ Token: double-quote = "\""
+      ├─ Token: value-separator = ","
+      ├─ Region: trailing_ws
+        ├─ Token: newline = "\n"
+      ├─ Region: leading_ws
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+      ├─ Region: string
+        ├─ Token: double-quote = "\""
+        ├─ Token: unescaped = "php-architecture-kit\/actor"
+        ├─ Token: double-quote = "\""
+      ├─ Token: name-separator = ":"
+      ├─ Region: inline_ws
+        ├─ Token: space = " "
+      ├─ Region: string
+        ├─ Token: double-quote = "\""
+        ├─ Token: unescaped = "@dev"
+        ├─ Token: double-quote = "\""
+      ├─ Token: value-separator = ","
+      ├─ Region: trailing_ws
+        ├─ Token: newline = "\n"
+      ├─ Region: leading_ws
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+      ├─ Region: string
+        ├─ Token: double-quote = "\""
+        ├─ Token: unescaped = "php-architecture-kit\/clock"
+        ├─ Token: double-quote = "\""
+      ├─ Token: name-separator = ":"
+      ├─ Region: inline_ws
+        ├─ Token: space = " "
+      ├─ Region: string
+        ├─ Token: double-quote = "\""
+        ├─ Token: unescaped = "@dev"
+        ├─ Token: double-quote = "\""
+      ├─ Token: value-separator = ","
+      ├─ Region: trailing_ws
+        ├─ Token: newline = "\n"
+      ├─ Region: leading_ws
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+      ├─ Region: string
+        ├─ Token: double-quote = "\""
+        ├─ Token: unescaped = "php-architecture-kit\/domain-core"
+        ├─ Token: double-quote = "\""
+      ├─ Token: name-separator = ":"
+      ├─ Region: inline_ws
+        ├─ Token: space = " "
+      ├─ Region: string
+        ├─ Token: double-quote = "\""
+        ├─ Token: unescaped = "@dev"
+        ├─ Token: double-quote = "\""
+      ├─ Token: value-separator = ","
+      ├─ Region: trailing_ws
+        ├─ Token: newline = "\n"
+      ├─ Region: leading_ws
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+      ├─ Region: string
+        ├─ Token: double-quote = "\""
+        ├─ Token: unescaped = "php-architecture-kit\/event-dispatcher"
+        ├─ Token: double-quote = "\""
+      ├─ Token: name-separator = ":"
+      ├─ Region: inline_ws
+        ├─ Token: space = " "
+      ├─ Region: string
+        ├─ Token: double-quote = "\""
+        ├─ Token: unescaped = "@dev"
+        ├─ Token: double-quote = "\""
+      ├─ Token: value-separator = ","
+      ├─ Region: trailing_ws
+        ├─ Token: newline = "\n"
+      ├─ Region: leading_ws
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+      ├─ Region: string
+        ├─ Token: double-quote = "\""
+        ├─ Token: unescaped = "php-architecture-kit\/uuid"
+        ├─ Token: double-quote = "\""
+      ├─ Token: name-separator = ":"
+      ├─ Region: inline_ws
+        ├─ Token: space = " "
+      ├─ Region: string
+        ├─ Token: double-quote = "\""
+        ├─ Token: unescaped = "@dev"
+        ├─ Token: double-quote = "\""
+      ├─ Region: trailing_ws
+        ├─ Token: newline = "\n"
+      ├─ Region: leading_ws
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+      ├─ Token: end-object = "}"
+    ├─ Token: value-separator = ","
+    ├─ Region: trailing_ws
+      ├─ Token: newline = "\n"
+    ├─ Region: leading_ws
+      ├─ Token: space = " "
+      ├─ Token: space = " "
+      ├─ Token: space = " "
+      ├─ Token: space = " "
+    ├─ Region: string
+      ├─ Token: double-quote = "\""
+      ├─ Token: unescaped = "require-dev"
+      ├─ Token: double-quote = "\""
+    ├─ Token: name-separator = ":"
+    ├─ Region: inline_ws
+      ├─ Token: space = " "
+    ├─ Region: object
+      ├─ Token: begin-object = "{"
+      ├─ Region: trailing_ws
+        ├─ Token: newline = "\n"
+      ├─ Region: leading_ws
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+      ├─ Region: string
+        ├─ Token: double-quote = "\""
+        ├─ Token: unescaped = "friendsofphp\/php-cs-fixer"
+        ├─ Token: double-quote = "\""
+      ├─ Token: name-separator = ":"
+      ├─ Region: inline_ws
+        ├─ Token: space = " "
+      ├─ Region: string
+        ├─ Token: double-quote = "\""
+        ├─ Token: unescaped = "*"
+        ├─ Token: double-quote = "\""
+      ├─ Token: value-separator = ","
+      ├─ Region: trailing_ws
+        ├─ Token: newline = "\n"
+      ├─ Region: leading_ws
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+      ├─ Region: string
+        ├─ Token: double-quote = "\""
+        ├─ Token: unescaped = "phpmd\/phpmd"
+        ├─ Token: double-quote = "\""
+      ├─ Token: name-separator = ":"
+      ├─ Region: inline_ws
+        ├─ Token: space = " "
+      ├─ Region: string
+        ├─ Token: double-quote = "\""
+        ├─ Token: unescaped = "*"
+        ├─ Token: double-quote = "\""
+      ├─ Token: value-separator = ","
+      ├─ Region: trailing_ws
+        ├─ Token: newline = "\n"
+      ├─ Region: leading_ws
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+      ├─ Region: string
+        ├─ Token: double-quote = "\""
+        ├─ Token: unescaped = "phpstan\/phpstan"
+        ├─ Token: double-quote = "\""
+      ├─ Token: name-separator = ":"
+      ├─ Region: inline_ws
+        ├─ Token: space = " "
+      ├─ Region: string
+        ├─ Token: double-quote = "\""
+        ├─ Token: unescaped = "*"
+        ├─ Token: double-quote = "\""
+      ├─ Token: value-separator = ","
+      ├─ Region: trailing_ws
+        ├─ Token: newline = "\n"
+      ├─ Region: leading_ws
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+      ├─ Region: string
+        ├─ Token: double-quote = "\""
+        ├─ Token: unescaped = "phpunit\/phpunit"
+        ├─ Token: double-quote = "\""
+      ├─ Token: name-separator = ":"
+      ├─ Region: inline_ws
+        ├─ Token: space = " "
+      ├─ Region: string
+        ├─ Token: double-quote = "\""
+        ├─ Token: unescaped = "*"
+        ├─ Token: double-quote = "\""
+      ├─ Token: value-separator = ","
+      ├─ Region: trailing_ws
+        ├─ Token: newline = "\n"
+      ├─ Region: leading_ws
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+      ├─ Region: string
+        ├─ Token: double-quote = "\""
+        ├─ Token: unescaped = "symfony\/uid"
+        ├─ Token: double-quote = "\""
+      ├─ Token: name-separator = ":"
+      ├─ Region: inline_ws
+        ├─ Token: space = " "
+      ├─ Region: string
+        ├─ Token: double-quote = "\""
+        ├─ Token: unescaped = "^7.4"
+        ├─ Token: double-quote = "\""
+      ├─ Token: value-separator = ","
+      ├─ Region: trailing_ws
+        ├─ Token: newline = "\n"
+      ├─ Region: leading_ws
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+      ├─ Region: string
+        ├─ Token: double-quote = "\""
+        ├─ Token: unescaped = "ramsey\/uuid"
+        ├─ Token: double-quote = "\""
+      ├─ Token: name-separator = ":"
+      ├─ Region: inline_ws
+        ├─ Token: space = " "
+      ├─ Region: string
+        ├─ Token: double-quote = "\""
+        ├─ Token: unescaped = "^4.9"
+        ├─ Token: double-quote = "\""
+      ├─ Token: value-separator = ","
+      ├─ Region: trailing_ws
+        ├─ Token: newline = "\n"
+      ├─ Region: leading_ws
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+      ├─ Region: string
+        ├─ Token: double-quote = "\""
+        ├─ Token: unescaped = "phpbench\/phpbench"
+        ├─ Token: double-quote = "\""
+      ├─ Token: name-separator = ":"
+      ├─ Region: inline_ws
+        ├─ Token: space = " "
+      ├─ Region: string
+        ├─ Token: double-quote = "\""
+        ├─ Token: unescaped = "^1.4"
+        ├─ Token: double-quote = "\""
+      ├─ Token: value-separator = ","
+      ├─ Region: trailing_ws
+        ├─ Token: newline = "\n"
+      ├─ Region: leading_ws
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+      ├─ Region: string
+        ├─ Token: double-quote = "\""
+        ├─ Token: unescaped = "psr\/event-dispatcher"
+        ├─ Token: double-quote = "\""
+      ├─ Token: name-separator = ":"
+      ├─ Region: inline_ws
+        ├─ Token: space = " "
+      ├─ Region: string
+        ├─ Token: double-quote = "\""
+        ├─ Token: unescaped = "^1.0"
+        ├─ Token: double-quote = "\""
+      ├─ Token: value-separator = ","
+      ├─ Region: trailing_ws
+        ├─ Token: newline = "\n"
+      ├─ Region: leading_ws
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+      ├─ Region: string
+        ├─ Token: double-quote = "\""
+        ├─ Token: unescaped = "illuminate\/events"
+        ├─ Token: double-quote = "\""
+      ├─ Token: name-separator = ":"
+      ├─ Region: inline_ws
+        ├─ Token: space = " "
+      ├─ Region: string
+        ├─ Token: double-quote = "\""
+        ├─ Token: unescaped = "^12.53"
+        ├─ Token: double-quote = "\""
+      ├─ Token: value-separator = ","
+      ├─ Region: trailing_ws
+        ├─ Token: newline = "\n"
+      ├─ Region: leading_ws
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+      ├─ Region: string
+        ├─ Token: double-quote = "\""
+        ├─ Token: unescaped = "symfony\/event-dispatcher"
+        ├─ Token: double-quote = "\""
+      ├─ Token: name-separator = ":"
+      ├─ Region: inline_ws
+        ├─ Token: space = " "
+      ├─ Region: string
+        ├─ Token: double-quote = "\""
+        ├─ Token: unescaped = "^7.4"
+        ├─ Token: double-quote = "\""
+      ├─ Token: value-separator = ","
+      ├─ Region: trailing_ws
+        ├─ Token: newline = "\n"
+      ├─ Region: leading_ws
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+      ├─ Region: string
+        ├─ Token: double-quote = "\""
+        ├─ Token: unescaped = "symfony\/console"
+        ├─ Token: double-quote = "\""
+      ├─ Token: name-separator = ":"
+      ├─ Region: inline_ws
+        ├─ Token: space = " "
+      ├─ Region: string
+        ├─ Token: double-quote = "\""
+        ├─ Token: unescaped = "^7.4"
+        ├─ Token: double-quote = "\""
+      ├─ Region: trailing_ws
+        ├─ Token: newline = "\n"
+      ├─ Region: leading_ws
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+      ├─ Token: end-object = "}"
+    ├─ Token: value-separator = ","
+    ├─ Region: trailing_ws
+      ├─ Token: newline = "\n"
+    ├─ Region: leading_ws
+      ├─ Token: space = " "
+      ├─ Token: space = " "
+      ├─ Token: space = " "
+      ├─ Token: space = " "
+    ├─ Region: string
+      ├─ Token: double-quote = "\""
+      ├─ Token: unescaped = "scripts"
+      ├─ Token: double-quote = "\""
+    ├─ Token: name-separator = ":"
+    ├─ Region: inline_ws
+      ├─ Token: space = " "
+    ├─ Region: object
+      ├─ Token: begin-object = "{"
+      ├─ Region: trailing_ws
+        ├─ Token: newline = "\n"
+      ├─ Region: leading_ws
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+      ├─ Region: string
+        ├─ Token: double-quote = "\""
+        ├─ Token: unescaped = "benchmark:uuid"
+        ├─ Token: double-quote = "\""
+      ├─ Token: name-separator = ":"
+      ├─ Region: inline_ws
+        ├─ Token: space = " "
+      ├─ Region: string
+        ├─ Token: double-quote = "\""
+        ├─ Token: unescaped = "vendor\/bin\/phpbench run benchmarks\/uuid --config=t..."
+        ├─ Token: double-quote = "\""
+      ├─ Token: value-separator = ","
+      ├─ Region: trailing_ws
+        ├─ Token: newline = "\n"
+      ├─ Region: leading_ws
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+      ├─ Region: string
+        ├─ Token: double-quote = "\""
+        ├─ Token: unescaped = "code:fix"
+        ├─ Token: double-quote = "\""
+      ├─ Token: name-separator = ":"
+      ├─ Region: inline_ws
+        ├─ Token: space = " "
+      ├─ Region: string
+        ├─ Token: double-quote = "\""
+        ├─ Token: unescaped = "vendor\/bin\/php-cs-fixer --config=tools\/php-cs-fixe..."
+        ├─ Token: double-quote = "\""
+      ├─ Token: value-separator = ","
+      ├─ Region: trailing_ws
+        ├─ Token: newline = "\n"
+      ├─ Region: leading_ws
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+      ├─ Region: string
+        ├─ Token: double-quote = "\""
+        ├─ Token: unescaped = "code:fix:dry"
+        ├─ Token: double-quote = "\""
+      ├─ Token: name-separator = ":"
+      ├─ Region: inline_ws
+        ├─ Token: space = " "
+      ├─ Region: string
+        ├─ Token: double-quote = "\""
+        ├─ Token: unescaped = "vendor\/bin\/php-cs-fixer --config=tools\/php-cs-fixe..."
+        ├─ Token: double-quote = "\""
+      ├─ Token: value-separator = ","
+      ├─ Region: trailing_ws
+        ├─ Token: newline = "\n"
+      ├─ Region: leading_ws
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+      ├─ Region: string
+        ├─ Token: double-quote = "\""
+        ├─ Token: unescaped = "code:analyse"
+        ├─ Token: double-quote = "\""
+      ├─ Token: name-separator = ":"
+      ├─ Region: inline_ws
+        ├─ Token: space = " "
+      ├─ Region: string
+        ├─ Token: double-quote = "\""
+        ├─ Token: unescaped = "vendor\/bin\/phpstan analyse packages -c tools\/phpst..."
+        ├─ Token: double-quote = "\""
+      ├─ Token: value-separator = ","
+      ├─ Region: trailing_ws
+        ├─ Token: newline = "\n"
+      ├─ Region: leading_ws
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+      ├─ Region: string
+        ├─ Token: double-quote = "\""
+        ├─ Token: unescaped = "code:analyse:b"
+        ├─ Token: double-quote = "\""
+      ├─ Token: name-separator = ":"
+      ├─ Region: inline_ws
+        ├─ Token: space = " "
+      ├─ Region: string
+        ├─ Token: double-quote = "\""
+        ├─ Token: unescaped = "vendor\/bin\/phpstan analyse packages -c tools\/phpst..."
+        ├─ Token: double-quote = "\""
+      ├─ Token: value-separator = ","
+      ├─ Region: trailing_ws
+        ├─ Token: newline = "\n"
+      ├─ Region: leading_ws
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+      ├─ Region: string
+        ├─ Token: double-quote = "\""
+        ├─ Token: unescaped = "phpunit"
+        ├─ Token: double-quote = "\""
+      ├─ Token: name-separator = ":"
+      ├─ Region: inline_ws
+        ├─ Token: space = " "
+      ├─ Region: string
+        ├─ Token: double-quote = "\""
+        ├─ Token: unescaped = "php vendor\/bin\/phpunit --colors=always --configura..."
+        ├─ Token: double-quote = "\""
+      ├─ Token: value-separator = ","
+      ├─ Region: trailing_ws
+        ├─ Token: newline = "\n"
+      ├─ Region: leading_ws
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+      ├─ Region: string
+        ├─ Token: double-quote = "\""
+        ├─ Token: unescaped = "phpunit:coverage"
+        ├─ Token: double-quote = "\""
+      ├─ Token: name-separator = ":"
+      ├─ Region: inline_ws
+        ├─ Token: space = " "
+      ├─ Region: array
+        ├─ Token: begin-array = "["
+        ├─ Region: trailing_ws
+          ├─ Token: newline = "\n"
+        ├─ Region: leading_ws
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+        ├─ Region: string
+          ├─ Token: double-quote = "\""
+          ├─ Token: unescaped = "@putenv XDEBUG_MODE=coverage"
+          ├─ Token: double-quote = "\""
+        ├─ Token: value-separator = ","
+        ├─ Region: trailing_ws
+          ├─ Token: newline = "\n"
+        ├─ Region: leading_ws
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+        ├─ Region: string
+          ├─ Token: double-quote = "\""
+          ├─ Token: unescaped = "@phpunit --do-not-cache-result --log-junit var\/cov..."
+          ├─ Token: double-quote = "\""
+        ├─ Region: trailing_ws
+          ├─ Token: newline = "\n"
+        ├─ Region: leading_ws
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+          ├─ Token: space = " "
+        ├─ Token: end-array = "]"
+      ├─ Region: trailing_ws
+        ├─ Token: newline = "\n"
+      ├─ Region: leading_ws
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+        ├─ Token: space = " "
+      ├─ Token: end-object = "}"
+    ├─ Region: trailing_ws
+      ├─ Token: newline = "\n"
+    ├─ Token: end-object = "}"
+  ├─ Region: trailing_ws
+    ├─ Token: newline = "\n"
+  ├─ Token: eof = ""

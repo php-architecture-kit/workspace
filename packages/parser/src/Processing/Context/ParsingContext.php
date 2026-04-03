@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace PhpArchitecture\Parser;
+namespace PhpArchitecture\Parser\Processing\Context;
 
 use PhpArchitecture\Parser\Grammar\Compiled\Model\CompiledGrammar;
 use PhpArchitecture\Parser\Processing\Context\MatchingContext;
 use PhpArchitecture\Parser\Processing\Context\TokenizationContext;
-use PhpArchitecture\Parser\Processing\Model\Parsing\NodeFactoryInterface;
+use PhpArchitecture\Parser\Parsing\NodeFactoryInterface;
 use PhpArchitecture\Parser\Processing\Model\Parsing\NodeInterface;
 use PhpArchitecture\Parser\Processing\Model\Tokenization\TokenRegion;
 

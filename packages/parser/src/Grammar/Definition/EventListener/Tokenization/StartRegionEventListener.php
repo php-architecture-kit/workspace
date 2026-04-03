@@ -7,12 +7,14 @@ namespace PhpArchitecture\Parser\Grammar\Definition\EventListener\Tokenization;
 use PhpArchitecture\Parser\Grammar\Definition\EventListener\RuleMatchedEventListener;
 use PhpArchitecture\Parser\Grammar\Definition\Rule;
 use PhpArchitecture\Parser\Grammar\Definition\Region;
+use PhpArchitecture\Parser\Parsing\Model\RegionRawContent;
 use PhpArchitecture\Parser\Processing\Event\Tokenization\Contract\TokenizationEvent;
 use PhpArchitecture\Parser\Processing\Event\Tokenization\Contract\TokenizationEventListener;
 use PhpArchitecture\Parser\Processing\Event\Tokenization\TokenAddedEvent;
 use PhpArchitecture\Parser\Processing\Event\Tokenization\TokenMatchedEvent;
 use PhpArchitecture\Parser\Processing\Model\Tokenization\TokenRegion;
 use PhpArchitecture\Parser\Processing\Context\TokenizationContext;
+use PhpArchitecture\Parser\Processing\Model\Parsing\NodeType;
 
 final class StartRegionEventListener implements TokenizationEventListener, RuleMatchedEventListener
 {
@@ -36,6 +38,11 @@ final class StartRegionEventListener implements TokenizationEventListener, RuleM
 
         $token->setMeta(self::KEY_STARTED_REGION, $newRegion);
         $newRegion->setMeta(self::KEY_STARTED_BY, $token);
+        $newRegion->setMeta(
+            RegionRawContent::REGION_INCLUDES_STRUCTURE_OPENER_KEY,
+            $event instanceof TokenMatchedEvent && $this->rule->nodeType === NodeType::Structure
+        );
+        $newRegion->addTag(...$this->region->tags);
 
         $context->addRegion($newRegion);
     }

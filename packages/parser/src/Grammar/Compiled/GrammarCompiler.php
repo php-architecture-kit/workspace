@@ -10,6 +10,7 @@ use PhpArchitecture\Parser\Grammar\Compiled\Compiler\GrammarPrecompilerInterface
 use PhpArchitecture\Parser\Grammar\Compiled\Compiler\InnerGrammarEventListenerCompiler;
 use PhpArchitecture\Parser\Grammar\Compiled\Compiler\InnerGrammarInheritanceCompiler;
 use PhpArchitecture\Parser\Grammar\Compiled\Compiler\InRuleDeclaredEventSubscribersCompiler;
+use PhpArchitecture\Parser\Grammar\Compiled\Compiler\NodeTypeToTagCompiler;
 use PhpArchitecture\Parser\Grammar\Compiled\Compiler\RegionInheritanceCompiler;
 use PhpArchitecture\Parser\Grammar\Compiled\Compiler\RegionOpenerCloserCompiler;
 use PhpArchitecture\Parser\Grammar\Compiled\Compiler\RegionPrecompilerInterface;
@@ -47,21 +48,18 @@ class GrammarCompiler
 
     public function __construct()
     {
-        $innerGrammarInheritanceCompiler = new InnerGrammarInheritanceCompiler($this);
-        $innerGrammarEventListenerCompiler = new InnerGrammarEventListenerCompiler($this);
         $regionInheritanceCompiler = new RegionInheritanceCompiler();
-        $inRuleDeclaredEventSubscribersCompiler = new InRuleDeclaredEventSubscribersCompiler();
-        $dynamicTokenCompiler = new DynamicTokenCompiler();
 
         $this->grammarPrecompilers = [
             $regionInheritanceCompiler,
-            $dynamicTokenCompiler,
+            new DynamicTokenCompiler(),
         ];
 
         $this->regionPrecompilers = [
-            $innerGrammarInheritanceCompiler,
-            $inRuleDeclaredEventSubscribersCompiler,
-            $innerGrammarEventListenerCompiler,
+            new NodeTypeToTagCompiler(),
+            new InnerGrammarInheritanceCompiler($this),
+            new InRuleDeclaredEventSubscribersCompiler(),
+            new InnerGrammarEventListenerCompiler($this),
         ];
 
         $this->grammarCompilers = [

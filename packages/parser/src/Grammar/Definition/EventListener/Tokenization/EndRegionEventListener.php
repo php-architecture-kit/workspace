@@ -6,12 +6,14 @@ namespace PhpArchitecture\Parser\Grammar\Definition\EventListener\Tokenization;
 
 use PhpArchitecture\Parser\Grammar\Definition\EventListener\RuleMatchedEventListener;
 use PhpArchitecture\Parser\Grammar\Definition\Rule;
+use PhpArchitecture\Parser\Parsing\Model\RegionRawContent;
 use PhpArchitecture\Parser\Processing\Event\Tokenization\Contract\TokenizationEvent;
 use PhpArchitecture\Parser\Processing\Event\Tokenization\Contract\TokenizationEventListener;
 use PhpArchitecture\Parser\Processing\Event\Tokenization\TokenAddedEvent;
 use PhpArchitecture\Parser\Processing\Event\Tokenization\TokenMatchedEvent;
 use PhpArchitecture\Parser\Processing\Model\Tokenization\TokenRegion;
 use PhpArchitecture\Parser\Processing\Context\TokenizationContext;
+use PhpArchitecture\Parser\Processing\Model\Parsing\NodeType;
 
 final class EndRegionEventListener implements TokenizationEventListener, RuleMatchedEventListener
 {
@@ -62,6 +64,11 @@ final class EndRegionEventListener implements TokenizationEventListener, RuleMat
                 $token->name,
             );
         }
+
+        $currentRegion->setMeta(
+            RegionRawContent::REGION_INCLUDES_STRUCTURE_CLOSER_KEY,
+            $event instanceof TokenAddedEvent && $this->rule->nodeType === NodeType::Structure
+        );
     }
 
     public function priority(): int

@@ -30,6 +30,11 @@ final class TokenizationContextCompiler
             regionToEventDispatcherMap: [],
         );
 
+        if ($applyRowColTracking) {
+            $context->setMeta('currentRow', 1);
+            $context->setMeta('currentColumn', 1);
+        }
+
         $applyRowColTrackingInstance = new IdentifyRowsAndColumns();
         foreach ($grammar->regions as $regionName => $region) {
             $dispatcher = new TokenizationEventDispatcher($context);

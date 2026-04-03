@@ -8,6 +8,11 @@ interface MetaInterface
 {
     public function getMeta(string $key, mixed $default = null): mixed;
 
+    /**
+     * @param array<string,mixed> $meta
+     */
+    public function initMeta(array $meta): static;
+
     public function setMeta(string $key, mixed $value): void;
 
     public function hasMeta(string $key): bool;

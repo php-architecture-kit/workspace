@@ -18,6 +18,7 @@ use PhpArchitecture\Parser\Processing\Event\Matching\Contract\MatchingEventListe
 use PhpArchitecture\Parser\Processing\Event\Tokenization\Contract\TokenizationEventListener;
 use PhpArchitecture\Parser\Processing\Event\Tokenization\TokenAddedEvent;
 use PhpArchitecture\Parser\Processing\Event\Tokenization\TokenMatchedEvent;
+use PhpArchitecture\Parser\Processing\Model\Parsing\NodeType;
 use PhpArchitecture\Parser\Processing\Model\Tokenization\Token;
 use PhpArchitecture\Parser\Shared\Tags\TagsTrait;
 
@@ -39,7 +40,8 @@ class Rule
         public readonly string $name,
         public readonly RuleType $type,
         public RuleDefinition $definition,
-        array $tags = []
+        public ?NodeType $nodeType = null,
+        array $tags = [],
     ) {
         if (!empty($tags)) {
             $this->addTag(...$tags);
@@ -50,13 +52,15 @@ class Rule
     public static function token(
         string $name,
         string $token,
-        array $tags = []
+        array $tags = [],
+        NodeType $type = NodeType::Raw,
     ): self {
         return new self(
             $name,
             RuleType::Token,
             RegexRule::fromString(preg_quote($token, '~')),
-            $tags
+            $type,
+            $tags,
         );
     }
 
@@ -66,11 +70,13 @@ class Rule
         bool $caseSensitive = false,
         ?string $name = null,
         array $tags = [],
+        NodeType $type = NodeType::Raw,
     ): self {
         return new self(
             $name ?? $keyword,
             RuleType::Keyword,
             RegexRule::fromString(preg_quote($keyword, '~'), $caseSensitive),
+            $type,
             $tags,
         );
     }
@@ -81,11 +87,13 @@ class Rule
         string $expression,
         bool $caseSensitive = false,
         array $tags = [],
+        NodeType $type = NodeType::Raw,
     ): self {
         return new self(
             $name,
             RuleType::Expression,
             RegexRule::fromString($expression, $caseSensitive),
+            $type,
             $tags,
         );
     }
@@ -101,11 +109,13 @@ class Rule
         string $triggerRule,
         array $listenInRegions = [CallbackRule::PARENT_REGION],
         array $tags = [],
+        NodeType $type = NodeType::Raw,
     ): self {
         return new self(
             $name,
             RuleType::DynamicToken,
             new CallbackRule(Closure::fromCallable($builder), $triggerRule, $listenInRegions),
+            $type,
             $tags,
         );
     }
@@ -116,6 +126,7 @@ class Rule
             $tag,
             RuleType::Tag,
             new TaggedRule($tag),
+            null,
             []
         );
     }
@@ -130,6 +141,7 @@ class Rule
             $name,
             RuleType::Token,
             new TechnicalTokenRule($name),
+            NodeType::Raw,
             $tags,
         );
     }
@@ -137,12 +149,17 @@ class Rule
     /**
      * @param string[] $tags
      */
-    public static function seq(string $name, string $sequence, array $tags = []): self
-    {
+    public static function seq(
+        string $name,
+        string $sequence,
+        array $tags = [],
+        NodeType $type = NodeType::Node,
+    ): self {
         return new self(
             $name,
             RuleType::Sequence,
             SequenceRule::fromString($sequence),
+            $type,
             $tags,
         );
     }
@@ -156,6 +173,7 @@ class Rule
         array $options,
         Cardinality $cardinality = Cardinality::ExactlyOne,
         array $tags = [],
+        NodeType $type = NodeType::Node,
     ): self {
         $addedRules = [];
         $rulesNames = [];
@@ -174,6 +192,7 @@ class Rule
             $name,
             RuleType::Choice,
             new SequenceRule([new Model\Sequence\SequenceNode($rulesNames, $cardinality)]),
+            $type,
             $tags,
         ));
 
@@ -226,6 +245,12 @@ class Rule
             )
         );
 
+        return $this;
+    }
+
+    public function setNodeType(NodeType $type): self
+    {
+        $this->nodeType = $type;
         return $this;
     }
 }

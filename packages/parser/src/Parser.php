@@ -5,11 +5,12 @@ declare(strict_types=1);
 namespace PhpArchitecture\Parser\Parser;
 
 use PhpArchitecture\Parser\Matching\Matcher;
-use PhpArchitecture\Parser\ParsingContext;
+use PhpArchitecture\Parser\Processing\Context\ParsingContext;
 use PhpArchitecture\Parser\Processing\Model\Matching\MatchedRegion;
 use PhpArchitecture\Parser\Processing\Model\Matching\MatchedSequence;
 use PhpArchitecture\Parser\Processing\Model\Matching\MatchedSequenceNode;
 use PhpArchitecture\Parser\Processing\Model\Parsing\NodeInterface;
+use PhpArchitecture\Parser\Processing\Model\Parsing\NodeType;
 use PhpArchitecture\Parser\Processing\Model\Tokenization\Token;
 use PhpArchitecture\Parser\Processing\Model\Tokenization\TokenRegion;
 use PhpArchitecture\Parser\Tokenization\Lexer;
@@ -40,13 +41,15 @@ class Parser
             $node = $context->nodeFactory()->fromTokenRegion($region);
             $context->addNode($parent, $node);
 
-            foreach ($region->stream->tokens as $tokenOrRegion) {
-                if ($tokenOrRegion instanceof TokenRegion) {
-                    $this->parseRegionRecursive($tokenOrRegion, $context, $node);
-                    continue;
-                }
+            if ($region->hasTag(NodeType::Node->value)) {
+                foreach ($region->stream->tokens as $tokenOrRegion) {
+                    if ($tokenOrRegion instanceof TokenRegion) {
+                        $this->parseRegionRecursive($tokenOrRegion, $context, $node);
+                        continue;
+                    }
 
-                $this->parseToken($tokenOrRegion, $context, $node);
+                    $this->parseToken($tokenOrRegion, $context, $node);
+                }
             }
 
             return;
