@@ -33,6 +33,7 @@ class TokenStream
     public function remove(int $offset): void
     {
         unset($this->tokens[$offset]);
+        $this->tokens = array_values($this->tokens);
     }
 
     public function is(int $offset, string $token): bool
