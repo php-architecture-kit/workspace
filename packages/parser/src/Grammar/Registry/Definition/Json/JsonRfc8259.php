@@ -28,8 +28,6 @@ class JsonRfc8259 extends Whitespace
             ->setInheritanceFromGlobal()
             ->withRootSequence("ws* value ws*");
 
-        $grammar->setRootRegion($jsonText);
-
         $grammar->global->add(
             $jsonText,
 
@@ -106,6 +104,8 @@ class JsonRfc8259 extends Whitespace
                 ->setNodeType(NodeType::Raw)
                 ->closeWith(Rule::taggedWith("_number_part"), true, false),
         );
+
+        $grammar->setRootRegion($jsonText);
 
         return $grammar;
     }

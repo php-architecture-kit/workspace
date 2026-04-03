@@ -9,7 +9,7 @@ trait MetaTrait
     /**
      * @var array<string,mixed>
      */
-    private array $meta = [];
+    public private(set) array $meta = [];
 
     public function getMeta(string $key, mixed $default = null): mixed
     {

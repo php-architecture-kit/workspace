@@ -33,7 +33,9 @@ final class StartRegionEventListener implements TokenizationEventListener, RuleM
         }
 
         $token = $event->token;
-        $newRegion = TokenRegion::new($this->region->name);
+        $newRegion = TokenRegion::new($this->region->name)
+            ->addTag($this->region->config->nodeType->value);
+
         $newRegion->setMeta(TokenRegion::KEY_PARENT, $context->getCurrentRegion());
 
         $token->setMeta(self::KEY_STARTED_REGION, $newRegion);

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace PhpArchitecture\Parser\Parser;
+namespace PhpArchitecture\Parser;
 
 use PhpArchitecture\Parser\Matching\Matcher;
 use PhpArchitecture\Parser\Processing\Context\ParsingContext;
@@ -71,17 +71,19 @@ class Parser
         $node = $context->nodeFactory()->fromMatchedRegion($region);
         $context->addNode($parent, $node);
 
-        foreach ($region->items as $item) {
-            if ($item instanceof Token) {
-                $this->parseToken($item, $context, $node);
-                continue;
+        if ($region->hasTag(NodeType::Node->value)) {
+            foreach ($region->items as $item) {
+                if ($item instanceof Token) {
+                    $this->parseToken($item, $context, $node);
+                    continue;
+                }
+                if ($item instanceof TokenRegion) {
+                    $this->parseRegionRecursive($item, $context, $node);
+                    continue;
+                }
+                assert($item instanceof MatchedSequence);
+                $this->parseMatchedSequenceRecursive($item, $context, $node);
             }
-            if ($item instanceof TokenRegion) {
-                $this->parseRegionRecursive($item, $context, $node);
-                continue;
-            }
-            assert($item instanceof MatchedSequence);
-            $this->parseMatchedSequenceRecursive($item, $context, $node);
         }
     }
 
@@ -90,28 +92,31 @@ class Parser
         $node = $context->nodeFactory()->fromMatchedSequence($sequence);
         $context->addNode($parent, $node);
 
-        foreach ($sequence->items as $item) {
-            $this->parseMatchedSequenceNodeRecursive($item, $context, $node);
+        if ($sequence->hasTag(NodeType::Node->value)) {
+            foreach ($sequence->items as $item) {
+                $this->parseMatchedSequenceNodeRecursive($item, $context, $node);
+            }
         }
     }
 
     private function parseMatchedSequenceNodeRecursive(MatchedSequenceNode $sequenceNode, ParsingContext $context, NodeInterface $parent): void
     {
-
         $node = $context->nodeFactory()->fromMatchedSequenceNode($sequenceNode);
         $context->addNode($parent, $node);
 
-        foreach ($sequenceNode->items as $item) {
-            if ($item instanceof Token) {
-                $this->parseToken($item, $context, $node);
-                continue;
+        if ($sequenceNode->hasTag(NodeType::Node->value)) {
+            foreach ($sequenceNode->items as $item) {
+                if ($item instanceof Token) {
+                    $this->parseToken($item, $context, $node);
+                    continue;
+                }
+                if ($item instanceof TokenRegion) {
+                    $this->parseRegionRecursive($item, $context, $node);
+                    continue;
+                }
+                assert($item instanceof MatchedSequence);
+                $this->parseMatchedSequenceRecursive($item, $context, $node);
             }
-            if ($item instanceof TokenRegion) {
-                $this->parseRegionRecursive($item, $context, $node);
-                continue;
-            }
-            assert($item instanceof MatchedSequence);
-            $this->parseMatchedSequenceRecursive($item, $context, $node);
         }
     }
 

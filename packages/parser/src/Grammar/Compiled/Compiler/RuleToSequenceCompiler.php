@@ -88,7 +88,7 @@ class RuleToSequenceCompiler implements RuleCompilerInterface
             $definition->isLookahead,
             $definition->isLookbehind,
             $definition->anchorName,
-            $definition->tags
+            $definition->nodeType ? ($definition->tags + [$definition->nodeType->value]) : $definition->tags,
         );
     }
 }

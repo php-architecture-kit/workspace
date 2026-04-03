@@ -14,8 +14,22 @@ class RawContent implements NodeInterface, MetaInterface
     use MetaTrait;
     use TagsTrait;
 
+    /**
+     * @param array<string,mixed> $meta
+     * @param string[] $tags
+     */
     public function __construct(
         public string $name,
-        public string $content
-    ) {}
+        public string $content,
+        array $meta = [],
+        array $tags = [],
+    ) {
+        $this->meta = $meta;
+        $this->tags = $tags;
+    }
+
+    public function __toString(): string
+    {
+        return $this->content;
+    }
 }

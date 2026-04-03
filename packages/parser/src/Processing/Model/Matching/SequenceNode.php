@@ -4,8 +4,15 @@ declare(strict_types=1);
 
 namespace PhpArchitecture\Parser\Processing\Model\Matching;
 
-final class SequenceNode
+use PhpArchitecture\Parser\Shared\Meta\MetaInterface;
+use PhpArchitecture\Parser\Shared\Meta\MetaTrait;
+use PhpArchitecture\Parser\Shared\Tags\TagsTrait;
+
+final class SequenceNode implements MetaInterface
 {
+    use MetaTrait;
+    use TagsTrait;
+
     /**
      * @param string[] $alternatives
      * @param string[] $tags
@@ -17,8 +24,12 @@ final class SequenceNode
         public bool $isLookahead = false,
         public bool $isLookbehind = false,
         public ?string $anchorName = null,
-        public array $tags = [],
-    ) {}
+        array $meta = [],
+        array $tags = [],
+    ) {
+        $this->meta = $meta;
+        $this->tags = $tags;
+    }
 
     /**
      * @return string[]

@@ -15,10 +15,25 @@ class Node implements NodeInterface, MetaInterface
     use TagsTrait;
 
     /**
-     * @param array<string,NodeInterface> $attributes
+     * @param array<int,NodeInterface> $attributes
+     * @param array<string,mixed> $meta
+     * @param string[] $tags
      */
     public function __construct(
         public string $name,
-        public array $attributes
-    ) {}
+        public array $attributes,
+        array $meta = [],
+        array $tags = [],
+    ) {
+        $this->meta = $meta;
+        $this->tags = $tags;
+    }
+
+    public function __toString(): string
+    {
+        return implode('', array_map(
+            static fn(NodeInterface $attr) => $attr->__toString(),
+            $this->attributes
+        ));
+    }
 }

@@ -103,8 +103,21 @@ class Matcher
         $firstTokenName = $firstToken instanceof Token ? $firstToken->name : $firstToken->name;
         $validFirstNodes = $sequence->getFirstValidNodeNodeNames();
 
-        if (!empty($validFirstNodes) && !in_array($firstTokenName, $validFirstNodes)) {
-            return null;
+        if (!empty($validFirstNodes)) {
+            $isValid = in_array($firstTokenName, $validFirstNodes);
+
+            if (!$isValid) {
+                foreach ($firstToken->tags as $tag) {
+                    if (in_array($tag, $validFirstNodes)) {
+                        $isValid = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!$isValid) {
+                return null;
+            }
         }
 
         if (in_array($sequence->name, $this->currentStack)) {
@@ -130,19 +143,24 @@ class Matcher
                 }
                 $items = array_merge($items, $nestedItems);
             } elseif ($node instanceof SequenceNode) {
-                $nodeItems = $this->matchSequenceNode($node, $stream, $offset);
-                if ($nodeItems === null) {
+                $matchedNode = $this->matchSequenceNode($node, $stream, $offset);
+                if ($matchedNode === null) {
                     $offset = $start;
                     array_pop($this->currentStack);
                     return null;
                 }
-                $items = array_merge($items, $nodeItems);
+                $items[] = $matchedNode;
             }
         }
 
         array_pop($this->currentStack);
 
-        $matchedSequence = new MatchedSequence($sequence->name, $items);
+        $matchedSequence = new MatchedSequence(
+            $sequence->name,
+            $items,
+            $sequence->meta,
+            $sequence->tags,
+        );
 
         return $matchedSequence;
     }
@@ -188,8 +206,8 @@ class Matcher
                             break;
                         }
                     } elseif ($node instanceof SequenceNode) {
-                        $items = $this->matchSequenceNode($node, $stream, $offset);
-                        if ($items !== null) {
+                        $matchedNode = $this->matchSequenceNode($node, $stream, $offset);
+                        if ($matchedNode !== null) {
                             if ($node->isLookbehind) {
                                 $offset = $nodeStart;
                                 continue;
@@ -198,7 +216,7 @@ class Matcher
                                 $offset = $nodeStart;
                                 break;
                             }
-                            $alternativeItems = array_merge($alternativeItems, $items);
+                            $alternativeItems[] = $matchedNode;
                         } else {
                             $allMatched = false;
                             break;
@@ -230,9 +248,9 @@ class Matcher
     }
 
     /**
-     * @return null|array<MatchedSequenceNode>
+     * @return null|MatchedSequenceNode
      */
-    private function matchSequenceNode(SequenceNode $node, TokenStream $stream, int &$offset): ?array
+    private function matchSequenceNode(SequenceNode $node, TokenStream $stream, int &$offset): ?MatchedSequenceNode
     {
         $count = 0;
         $start = $offset;
@@ -251,11 +269,7 @@ class Matcher
 
                         $matchedSequence = $this->matchSequence($namedSequence, $stream, $offset);
                         if ($matchedSequence !== null) {
-                            $items[] = new MatchedSequenceNode(
-                                $matchedSequence->name,
-                                $node->anchorName ?? '',
-                                [$matchedSequence]
-                            );
+                            $items[] = $matchedSequence;
                             $matched = true;
                             unset($this->currentOffsetStack[$currentOffset]);
                             $count++;
@@ -265,11 +279,7 @@ class Matcher
                 } else {
                     $token = $stream->matchAny($offset, [$alternative]);
                     if ($token !== null) {
-                        $items[] = new MatchedSequenceNode(
-                            $token->name,
-                            $node->anchorName ?? '',
-                            [$token]
-                        );
+                        $items[] = $token;
                         $matched = true;
                         $count++;
                         break;
@@ -287,6 +297,11 @@ class Matcher
             return null;
         }
 
-        return $items;
+        return new MatchedSequenceNode(
+            $node->anchorName ?? implode('|', $node->alternatives),
+            $items,
+            $node->meta,
+            $node->tags,
+        );
     }
 }

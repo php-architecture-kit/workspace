@@ -4,10 +4,18 @@ declare(strict_types=1);
 
 namespace PhpArchitecture\Parser\Processing\Model\Matching;
 
-final class NestedSequence
+use PhpArchitecture\Parser\Shared\Meta\MetaInterface;
+use PhpArchitecture\Parser\Shared\Meta\MetaTrait;
+use PhpArchitecture\Parser\Shared\Tags\TagsTrait;
+
+final class NestedSequence implements MetaInterface
 {
+    use MetaTrait;
+    use TagsTrait;
+
     /**
      * @param (NestedSequence|SequenceNode)[][] $alternativeSequences Array of alternative sequences (union)
+     * @param array<string,mixed> $meta
      * @param string[] $tags
      */
     public function __construct(
@@ -16,8 +24,12 @@ final class NestedSequence
         public int $max,
         public bool $isLookahead = false,
         public bool $isLookbehind = false,
-        public array $tags = [],
-    ) {}
+        array $meta = [],
+        array $tags = [],
+    ) {
+        $this->meta = $meta;
+        $this->tags = $tags;
+    }
 
     public function getMinMembersNumber(): int
     {

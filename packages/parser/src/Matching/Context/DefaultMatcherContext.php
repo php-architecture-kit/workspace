@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace PhpArchitecture\Parser\Matching\Context;
 
 use PhpArchitecture\Parser\Processing\Context\MatchingContext;
-use PhpArchitecture\Parser\Processing\Event\Matching\Contract\MatchingEvent;
 use PhpArchitecture\Parser\Processing\Event\Matching\Contract\MatchingEventListener;
 use PhpArchitecture\Parser\Processing\Event\Matching\MatchingFinishedEvent;
 use PhpArchitecture\Parser\Processing\Event\Matching\MatchingStartedEvent;
@@ -20,7 +19,7 @@ use PhpArchitecture\Parser\Processing\Model\Tokenization\Token;
 use PhpArchitecture\Parser\Processing\Model\Tokenization\TokenRegion;
 use PhpArchitecture\Parser\Shared\Meta\MetaTrait;
 
-class DefaultMatcherContext implements MatchingContext 
+class DefaultMatcherContext implements MatchingContext
 {
     use MetaTrait;
 
@@ -31,7 +30,7 @@ class DefaultMatcherContext implements MatchingContext
         private readonly string $regionName,
         private readonly SequenceLibrary $sequenceLibrary,
     ) {
-        $this->output = new MatchedRegion($this->regionName, []);
+        $this->output = new MatchedRegion($this->regionName, [], [], []);
         $this->dispatcher = new MatchingEventDispatcher($this);
     }
 

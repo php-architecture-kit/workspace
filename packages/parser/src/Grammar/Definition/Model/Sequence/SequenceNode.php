@@ -6,9 +6,12 @@ namespace PhpArchitecture\Parser\Grammar\Definition\Model\Sequence;
 
 use InvalidArgumentException;
 use PhpArchitecture\Parser\Grammar\Definition\Model\Cardinality;
+use PhpArchitecture\Parser\Processing\Model\Parsing\NodeType;
 
 final class SequenceNode
 {
+    public ?NodeType $nodeType = null;
+
     /**
      * @param string[] $alternatives
      * @param string[] $tags
@@ -20,7 +23,15 @@ final class SequenceNode
         public bool $isLookbehind = false,
         public ?string $anchorName = null,
         public array $tags = [],
-    ) {}
+    ) {
+        if (in_array('n', $tags)) {
+            $this->nodeType = NodeType::Node;
+        } elseif (in_array('s', $tags)) {
+            $this->nodeType = NodeType::Structure;
+        } elseif (in_array('r', $tags)) {
+            $this->nodeType = NodeType::Raw;
+        }
+    }
 
     /**
      * @param string $sequenceNode ex.:

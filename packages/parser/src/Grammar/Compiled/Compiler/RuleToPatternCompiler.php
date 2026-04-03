@@ -13,7 +13,7 @@ class RuleToPatternCompiler implements RuleCompilerInterface
 {
     public function supports(object $object): bool
     {
-        return $object instanceof Rule && $object->type->isTokenizationRuleType();
+        return $object instanceof Rule && $object->definition instanceof RegexRule;
     }
 
     public function compileRule(Rule $rule): Pattern

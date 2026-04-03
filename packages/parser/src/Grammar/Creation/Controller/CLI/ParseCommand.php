@@ -6,6 +6,8 @@ namespace PhpArchitecture\Parser\Grammar\Creation\Controller\CLI;
 
 use PhpArchitecture\Parser\Grammar\Compiled\GrammarCompiler;
 use PhpArchitecture\Parser\Grammar\Registry\GrammarDefinitionInterface;
+use PhpArchitecture\Parser\Parser;
+use PhpArchitecture\Parser\Parsing\Context\DefaultParsingContext;
 use PhpArchitecture\Parser\Processing\Model\Tokenization\Token;
 use PhpArchitecture\Parser\Processing\Model\Tokenization\TokenRegion;
 use PhpArchitecture\Parser\Tokenization\Context\TokenizationContextCompiler;
@@ -58,17 +60,16 @@ final class ParseCommand extends Command
 
         $grammarDefinition = new $grammarClass();
         $grammar = $grammarDefinition->grammar();
-        
+
         $compiler = new GrammarCompiler();
         $compiledGrammar = $compiler->compile($grammar);
-        
-        $contextCompiler = new TokenizationContextCompiler();
-        $context = $contextCompiler->compile($compiledGrammar, applyRowColTracking: true);
-        
-        $lexer = new Lexer($context);
-        $parseTree = $lexer->process(new StringStream(file_get_contents($inputFile)));
 
-        $formattedOutput = match($format) {
+        $parsingContext = new DefaultParsingContext($compiledGrammar);
+        $parser = new Parser();
+
+        $parseTree = $parser->parse(new StringStream(file_get_contents($inputFile)), $parsingContext);
+
+        $formattedOutput = match ($format) {
             'json' => $this->formatJson($parseTree),
             'simple' => $this->formatSimple($parseTree),
             default => $this->formatTree($parseTree, $maxDepth),
@@ -92,7 +93,7 @@ final class ParseCommand extends Command
 
         $result = '';
         $indent = str_repeat('  ', $currentDepth);
-        
+
         if ($node instanceof Token) {
             $displayValue = strlen($node->raw ?? '') > 50 ? substr($node->raw ?? '', 0, 50) . '...' : ($node->raw ?? '');
             $result .= $indent . "├─ Token: {$node->name} = " . json_encode($displayValue) . "\n";
@@ -102,7 +103,7 @@ final class ParseCommand extends Command
                 $result .= $this->formatTree($child, $maxDepth, $currentDepth + 1);
             }
         }
-        
+
         return $result;
     }
 
@@ -115,8 +116,8 @@ final class ParseCommand extends Command
     private function formatSimple(Token|TokenRegion $node): string
     {
         $result = '';
-        
-        $traverse = function(Token|TokenRegion $node) use (&$traverse, &$result) {
+
+        $traverse = function (Token|TokenRegion $node) use (&$traverse, &$result) {
             if ($node instanceof Token) {
                 $result .= $node->raw ?? '';
             } elseif ($node instanceof TokenRegion) {
@@ -125,9 +126,9 @@ final class ParseCommand extends Command
                 }
             }
         };
-        
+
         $traverse($node);
-        
+
         return $result;
     }
 
@@ -144,21 +145,21 @@ final class ParseCommand extends Command
                 ],
             ];
         }
-        
+
         $data = [
             'type' => 'Region',
             'name' => $node->name,
         ];
-        
+
         $children = [];
         foreach ($node->stream->tokens as $child) {
             $children[] = $this->nodeToArray($child);
         }
-        
+
         if (count($children) > 0) {
             $data['children'] = $children;
         }
-        
+
         return $data;
     }
 }

@@ -4,17 +4,30 @@ declare(strict_types=1);
 
 namespace PhpArchitecture\Parser\Processing\Model\Matching;
 
-final readonly class Sequence
+use PhpArchitecture\Parser\Shared\Meta\MetaInterface;
+use PhpArchitecture\Parser\Shared\Meta\MetaTrait;
+use PhpArchitecture\Parser\Shared\Tags\TagsTrait;
+
+final class Sequence implements MetaInterface
 {
+    use MetaTrait;
+    use TagsTrait;
+
     /**
      * @param (NestedSequence|SequenceNode)[] $nodes
+     * @param array<string,mixed> $meta
+     * @param string[] $tags
      */
     public function __construct(
         public string $name,
         public array $nodes,
         public int $priority,
-        public array $tags,
-    ) {}
+        array $meta = [],
+        array $tags = [],
+    ) {
+        $this->meta = $meta;
+        $this->tags = $tags;
+    }
 
     /**
      * @return string[]
