@@ -8,8 +8,11 @@ use PhpArchitecture\Parser\Grammar\Compiled\GrammarCompiler;
 use PhpArchitecture\Parser\Grammar\Registry\GrammarDefinitionInterface;
 use PhpArchitecture\Parser\Parser;
 use PhpArchitecture\Parser\Parsing\Context\DefaultParsingContext;
-use PhpArchitecture\Parser\Processing\Model\Tokenization\Token;
-use PhpArchitecture\Parser\Processing\Model\Tokenization\TokenRegion;
+use PhpArchitecture\Parser\Parsing\Model\Node;
+use PhpArchitecture\Parser\Parsing\Model\RawContent;
+use PhpArchitecture\Parser\Parsing\Model\RegionRawContent;
+use PhpArchitecture\Parser\Parsing\Model\Structure;
+use PhpArchitecture\Parser\Processing\Model\Parsing\NodeInterface;
 use PhpArchitecture\Parser\Tokenization\Context\TokenizationContextCompiler;
 use PhpArchitecture\Parser\Tokenization\Lexer;
 use PhpArchitecture\Parser\Tokenization\Model\StringStream;
@@ -85,7 +88,7 @@ final class ParseCommand extends Command
         return Command::SUCCESS;
     }
 
-    private function formatTree(Token|TokenRegion $node, ?int $maxDepth, int $currentDepth = 0): string
+    private function formatTree(NodeInterface $node, ?int $maxDepth, int $currentDepth = 0): string
     {
         if ($maxDepth !== null && $currentDepth > $maxDepth) {
             return '';
@@ -93,73 +96,94 @@ final class ParseCommand extends Command
 
         $result = '';
         $indent = str_repeat('  ', $currentDepth);
+        $prefix = $currentDepth === 0 ? '' : '├─ ';
 
-        if ($node instanceof Token) {
-            $displayValue = strlen($node->raw ?? '') > 50 ? substr($node->raw ?? '', 0, 50) . '...' : ($node->raw ?? '');
-            $result .= $indent . "├─ Token: {$node->name} = " . json_encode($displayValue) . "\n";
-        } elseif ($node instanceof TokenRegion) {
-            $result .= $indent . "├─ Region: {$node->name}\n";
-            foreach ($node->stream->tokens as $child) {
+        if ($node instanceof Node) {
+            $metaInfo = !empty($node->meta) ? ' [meta: ' . json_encode($node->meta) . ']' : '';
+            $tagsInfo = !empty($node->tags) ? ' [tags: ' . implode(', ', $node->tags) . ']' : '';
+            $result .= $indent . $prefix . "Node: {$node->name}{$metaInfo}{$tagsInfo}\n";
+            foreach ($node->attributes as $child) {
                 $result .= $this->formatTree($child, $maxDepth, $currentDepth + 1);
             }
+        } elseif ($node instanceof RegionRawContent) {
+            $displayValue = strlen($node->content) > 50 ? substr($node->content, 0, 50) . '...' : $node->content;
+            $metaInfo = !empty($node->meta) ? ' [meta: ' . json_encode($node->meta) . ']' : '';
+            $tagsInfo = !empty($node->tags) ? ' [tags: ' . implode(', ', $node->tags) . ']' : '';
+            $result .= $indent . $prefix . "RegionRawContent: {$node->name} = " . json_encode($displayValue) . "{$metaInfo}{$tagsInfo}\n";
+            if ($node->opener !== null) {
+                $result .= $this->formatTree($node->opener, $maxDepth, $currentDepth + 1);
+            }
+            if ($node->closer !== null) {
+                $result .= $this->formatTree($node->closer, $maxDepth, $currentDepth + 1);
+            }
+        } elseif ($node instanceof RawContent) {
+            $displayValue = strlen($node->content) > 50 ? substr($node->content, 0, 50) . '...' : $node->content;
+            $metaInfo = !empty($node->meta) ? ' [meta: ' . json_encode($node->meta) . ']' : '';
+            $tagsInfo = !empty($node->tags) ? ' [tags: ' . implode(', ', $node->tags) . ']' : '';
+            $result .= $indent . $prefix . "RawContent: {$node->name} = " . json_encode($displayValue) . "{$metaInfo}{$tagsInfo}\n";
+        } elseif ($node instanceof Structure) {
+            $displayValue = strlen($node->content) > 50 ? substr($node->content, 0, 50) . '...' : $node->content;
+            $presentInfo = $node->present ? 'present' : 'absent';
+            $metaInfo = !empty($node->meta) ? ' [meta: ' . json_encode($node->meta) . ']' : '';
+            $tagsInfo = !empty($node->tags) ? ' [tags: ' . implode(', ', $node->tags) . ']' : '';
+            $result .= $indent . $prefix . "Structure: {$node->name} ({$presentInfo}) = " . json_encode($displayValue) . "{$metaInfo}{$tagsInfo}\n";
         }
 
         return $result;
     }
 
-    private function formatJson(Token|TokenRegion $node): string
+    private function formatJson(NodeInterface $node): string
     {
         $data = $this->nodeToArray($node);
         return json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     }
 
-    private function formatSimple(Token|TokenRegion $node): string
+    private function formatSimple(NodeInterface $node): string
     {
-        $result = '';
-
-        $traverse = function (Token|TokenRegion $node) use (&$traverse, &$result) {
-            if ($node instanceof Token) {
-                $result .= $node->raw ?? '';
-            } elseif ($node instanceof TokenRegion) {
-                foreach ($node->stream->tokens as $child) {
-                    $traverse($child);
-                }
-            }
-        };
-
-        $traverse($node);
-
-        return $result;
+        return $node->__toString();
     }
 
-    private function nodeToArray(Token|TokenRegion $node): array
+    private function nodeToArray(NodeInterface $node): array
     {
-        if ($node instanceof Token) {
-            return [
-                'type' => 'Token',
-                'name' => $node->name,
-                'value' => $node->raw ?? '',
-                'position' => [
-                    'start' => $node->startPosition,
-                    'end' => $node->endPosition,
-                ],
-            ];
-        }
-
-        $data = [
-            'type' => 'Region',
-            'name' => $node->name,
+        $baseData = [
+            'name' => $node->name ?? 'unknown',
         ];
 
-        $children = [];
-        foreach ($node->stream->tokens as $child) {
-            $children[] = $this->nodeToArray($child);
+        if (method_exists($node, 'getMeta') && !empty($node->meta)) {
+            $baseData['meta'] = $node->meta;
         }
 
-        if (count($children) > 0) {
-            $data['children'] = $children;
+        if (method_exists($node, 'getTags') && !empty($node->tags)) {
+            $baseData['tags'] = $node->tags;
         }
 
-        return $data;
+        if ($node instanceof Node) {
+            $baseData['type'] = 'Node';
+            $children = [];
+            foreach ($node->attributes as $child) {
+                $children[] = $this->nodeToArray($child);
+            }
+            if (count($children) > 0) {
+                $baseData['attributes'] = $children;
+            }
+        } elseif ($node instanceof RegionRawContent) {
+            $baseData['type'] = 'RegionRawContent';
+            $baseData['content'] = $node->content;
+            if ($node->opener !== null) {
+                $baseData['opener'] = $this->nodeToArray($node->opener);
+            }
+            if ($node->closer !== null) {
+                $baseData['closer'] = $this->nodeToArray($node->closer);
+            }
+        } elseif ($node instanceof RawContent) {
+            $baseData['type'] = 'RawContent';
+            $baseData['content'] = $node->content;
+        } elseif ($node instanceof Structure) {
+            $baseData['type'] = 'Structure';
+            $baseData['present'] = $node->present;
+            $baseData['content'] = $node->content;
+        }
+
+        return $baseData;
     }
 }
