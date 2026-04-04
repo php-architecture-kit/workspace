@@ -37,7 +37,7 @@ class JsonRfc8259 extends Whitespace
                 ->add(
                     $this->addTriviaMiddleware(),
                     Rule::token("value-separator", ",", type: NodeType::Structure),
-                    Rule::seq("items", "value (value-separator value)*")
+                    Rule::seq("items", "value (ws* value-separator ws* value)*")
                 )
                 ->withRootSequence("begin-array ?items end-array")
                 ->closeWith(
@@ -53,7 +53,7 @@ class JsonRfc8259 extends Whitespace
                     Rule::token("name-separator", ":", type: NodeType::Structure),
                     Rule::token("value-separator", ",", type: NodeType::Structure),
                     Rule::seq("member", "string[identifier] name-separator value"),
-                    Rule::seq("members", "member (value-separator member)*")
+                    Rule::seq("members", "member (ws* value-separator ws* member)*")
                 )
                 ->withRootSequence("begin-object ?members end-object")
                 ->closeWith(

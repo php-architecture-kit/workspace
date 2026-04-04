@@ -47,19 +47,19 @@ class DefaultMatcherContext implements MatchingContext
     public function addMatchedSequence(MatchedSequence $sequence): void
     {
         $this->dispatchSequenceMatchedRecursively($sequence);
-        $this->output->items[] = $sequence;
+        $this->output->addItem($sequence);
         $this->dispatchSequenceAddedRecursively($sequence);
     }
 
     public function addUnmatchedToken(Token $token): void
     {
-        $this->output->items[] = $token;
+        $this->output->addItem($token);
         $this->dispatcher->dispatchEvent(new UnmatchedTokenAddedEvent($token));
     }
 
     public function addUnmatchedTokenRegion(TokenRegion $region): void
     {
-        $this->output->items[] = $region;
+        $this->output->addItem($region);
         $this->dispatcher->dispatchEvent(new UnmatchedTokenRegionAddedEvent($region));
     }
 

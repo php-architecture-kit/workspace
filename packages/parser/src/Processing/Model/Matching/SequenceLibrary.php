@@ -20,6 +20,14 @@ final class SequenceLibrary
      */
     public array $expandedFirstValidTokens = [];
 
+    /**
+     * Index mapping tags to sequences that have those tags.
+     * Sequences are ordered by priority (highest first).
+     * 
+     * @var array<string,Sequence[]>
+     */
+    public array $tagToSequencesMap = [];
+
     public ?Sequence $rootSequence = null;
 
     /** 
@@ -32,6 +40,7 @@ final class SequenceLibrary
         $this->rootSequence = $rootSequence;
         $this->compileSequences($sequences);
         $this->buildExpandedFirstValidTokensIndex();
+        $this->buildTagToSequencesIndex();
     }
 
     /** @param Sequence[] $sequences */
@@ -104,5 +113,32 @@ final class SequenceLibrary
     public function getExpandedFirstValidTokens(string $sequenceName): array
     {
         return $this->expandedFirstValidTokens[$sequenceName] ?? [];
+    }
+
+    /**
+     * Builds an index mapping tags to sequences that have those tags.
+     * Sequences are already sorted by priority in $this->sequences.
+     */
+    private function buildTagToSequencesIndex(): void
+    {
+        foreach ($this->sequences as $sequence) {
+            foreach ($sequence->tags as $tag) {
+                if (!isset($this->tagToSequencesMap[$tag])) {
+                    $this->tagToSequencesMap[$tag] = [];
+                }
+                $this->tagToSequencesMap[$tag][] = $sequence;
+            }
+        }
+    }
+
+    /**
+     * Get sequences that have the given tag, ordered by priority (highest first).
+     * 
+     * @param string $tag
+     * @return Sequence[]
+     */
+    public function getSequencesByTag(string $tag): array
+    {
+        return $this->tagToSequencesMap[$tag] ?? [];
     }
 }

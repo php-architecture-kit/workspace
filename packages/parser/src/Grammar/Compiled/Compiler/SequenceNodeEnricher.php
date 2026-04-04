@@ -45,12 +45,17 @@ class SequenceNodeEnricher
             }
         }
 
+        $tags = $sequence->tags;
+        if (isset($sequence->meta['nodeType']) && $sequence->meta['nodeType'] instanceof NodeType) {
+            $tags[] = $sequence->meta['nodeType']->value;
+        }
+
         return new Sequence(
             $sequence->name,
             $enrichedNodes,
             $sequence->priority,
             $sequence->meta,
-            $sequence->tags,
+            $tags,
         );
     }
 
@@ -140,6 +145,7 @@ class SequenceNodeEnricher
             $node->anchorName,
             $node->meta,
             $tags,
+            $node->isSpread,
         );
     }
 

@@ -325,6 +325,15 @@ class Matcher
                             $count++;
                             break;
                         }
+                        
+                        $token = $stream->matchAny($offset, [$alternative]);
+                        if ($token !== null) {
+                            $items[] = $token;
+                            $matched = true;
+                            unset($this->currentOffsetStack[$currentOffset]);
+                            $count++;
+                            break;
+                        }
                     }
                 } else {
                     $token = $stream->matchAny($offset, [$alternative]);
@@ -333,6 +342,22 @@ class Matcher
                         $matched = true;
                         $count++;
                         break;
+                    }
+                    
+                    $taggedSequences = $this->context->getSequenceLibrary()->getSequencesByTag($alternative);
+                    foreach ($taggedSequences as $sequence) {
+                        if (!in_array($sequence->name, $this->currentOffsetStack[$currentOffset] ?? [])) {
+                            $this->currentOffsetStack[$currentOffset][] = $sequence->name;
+
+                            $matchedSequence = $this->matchSequence($sequence, $stream, $offset);
+                            if ($matchedSequence !== null) {
+                                $items[] = $matchedSequence;
+                                $matched = true;
+                                unset($this->currentOffsetStack[$currentOffset]);
+                                $count++;
+                                break 2;
+                            }
+                        }
                     }
                 }
             }
@@ -352,6 +377,7 @@ class Matcher
             $items,
             $node->meta,
             $node->tags,
+            $node->isSpread,
         );
     }
 }

@@ -58,7 +58,13 @@ class DefaultParsingContext implements ParsingContext
 
     public function matchingContextForRegion(TokenRegion $region): ?MatchingContext
     {
-        return new DefaultMatcherContext($region->name, $this->grammar->regions[$region->name]->sequenceLibrary);
+        $compiledRegion = $this->grammar->regions[$region->name] ?? null;
+        
+        if ($compiledRegion === null) {
+            return null;
+        }
+        
+        return new DefaultMatcherContext($region->name, $compiledRegion->sequenceLibrary);
     }
 
     public function tokenizationContext(): TokenizationContext

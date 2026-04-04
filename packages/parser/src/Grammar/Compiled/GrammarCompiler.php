@@ -18,6 +18,7 @@ use PhpArchitecture\Parser\Grammar\Compiled\Compiler\RuleCompilerInterface;
 use PhpArchitecture\Parser\Grammar\Compiled\Compiler\RuleToPatternCompiler;
 use PhpArchitecture\Parser\Grammar\Compiled\Compiler\RuleToSequenceCompiler;
 use PhpArchitecture\Parser\Grammar\Compiled\Compiler\TaggedRuleBasedEventSubscribersCompiler;
+use PhpArchitecture\Parser\Grammar\Compiled\Compiler\TagToChoiceCompiler;
 use PhpArchitecture\Parser\Grammar\Compiled\Model\CompiledEventSubscriber;
 use PhpArchitecture\Parser\Grammar\Compiled\Model\CompiledGrammar;
 use PhpArchitecture\Parser\Grammar\Compiled\Model\CompiledRegion;
@@ -66,6 +67,7 @@ class GrammarCompiler
             new RegionOpenerCloserCompiler(),
             $regionInheritanceCompiler,
             new TaggedRuleBasedEventSubscribersCompiler(),
+            new TagToChoiceCompiler(),
         ];
 
         $this->ruleCompilers = [

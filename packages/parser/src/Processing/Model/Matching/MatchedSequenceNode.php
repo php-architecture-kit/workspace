@@ -26,6 +26,7 @@ class MatchedSequenceNode implements MetaInterface, Stringable
         public private(set) array $items,
         array $meta,
         array $tags,
+        public private(set) bool $isSpread = false,
     ) {
         $this->meta = $meta;
         $this->tags = $tags;

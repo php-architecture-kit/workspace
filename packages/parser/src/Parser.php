@@ -101,6 +101,23 @@ class Parser
 
     private function parseMatchedSequenceNodeRecursive(MatchedSequenceNode $sequenceNode, ParsingContext $context, NodeInterface $parent): void
     {
+        // If spread, parse items directly into parent without creating intermediate node
+        if ($sequenceNode->isSpread) {
+            foreach ($sequenceNode->items as $item) {
+                if ($item instanceof Token) {
+                    $this->parseToken($item, $context, $parent);
+                    continue;
+                }
+                if ($item instanceof TokenRegion) {
+                    $this->parseRegionRecursive($item, $context, $parent);
+                    continue;
+                }
+                assert($item instanceof MatchedSequence);
+                $this->parseMatchedSequenceRecursive($item, $context, $parent);
+            }
+            return;
+        }
+        
         $node = $context->nodeFactory()->fromMatchedSequenceNode($sequenceNode);
         $context->addNode($parent, $node);
 

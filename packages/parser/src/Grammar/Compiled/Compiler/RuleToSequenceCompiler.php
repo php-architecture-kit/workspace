@@ -100,6 +100,7 @@ class RuleToSequenceCompiler implements RuleCompilerInterface
             $definition->anchorName,
             [],
             $definition->nodeType ? ($definition->tags + [$definition->nodeType->value]) : $definition->tags,
+            $definition->isSpread,
         );
     }
 }
