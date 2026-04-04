@@ -68,6 +68,10 @@ final class TokenizeCommand extends Command
         $lexer = new Lexer($context);
         $tokenizedOutput = $lexer->process(new StringStream(file_get_contents($inputFile)));
 
+        // Check for unknown tokens
+        $unknownTokens = $this->findUnknownTokens($tokenizedOutput);
+        $hasUnknownTokens = count($unknownTokens) > 0;
+
         $formattedOutput = match($format) {
             'simple' => $this->formatSimple($tokenizedOutput),
             'stats' => $this->formatStats($tokenizedOutput),
@@ -76,12 +80,19 @@ final class TokenizeCommand extends Command
 
         if ($outputFile) {
             file_put_contents($outputFile, $formattedOutput);
-            $io->success("Tokenization output saved to: {$outputFile}");
+            if ($hasUnknownTokens) {
+                $io->error("Tokenization completed with " . count($unknownTokens) . " unknown token(s). Output saved to: {$outputFile}");
+            } else {
+                $io->success("Tokenization output saved to: {$outputFile}");
+            }
         } else {
             $output->write($formattedOutput);
+            if ($hasUnknownTokens) {
+                $io->error("Tokenization completed with " . count($unknownTokens) . " unknown token(s).");
+            }
         }
 
-        return Command::SUCCESS;
+        return $hasUnknownTokens ? Command::FAILURE : Command::SUCCESS;
     }
 
     private function formatSimple(TokenRegion $output): string
@@ -195,15 +206,29 @@ final class TokenizeCommand extends Command
                 $icon = $this->getTokenIcon($token->name);
                 $indent = str_repeat('  ', $item['depth']);
                 
+                // Build position string - show both absolute and row/col if available
+                $positionStr = sprintf("abs: %5d-%-5d", $token->startPosition, $token->endPosition);
+                
+                // Check if row/col tracking is enabled (Position objects in meta)
+                if ($token->hasMeta(\PhpArchitecture\Parser\Processing\Model\Tokenization\Position::KEY_START)) {
+                    $startPos = $token->getMeta(\PhpArchitecture\Parser\Processing\Model\Tokenization\Position::KEY_START);
+                    $endPos = $token->getMeta(\PhpArchitecture\Parser\Processing\Model\Tokenization\Position::KEY_END);
+                    $positionStr .= sprintf(" | row/col: %d:%d-%d:%d", 
+                        $startPos->row, 
+                        $startPos->column,
+                        $endPos->row,
+                        $endPos->column
+                    );
+                }
+                
                 $result .= sprintf(
-                    "%s%s %5d. %-25s | %-50s | pos: %5d-%-5d | region: %s\n",
+                    "%s%s %5d. %-25s | %-50s | %s | region: %s\n",
                     $indent,
                     $icon,
                     $tokenIndex,
                     $token->name,
                     json_encode($displayValue),
-                    $token->startPosition,
-                    $token->endPosition,
+                    $positionStr,
                     $item['region']
                 );
             }
@@ -212,6 +237,30 @@ final class TokenizeCommand extends Command
         $result .= "\n" . str_repeat("=", 120) . "\n";
         
         return $result;
+    }
+
+    /**
+     * Find all unknown tokens in the tokenized output
+     * 
+     * @return Token[]
+     */
+    private function findUnknownTokens(TokenRegion $region): array
+    {
+        $unknownTokens = [];
+        
+        $findRecursive = function(TokenRegion $region) use (&$findRecursive, &$unknownTokens) {
+            foreach ($region->stream->tokens as $item) {
+                if ($item instanceof Token && $item->name === Token::TOKEN_UNKNOWN) {
+                    $unknownTokens[] = $item;
+                } elseif ($item instanceof TokenRegion) {
+                    $findRecursive($item);
+                }
+            }
+        };
+        
+        $findRecursive($region);
+        
+        return $unknownTokens;
     }
 
     private function collectTokens(TokenRegion $region): array

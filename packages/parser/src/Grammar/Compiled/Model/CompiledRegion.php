@@ -11,11 +11,13 @@ final readonly class CompiledRegion
 {
     /**
      * @param array<string,CompiledEventSubscriber> $eventSubscribers
+     * @param string[] $tags
      */
     public function __construct(
         public string $name,
         public array $eventSubscribers,
         public PatternLibrary $patternLibrary,
         public SequenceLibrary $sequenceLibrary,
+        public array $tags = [],
     ) {}
 }

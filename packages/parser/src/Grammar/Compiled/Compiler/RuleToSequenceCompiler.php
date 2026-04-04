@@ -31,16 +31,25 @@ class RuleToSequenceCompiler implements RuleCompilerInterface
             throw new LogicException("Unsupported definition type. Compiler require SequenceRule definition.");
         }
 
+        $meta = [];
+        if ($rule->nodeType !== null) {
+            $meta['nodeType'] = $rule->nodeType;
+        }
+
         return $this->compileSequence(
             $rule->name,
             $sequenceRule,
             $rule->priority,
             $rule->tags,
+            $meta,
         );
     }
 
-    /** @param string[] $tags */
-    public function compileSequence(string $name, SequenceRule $definition, int $priority, array $tags): CompiledSequence
+    /** 
+     * @param string[] $tags 
+     * @param array<string,mixed> $meta
+     */
+    public function compileSequence(string $name, SequenceRule $definition, int $priority, array $tags, array $meta = []): CompiledSequence
     {
         return new CompiledSequence(
             $name,
@@ -51,6 +60,7 @@ class RuleToSequenceCompiler implements RuleCompilerInterface
                 $definition->nodes,
             ),
             $priority,
+            $meta,
             $tags,
         );
     }
@@ -88,6 +98,7 @@ class RuleToSequenceCompiler implements RuleCompilerInterface
             $definition->isLookahead,
             $definition->isLookbehind,
             $definition->anchorName,
+            [],
             $definition->nodeType ? ($definition->tags + [$definition->nodeType->value]) : $definition->tags,
         );
     }

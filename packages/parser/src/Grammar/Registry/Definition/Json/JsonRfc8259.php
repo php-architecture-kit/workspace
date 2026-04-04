@@ -88,6 +88,7 @@ class JsonRfc8259 extends Whitespace
             Rule::taggedWith("_number_part")
                 ->startRegion("number", true)
                 ->add(
+                    $this->addNodeTypeSetupForRules(NodeType::Raw),
                     Rule::token("decimal-point", ".", tags: ["_number_part"]),
                     Rule::token("plus", "+", tags: ["_number_part"]),
                     Rule::token("minus", "-", tags: ["_number_part"]),
@@ -108,6 +109,16 @@ class JsonRfc8259 extends Whitespace
         $grammar->setRootRegion($jsonText);
 
         return $grammar;
+    }
+
+    private function addNodeTypeSetupForRules(NodeType $nodeType): AddRuleMiddleware
+    {
+        return AddRuleMiddleware::fromCallable(
+            static function (Rule $rule) use ($nodeType): Rule {
+                $rule->setNodeType($nodeType);
+                return $rule;
+            }
+        );
     }
 
     private function addTriviaMiddleware(): AddRuleMiddleware

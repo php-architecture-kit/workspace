@@ -195,8 +195,16 @@ class GrammarCompiler
                 $region->name,
                 $region->config->rootSequence,
                 0,
-                $region->tags
+                $region->tags,
+                []
             );
+        }
+
+        // Enrich sequences with NodeType from Rules/Regions/Tags
+        $enricher = new Compiler\SequenceNodeEnricher();
+        $sequences = $enricher->enrichSequences($sequences, $region);
+        if ($rootSequence !== null) {
+            $rootSequence = $enricher->enrichSequence($rootSequence, $region);
         }
 
         $compiledEventSubscribers = [];
@@ -237,6 +245,7 @@ class GrammarCompiler
             $compiledEventSubscribers,
             new PatternLibrary($patterns),
             new SequenceLibrary($sequences, $rootSequence),
+            $region->getAllTags(),
         );
     }
 }

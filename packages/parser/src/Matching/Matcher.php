@@ -53,7 +53,52 @@ class Matcher
         $matchedSequence = $this->matchSequence($rootSequence, $region->stream, $offset);
 
         if ($matchedSequence === null) {
-            throw new LogicException("Root sequence '{$rootSequence->name}' could not be matched for region '{$region->name}'.");
+            // Build detailed error message
+            $errorMsg = "Root sequence '{$rootSequence->name}' could not be matched for region '{$region->name}'.\n\n";
+            
+            // Show sequence structure
+            $errorMsg .= "Expected sequence structure:\n";
+            $nodeDescriptions = [];
+            foreach ($rootSequence->nodes as $idx => $node) {
+                if ($node instanceof SequenceNode) {
+                    $alternatives = implode(' | ', $node->alternatives);
+                    $cardinality = $node->min === $node->max 
+                        ? "exactly {$node->min}" 
+                        : "min:{$node->min}, max:{$node->max}";
+                    $nodeDescriptions[] = "  [{$idx}] ({$alternatives}) - {$cardinality}";
+                } elseif ($node instanceof NestedSequence) {
+                    $nodeDescriptions[] = "  [{$idx}] <nested sequence> - min:{$node->min}, max:{$node->max}";
+                }
+            }
+            $errorMsg .= implode("\n", $nodeDescriptions) . "\n\n";
+            
+            // Show available tokens at start
+            $errorMsg .= "Available tokens in region (first 10):\n";
+            $tokenCount = 0;
+            $tokenOffset = 0;
+            while ($region->stream->has($tokenOffset) && $tokenCount < 10) {
+                $token = $region->stream->peek($tokenOffset);
+                if ($token instanceof Token) {
+                    $displayValue = strlen($token->raw) > 30 ? substr($token->raw, 0, 30) . '...' : $token->raw;
+                    $errorMsg .= "  [{$tokenOffset}] {$token->name}: " . json_encode($displayValue) . "\n";
+                } elseif ($token instanceof TokenRegion) {
+                    $errorMsg .= "  [{$tokenOffset}] <region: {$token->name}>\n";
+                }
+                $tokenOffset++;
+                $tokenCount++;
+            }
+            
+            if ($region->stream->has($tokenOffset)) {
+                $totalTokens = 0;
+                $countOffset = 0;
+                while ($region->stream->has($countOffset)) {
+                    $countOffset++;
+                    $totalTokens++;
+                }
+                $errorMsg .= "  ... and " . ($totalTokens - 10) . " more tokens\n";
+            }
+            
+            throw new LogicException($errorMsg);
         }
 
         return $matchedSequence;
