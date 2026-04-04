@@ -80,9 +80,11 @@ class Matcher
                 $token = $region->stream->peek($tokenOffset);
                 if ($token instanceof Token) {
                     $displayValue = strlen($token->raw) > 30 ? substr($token->raw, 0, 30) . '...' : $token->raw;
-                    $errorMsg .= "  [{$tokenOffset}] {$token->name}: " . json_encode($displayValue) . "\n";
+                    $tagsStr = count($token->tags) > 0 ? ' [' . implode(', ', $token->tags) . ']' : '';
+                    $errorMsg .= "  [{$tokenOffset}] {$token->name}: " . json_encode($displayValue) . "{$tagsStr}\n";
                 } elseif ($token instanceof TokenRegion) {
-                    $errorMsg .= "  [{$tokenOffset}] <region: {$token->name}>\n";
+                    $tagsStr = count($token->tags) > 0 ? ' [' . implode(', ', $token->tags) . ']' : '';
+                    $errorMsg .= "  [{$tokenOffset}] <region: {$token->name}>{$tagsStr}\n";
                 }
                 $tokenOffset++;
                 $tokenCount++;

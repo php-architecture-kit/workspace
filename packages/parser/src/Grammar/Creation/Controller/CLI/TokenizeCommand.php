@@ -192,11 +192,25 @@ final class TokenizeCommand extends Command
             if (isset($item['region_start'])) {
                 $region = $item['region_start'];
                 $indent = str_repeat('  ', $item['depth']);
-                $result .= sprintf("\n%s╔═══ REGION START: %-20s ═══╗\n", $indent, $region->name);
+                
+                // Add tags if present
+                $regionTagsStr = '';
+                if (count($region->tags) > 0) {
+                    $regionTagsStr = ' [' . implode(', ', $region->tags) . ']';
+                }
+                
+                $result .= sprintf("\n%s╔═══ REGION START: %-20s%s ═══╗\n", $indent, $region->name, $regionTagsStr);
             } elseif (isset($item['region_end'])) {
                 $region = $item['region_end'];
                 $indent = str_repeat('  ', $item['depth']);
-                $result .= sprintf("%s╚═══ REGION END: %-20s ═══╝\n\n", $indent, $region->name);
+                
+                // Add tags if present
+                $regionTagsStr = '';
+                if (count($region->tags) > 0) {
+                    $regionTagsStr = ' [' . implode(', ', $region->tags) . ']';
+                }
+                
+                $result .= sprintf("%s╚═══ REGION END: %-20s%s ═══╝\n\n", $indent, $region->name, $regionTagsStr);
             } elseif (isset($item['token'])) {
                 $token = $item['token'];
                 $tokenIndex++;
@@ -221,15 +235,22 @@ final class TokenizeCommand extends Command
                     );
                 }
                 
+                // Add tags if present
+                $tagsStr = '';
+                if (count($token->tags) > 0) {
+                    $tagsStr = ' [' . implode(', ', $token->tags) . ']';
+                }
+                
                 $result .= sprintf(
-                    "%s%s %5d. %-25s | %-50s | %s | region: %s\n",
+                    "%s%s %5d. %-25s | %-50s | %s | region: %s%s\n",
                     $indent,
                     $icon,
                     $tokenIndex,
                     $token->name,
                     json_encode($displayValue),
                     $positionStr,
-                    $item['region']
+                    $item['region'],
+                    $tagsStr
                 );
             }
         }
