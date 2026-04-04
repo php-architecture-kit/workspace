@@ -54,7 +54,8 @@ class Matcher
 
         if ($matchedSequence === null) {
             // Build detailed error message
-            $errorMsg = "Root sequence '{$rootSequence->name}' could not be matched for region '{$region->name}'.\n\n";
+            $errorMsg = "Root sequence '{$rootSequence->name}' could not be matched for region '{$region->name}'.\n";
+            $errorMsg .= "TokenStream topAskOffset: {$region->stream->topAskOffset}\n\n";
             
             // Show sequence structure
             $errorMsg .= "Expected sequence structure:\n";
@@ -148,14 +149,16 @@ class Matcher
 
         $firstToken = $stream->peek($offset);
         $firstTokenName = $firstToken instanceof Token ? $firstToken->name : $firstToken->name;
-        $validFirstNodes = $sequence->getFirstValidNodeNodeNames();
+        
+        // Use precomputed expanded first valid tokens from SequenceLibrary
+        $expandedValidTokens = $this->context->getSequenceLibrary()->getExpandedFirstValidTokens($sequence->name);
 
-        if (!empty($validFirstNodes)) {
-            $isValid = in_array($firstTokenName, $validFirstNodes);
+        if (!empty($expandedValidTokens)) {
+            $isValid = in_array($firstTokenName, $expandedValidTokens);
 
             if (!$isValid) {
                 foreach ($firstToken->tags as $tag) {
-                    if (in_array($tag, $validFirstNodes)) {
+                    if (in_array($tag, $expandedValidTokens)) {
                         $isValid = true;
                         break;
                     }

@@ -39,7 +39,7 @@ class JsonRfc8259 extends Whitespace
                     Rule::token("value-separator", ",", type: NodeType::Structure),
                     Rule::seq("items", "value (value-separator value)*")
                 )
-                ->withRootSequence("begin-array items end-array")
+                ->withRootSequence("begin-array ?items end-array")
                 ->closeWith(
                     Rule::token("end-array", "]", type: NodeType::Structure),
                 )
@@ -55,7 +55,7 @@ class JsonRfc8259 extends Whitespace
                     Rule::seq("member", "string[identifier] name-separator value"),
                     Rule::seq("members", "member (value-separator member)*")
                 )
-                ->withRootSequence("begin-object members end-object")
+                ->withRootSequence("begin-object ?members end-object")
                 ->closeWith(
                     Rule::token("end-object", "}", type: NodeType::Structure),
                 )

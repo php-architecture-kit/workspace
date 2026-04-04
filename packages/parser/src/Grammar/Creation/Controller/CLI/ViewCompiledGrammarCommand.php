@@ -129,27 +129,7 @@ final class ViewCompiledGrammarCommand extends Command
                 $nodeTypeStr = $nodeType ? " <fg=gray>(NodeType: {$nodeType->name})</>" : '';
                 $io->writeln("    - <fg=green>{$rootSeq->name}</> (ROOT){$nodeTypeStr}{$sequenceTags}:");
                 foreach ($rootSeq->nodes as $idx => $node) {
-                    if ($node instanceof \PhpArchitecture\Parser\Processing\Model\Matching\SequenceNode) {
-                        $options = implode(' | ', $node->alternatives);
-                        $cardinality = "min:{$node->min}, max:{$node->max}";
-                        
-                        $allTags = $node->tags ?? [];
-                        
-                        // Extract NodeType from tags (stored as "NodeType.Node", "NodeType.Raw", etc.)
-                        $nodeTypeTag = null;
-                        $otherTags = [];
-                        foreach ($allTags as $tag) {
-                            if (str_starts_with($tag, 'NodeType.')) {
-                                $nodeTypeTag = substr($tag, 9); // Remove "NodeType." prefix
-                            } else {
-                                $otherTags[] = $tag;
-                            }
-                        }
-                        
-                        $nodeTypeStr = $nodeTypeTag ? " <fg=gray>(NodeType: {$nodeTypeTag})</>" : '';
-                        $nodeTags = count($otherTags) > 0 ? ' <fg=yellow>[' . implode(', ', $otherTags) . ']</>' : '';
-                        $io->writeln("      [{$idx}] ({$options}) - {$cardinality}{$nodeTypeStr}{$nodeTags}");
-                    }
+                    $this->displaySequenceNode($io, $node, $idx, '      ');
                 }
             }
             
@@ -159,27 +139,7 @@ final class ViewCompiledGrammarCommand extends Command
                 $nodeTypeStr = $nodeType ? " <fg=gray>(NodeType: {$nodeType->name})</>" : '';
                 $io->writeln("    - {$sequenceName}{$nodeTypeStr}{$sequenceTags}:");
                 foreach ($sequence->nodes as $idx => $node) {
-                    if ($node instanceof \PhpArchitecture\Parser\Processing\Model\Matching\SequenceNode) {
-                        $options = implode(' | ', $node->alternatives);
-                        $cardinality = "min:{$node->min}, max:{$node->max}";
-                        
-                        $allTags = $node->tags ?? [];
-                        
-                        // Extract NodeType from tags (stored as "NodeType.Node", "NodeType.Raw", etc.)
-                        $nodeTypeTag = null;
-                        $otherTags = [];
-                        foreach ($allTags as $tag) {
-                            if (str_starts_with($tag, 'NodeType.')) {
-                                $nodeTypeTag = substr($tag, 9); // Remove "NodeType." prefix
-                            } else {
-                                $otherTags[] = $tag;
-                            }
-                        }
-                        
-                        $nodeTypeStr = $nodeTypeTag ? " <fg=gray>(NodeType: {$nodeTypeTag})</>" : '';
-                        $nodeTags = count($otherTags) > 0 ? ' <fg=yellow>[' . implode(', ', $otherTags) . ']</>' : '';
-                        $io->writeln("      [{$idx}] ({$options}) - {$cardinality}{$nodeTypeStr}{$nodeTags}");
-                    }
+                    $this->displaySequenceNode($io, $node, $idx, '      ');
                 }
             }
         }
@@ -199,6 +159,46 @@ final class ViewCompiledGrammarCommand extends Command
 
         if ($showTags) {
             $this->displayCompiledRegionTags($io, $region, $allRegions);
+        }
+    }
+
+    private function displaySequenceNode(SymfonyStyle $io, object $node, int $idx, string $indent): void
+    {
+        if ($node instanceof \PhpArchitecture\Parser\Processing\Model\Matching\SequenceNode) {
+            $options = implode(' | ', $node->alternatives);
+            $cardinality = "min:{$node->min}, max:{$node->max}";
+            
+            $allTags = $node->tags ?? [];
+            
+            // Extract NodeType from tags (stored as "NodeType.Node", "NodeType.Raw", etc.)
+            $nodeTypeTag = null;
+            $otherTags = [];
+            foreach ($allTags as $tag) {
+                if (str_starts_with($tag, 'NodeType.')) {
+                    $nodeTypeTag = substr($tag, 9); // Remove "NodeType." prefix
+                } else {
+                    $otherTags[] = $tag;
+                }
+            }
+            
+            $nodeTypeStr = $nodeTypeTag ? " <fg=gray>(NodeType: {$nodeTypeTag})</>" : '';
+            $nodeTags = count($otherTags) > 0 ? ' <fg=yellow>[' . implode(', ', $otherTags) . ']</>' : '';
+            $io->writeln("{$indent}[{$idx}] ({$options}) - {$cardinality}{$nodeTypeStr}{$nodeTags}");
+        } elseif ($node instanceof \PhpArchitecture\Parser\Processing\Model\Matching\NestedSequence) {
+            $cardinality = "min:{$node->min}, max:{$node->max}";
+            $alternativesCount = count($node->alternativeSequences);
+            $io->writeln("{$indent}[{$idx}] <fg=cyan>(NESTED {$alternativesCount} alternatives)</> - {$cardinality}");
+            
+            // Display each alternative sequence
+            foreach ($node->alternativeSequences as $altIdx => $alternativeNodes) {
+                if ($alternativesCount > 1) {
+                    $io->writeln("{$indent}  <fg=magenta>Alternative {$altIdx}:</>");
+                }
+                foreach ($alternativeNodes as $nestedIdx => $nestedNode) {
+                    $nestedIndent = $alternativesCount > 1 ? $indent . '    ' : $indent . '  ';
+                    $this->displaySequenceNode($io, $nestedNode, $nestedIdx, $nestedIndent);
+                }
+            }
         }
     }
 
