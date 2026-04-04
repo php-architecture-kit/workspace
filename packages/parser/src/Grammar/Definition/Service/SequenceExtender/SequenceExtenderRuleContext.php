@@ -13,6 +13,7 @@ class SequenceExtenderRuleContext
     private readonly Closure $matcher;
     private readonly Closure $callback;
     private bool $registered = false;
+    private bool $recursive = false;
 
     public function __destruct()
     {
@@ -39,6 +40,20 @@ class SequenceExtenderRuleContext
     }
 
     /**
+     * Enable recursive processing of NestedSequence nodes.
+     * When enabled, the rule will be applied to nodes inside NestedSequence as well.
+     */
+    public function applyRecursively(): self
+    {
+        if ($this->registered) {
+            throw new \LogicException('Rule already registered. Call applyRecursively() before which() or always().');
+        }
+
+        $this->recursive = true;
+        return $this;
+    }
+
+    /**
      * @param callable(NestedSequence|SequenceNode $contextNode, int $index, array $nodes): bool $contextMatcher
      */
     public function which(callable $contextMatcher): SequenceExtender
@@ -52,7 +67,8 @@ class SequenceExtenderRuleContext
             $this->action,
             $this->position,
             $this->callback,
-            $contextMatcher
+            $contextMatcher,
+            $this->recursive
         );
         $this->registered = true;
 
@@ -79,7 +95,8 @@ class SequenceExtenderRuleContext
             $this->action,
             $this->position,
             $this->callback,
-            null
+            null,
+            $this->recursive
         );
         $this->registered = true;
     }

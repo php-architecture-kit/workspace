@@ -73,15 +73,15 @@ class Whitespace implements GrammarDefinitionInterface
                                 if ($isStartedByNewLine && !$isTriggerTokenIncluded) {
                                     $event->region->rename('empty-line');
                                 } else {
-                                    $event->region->rename('trailing_ws');
+                                    $event->region->rename('trailing-ws');
                                 }
                             } else {
                                 if ($isStartedByNewLine && !$isTriggerTokenIncluded) {
-                                    $event->region->rename('leading_ws');
+                                    $event->region->rename('leading-ws');
                                 } elseif ($previousEndedWithNewline) {
-                                    $event->region->rename('leading_ws');
+                                    $event->region->rename('leading-ws');
                                 } else {
-                                    $event->region->rename('inline_ws');
+                                    $event->region->rename('inline-ws');
                                 }
                             }
                         }

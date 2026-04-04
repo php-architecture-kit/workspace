@@ -17,7 +17,8 @@ class SequenceExtender
      *   action: 'add'|'modify'|'remove',
      *   position: 'prev'|'exact'|'next',
      *   callback: callable,
-     *   contextMatcher: ?callable
+     *   contextMatcher: ?callable,
+     *   applyRecursively: bool
      * }>
      */
     private array $rules = [];
@@ -42,7 +43,8 @@ class SequenceExtender
         string $action,
         string $position,
         callable $callback,
-        ?callable $contextMatcher = null
+        ?callable $contextMatcher = null,
+        bool $applyRecursively = false
     ): self {
         $this->rules[] = [
             'matcher' => $matcher,
@@ -50,6 +52,7 @@ class SequenceExtender
             'position' => $position,
             'callback' => $callback,
             'contextMatcher' => $contextMatcher,
+            'applyRecursively' => $applyRecursively,
         ];
 
         return $this;
@@ -142,6 +145,55 @@ class SequenceExtender
             }
         }
 
+        // Apply recursive processing to NestedSequence nodes if any rule has applyRecursively enabled
+        $hasRecursiveRule = false;
+        foreach ($this->rules as $rule) {
+            if ($rule['applyRecursively']) {
+                $hasRecursiveRule = true;
+                break;
+            }
+        }
+
+        if ($hasRecursiveRule) {
+            $newNodes = $this->applyRecursiveProcessing($newNodes);
+        }
+
         return new SequenceRule($newNodes);
+    }
+
+    /**
+     * Recursively processes NestedSequence nodes by applying all rules to their internal nodes.
+     * 
+     * @param array<NestedSequence|SequenceNode> $nodes
+     * @return array<NestedSequence|SequenceNode>
+     */
+    private function applyRecursiveProcessing(array $nodes): array
+    {
+        $processedNodes = [];
+
+        foreach ($nodes as $node) {
+            if ($node instanceof NestedSequence) {
+                // Process each alternative sequence within the NestedSequence
+                $processedAlternatives = [];
+                foreach ($node->alternativeSequences as $alternativeNodes) {
+                    $alternativeSequence = new SequenceRule($alternativeNodes);
+                    $processedSequence = $this->extend($alternativeSequence);
+                    $processedAlternatives[] = $processedSequence->nodes;
+                }
+
+                // Create a new NestedSequence with processed alternatives
+                $processedNodes[] = new NestedSequence(
+                    $processedAlternatives,
+                    $node->cardinality,
+                    $node->isLookahead,
+                    $node->isLookbehind,
+                    $node->tags
+                );
+            } else {
+                $processedNodes[] = $node;
+            }
+        }
+
+        return $processedNodes;
     }
 }
