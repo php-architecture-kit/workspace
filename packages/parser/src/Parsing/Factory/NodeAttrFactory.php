@@ -5,13 +5,18 @@ declare(strict_types=1);
 namespace PhpArchitecture\Parser\Parsing\Factory;
 
 use InvalidArgumentException;
+use PhpArchitecture\Parser\Grammar\Definition\EventListener\Tokenization\EndRegionEventListener;
+use PhpArchitecture\Parser\Grammar\Definition\EventListener\Tokenization\StartRegionEventListener;
 use PhpArchitecture\Parser\Parsing\Model\Attribute\GroupAttribute;
 use PhpArchitecture\Parser\Parsing\Model\Attribute\NodeAttribute;
 use PhpArchitecture\Parser\Parsing\Model\Attribute\OptionalAttribute;
 use PhpArchitecture\Parser\Parsing\Model\Attribute\RawContentAttribute;
+use PhpArchitecture\Parser\Parsing\Model\Attribute\RawRegionAttribute;
 use PhpArchitecture\Parser\Parsing\Model\Attribute\StructureAttribute;
 use PhpArchitecture\Parser\Parsing\NodeAttrFactoryInterface;
 use PhpArchitecture\Parser\Processing\Context\ParsingContext;
+use PhpArchitecture\Parser\Processing\Event\Tokenization\TokenAddedEvent;
+use PhpArchitecture\Parser\Processing\Event\Tokenization\TokenMatchedEvent;
 use PhpArchitecture\Parser\Processing\Model\Matching\MatchedRegion;
 use PhpArchitecture\Parser\Processing\Model\Matching\MatchedSequence;
 use PhpArchitecture\Parser\Processing\Model\Matching\MatchedSequenceNode;
@@ -42,7 +47,7 @@ class NodeAttrFactory implements NodeAttrFactoryInterface
         $attribute = match ($nodeType) {
             NodeType::Node => new NodeAttribute($region->name, $this->context->nodeFactory()->fromTokenRegion($region, $parent), $region->meta, $region->tags),
             NodeType::Structure => new StructureAttribute(true, $region->name, ($content = $region->__toString()) === '' ? null : $content, $region->meta, $region->tags),
-            NodeType::Raw => new RawContentAttribute($region->__toString(), $region->name, $region->meta, $region->tags),
+            NodeType::Raw => $this->createRawRegionAttribute($region),
         };
 
         $parent->addAttribute($attribute);
@@ -53,7 +58,7 @@ class NodeAttrFactory implements NodeAttrFactoryInterface
         $attribute = match ($nodeType) {
             NodeType::Node => new NodeAttribute($region->name, $this->context->nodeFactory()->fromMatchedRegion($region, $parent), $region->meta, $region->tags),
             NodeType::Structure => new StructureAttribute(true, $region->name, ($content = $region->__toString()) === '' ? null : $content, $region->meta, $region->tags),
-            NodeType::Raw => new RawContentAttribute($region->__toString(), $region->name, $region->meta, $region->tags),
+            NodeType::Raw => $this->createRawRegionAttribute($region),
         };
 
         $parent->addAttribute($attribute);
@@ -87,12 +92,20 @@ class NodeAttrFactory implements NodeAttrFactoryInterface
         }
 
         if ($nodeType === NodeType::Raw) {
-            $parent->addAttribute(new RawContentAttribute(
-                $sequenceNode->__toString(),
-                $sequenceNode->name,
-                $sequenceNode->meta,
-                $sequenceNode->tags,
-            ));
+            $countItems = count($sequenceNode->items);
+            $firstItem = $sequenceNode->items[0] ?? null;
+            $parent->addAttribute(
+                match (true) {
+                    $countItems === 1 && $firstItem instanceof Token => new RawContentAttribute($firstItem->raw, $firstItem->name, $firstItem->meta, $firstItem->tags),
+                    $countItems === 1 && $firstItem instanceof TokenRegion => $this->createRawRegionAttribute($firstItem),
+                    default => new RawContentAttribute(
+                        $sequenceNode->__toString(),
+                        $sequenceNode->name,
+                        $sequenceNode->meta,
+                        $sequenceNode->tags,
+                    )
+                }
+            );
 
             return;
         }
@@ -147,5 +160,61 @@ class NodeAttrFactory implements NodeAttrFactoryInterface
             $sequenceNode->meta,
             $sequenceNode->tags,
         ));
+    }
+
+    private function createRawRegionAttribute(MatchedRegion|TokenRegion $region): RawRegionAttribute
+    {
+        $items = $region instanceof MatchedRegion ? $region->items : $region->stream->tokens;
+        $opener = null;
+        $closer = null;
+        if (empty($items)) {
+            return new RawRegionAttribute($opener, $closer, '', $region->name, $region->meta, $region->tags);
+        }
+
+        // opener
+        if (
+            $region->getMeta(StartRegionEventListener::KEY_CAUSED_BY_EVENT) instanceof TokenMatchedEvent &&
+            $items[0]->hasTag(NodeType::Structure->value)
+        ) {
+            $firstItem = array_shift($items);
+            $firstItemContent = $firstItem->__toString();
+            $opener = new StructureAttribute(
+                $firstItemContent !== '',
+                $firstItem->name,
+                $firstItemContent === '' ? null : $firstItemContent,
+                $firstItem->meta,
+                $firstItem->tags,
+            );
+        }
+
+        if (empty($items)) {
+            return new RawRegionAttribute($opener, $closer, '', $region->name, $region->meta, $region->tags);
+        }
+
+        // closer
+        $lastItemIndex = array_key_last($items);
+        if (
+            $region->getMeta(EndRegionEventListener::KEY_CAUSED_BY_EVENT) instanceof TokenAddedEvent &&
+            $items[$lastItemIndex]->hasTag(NodeType::Structure->value)
+        ) {
+            $lastItem = array_pop($items);
+            $lastItemContent = $lastItem->__toString();
+            $closer = new StructureAttribute(
+                $lastItemContent !== '',
+                $lastItem->name,
+                $lastItemContent === '' ? null : $lastItemContent,
+                $lastItem->meta,
+                $lastItem->tags,
+            );
+        }
+
+        return new RawRegionAttribute(
+            $opener,
+            $closer,
+            implode('', array_map(static fn(Token|TokenRegion|MatchedSequence $item) => $item->__toString(), $items)),
+            $region->name,
+            $region->meta,
+            $region->tags
+        );
     }
 }

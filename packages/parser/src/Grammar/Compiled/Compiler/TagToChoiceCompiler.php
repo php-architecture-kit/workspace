@@ -31,35 +31,9 @@ class TagToChoiceCompiler implements GrammarCompilerInterface
     {
         $tagsMap = $this->getTagsMap($region);
 
-        $choices = [];
         foreach ($tagsMap as $tag => $options) {
             if (!isset($region->rules[$tag]) || $region->rules[$tag]->definition instanceof TaggedRule) {
-                $choices[$tag] = Rule::choice($tag, $options, type: NodeType::Node);
-            }
-        }
-
-        $extender = new SequenceExtender();
-        $extender
-            ->when(fn(NestedSequence|SequenceNode $node, int $index, array $nodes): bool => $node instanceof SequenceNode && !empty(array_intersect(
-                array_keys($choices),
-                $node->alternatives
-            )))
-            ->modify(function (NestedSequence|SequenceNode $node, array $context) use ($choices): NestedSequence|SequenceNode {
-                foreach ($node->alternatives as $index => $alternative) {
-                    if (isset($choices[$alternative])) {
-                        $replacement = $choices[$alternative];
-
-                        array_splice($node->alternatives, $index, 1, [$replacement]);
-                    }
-                }
-
-                return $node;
-            })
-            ->applyRecursively();
-
-        foreach ($region->rules as $ruleName => $rule) {
-            if ($rule->definition instanceof SequenceRule) {
-                $extender->extend($rule->definition);
+                $region->addRule(Rule::choice($tag, $options, type: NodeType::Node));
             }
         }
     }

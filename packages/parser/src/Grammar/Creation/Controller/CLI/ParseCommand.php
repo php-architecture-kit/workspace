@@ -12,6 +12,7 @@ use PhpArchitecture\Parser\Parsing\Model\Attribute\GroupAttribute;
 use PhpArchitecture\Parser\Parsing\Model\Attribute\NodeAttribute;
 use PhpArchitecture\Parser\Parsing\Model\Attribute\OptionalAttribute;
 use PhpArchitecture\Parser\Parsing\Model\Attribute\RawContentAttribute;
+use PhpArchitecture\Parser\Parsing\Model\Attribute\RawRegionAttribute;
 use PhpArchitecture\Parser\Parsing\Model\Attribute\StructureAttribute;
 use PhpArchitecture\Parser\Parsing\Model\Node;
 use PhpArchitecture\Parser\Processing\Model\Parsing\NodeAttributeInterface;
@@ -122,6 +123,11 @@ final class ParseCommand extends Command
             foreach ($node->nodes as $index => $child) {
                 $result .= $this->formatTree($child, $maxDepth, $currentDepth + 1, $index === $childCount - 1);
             }
+        } elseif ($node instanceof RawRegionAttribute) {
+            $displayValue = strlen($node->content) > 50 ? substr($node->content, 0, 50) . '...' : $node->content;
+            $metaInfo = !empty($node->meta) ? ' [meta: ' . json_encode($node->meta) . ']' : '';
+            $tagsInfo = !empty($node->tags) ? ' [tags: ' . implode(', ', $node->tags) . ']' : '';
+            $result .= $indent . $prefix . "RawRegionAttribute: {$node->name} = " . json_encode($displayValue) . "{$metaInfo}{$tagsInfo}\n";
         } elseif ($node instanceof RawContentAttribute) {
             $displayValue = strlen($node->content) > 50 ? substr($node->content, 0, 50) . '...' : $node->content;
             $metaInfo = !empty($node->meta) ? ' [meta: ' . json_encode($node->meta) . ']' : '';

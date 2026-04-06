@@ -6,18 +6,16 @@ namespace PhpArchitecture\Parser\Grammar\Definition\EventListener\Tokenization;
 
 use PhpArchitecture\Parser\Grammar\Definition\EventListener\RuleMatchedEventListener;
 use PhpArchitecture\Parser\Grammar\Definition\Rule;
-use PhpArchitecture\Parser\Parsing\Model\RegionRawContent;
 use PhpArchitecture\Parser\Processing\Event\Tokenization\Contract\TokenizationEvent;
 use PhpArchitecture\Parser\Processing\Event\Tokenization\Contract\TokenizationEventListener;
 use PhpArchitecture\Parser\Processing\Event\Tokenization\TokenAddedEvent;
 use PhpArchitecture\Parser\Processing\Event\Tokenization\TokenMatchedEvent;
 use PhpArchitecture\Parser\Processing\Model\Tokenization\TokenRegion;
 use PhpArchitecture\Parser\Processing\Context\TokenizationContext;
-use PhpArchitecture\Parser\Processing\Model\Parsing\NodeType;
 
 final class EndRegionEventListener implements TokenizationEventListener, RuleMatchedEventListener
 {
-    public const KEY_CAUSED_BY = 'endCausedByEvent';
+    public const KEY_CAUSED_BY_EVENT = 'endCausedByEvent';
 
     public function __construct(
         public readonly Rule $rule,
@@ -68,7 +66,7 @@ final class EndRegionEventListener implements TokenizationEventListener, RuleMat
         }
 
         $currentRegion->setMeta(
-            self::KEY_CAUSED_BY,
+            self::KEY_CAUSED_BY_EVENT,
             $event
         );
     }
