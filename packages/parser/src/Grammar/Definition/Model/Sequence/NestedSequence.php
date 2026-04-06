@@ -27,7 +27,7 @@ final class NestedSequence
     public static function fromString(string $nestedSequence): self
     {
         if (!preg_match(
-            '/^(?<lookahead>>)?(?<lookbehind><)?(?<optional>\?)?(?<unions>\([a-zA-Z0-9_\-|\(\) \+\*\?<>\[\]\/]+\)(\|\([a-zA-Z0-9_\-|\(\) \+\*\?<>\[\]\/]+\))*)(?<quantifier>[+*])?(?:\/(?<tags>[a-zA-Z]+))?$/',
+            '/^(?<lookahead>>)?(?<lookbehind><)?(?<optional>\?)?(?<unions>\([a-zA-Z0-9_\-|\(\) \+\*\?<>\[\]\/\.]+\)(\|\([a-zA-Z0-9_\-|\(\) \+\*\?<>\[\]\/\.]+\))*)(?<quantifier>[+*])?(?:\/(?<tags>[a-zA-Z]+))?$/',
             $nestedSequence,
             $m,
         )) {
@@ -159,6 +159,30 @@ final class NestedSequence
         }
 
         return array_unique($names);
+    }
+
+    /**
+     * @param ?callable(SequenceNode):bool $filter
+     * @return SequenceNode[]
+     */
+    public function getAllSequenceNodes(?callable $filter = null): array
+    {
+        $nodes = [];
+        foreach ($this->alternativeSequences as $nodes) {
+            foreach ($nodes as $node) {
+                if ($node instanceof NestedSequence) {
+                    $nodes = array_merge($nodes, $node->getAllSequenceNodes($filter));
+
+                    continue;
+                }
+
+                if (!$filter || $filter($node)) {
+                    $nodes[] = $node;
+                }
+            }
+        }
+
+        return $nodes;
     }
 
     /**

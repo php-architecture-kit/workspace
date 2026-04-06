@@ -90,51 +90,55 @@ class SequenceNodeEnricher
     }
 
     /**
-     * Enrich SequenceNode with NodeType from Rules/Regions/Tags
+     * Enrich SequenceNode with NodeType and spread from Rules/Regions/Tags
      */
     private function enrichNode(CompiledSequenceNode $node, Region $region, string $sequenceName): CompiledSequenceNode
     {
-        // If node already has NodeType defined, return as is
-        if ($this->hasNodeType($node)) {
-            return $node;
-        }
-
         $nodeTypesMap = [];
-        
-        // Iterate through alternatives and collect NodeTypes
+
         foreach ($node->alternatives as $alternative) {
             $nodeType = $this->resolveNodeType($alternative, $region);
+
             if ($nodeType !== null) {
                 $nodeTypesMap[$alternative] = $nodeType;
             }
         }
 
-        // If no NodeTypes found, return node as is
+        if ($this->hasNodeType($node)) {
+            return $node;
+        }
+
         if (empty($nodeTypesMap)) {
             return $node;
         }
 
         // Verify all NodeTypes are the same
-        $uniqueNodeTypes = array_unique(array_map(fn(NodeType $nt) => $nt->value, $nodeTypesMap));
-        if (count($uniqueNodeTypes) > 1) {
-            // Build detailed error message
-            $details = [];
-            foreach ($nodeTypesMap as $alt => $nodeType) {
-                $details[] = "  - '{$alt}' has NodeType: {$nodeType->name}";
+        if (!empty($nodeTypesMap)) {
+            $uniqueNodeTypes = array_unique(array_map(fn(NodeType $nt) => $nt->value, $nodeTypesMap));
+            if (count($uniqueNodeTypes) > 1) {
+                // Build detailed error message
+                $details = [];
+                foreach ($nodeTypesMap as $alt => $nodeType) {
+                    $details[] = "  - '{$alt}' has NodeType: {$nodeType->name}";
+                }
+
+                throw new LogicException(
+                    "Conflicting NodeTypes in sequence '{$sequenceName}' in region '{$region->name}'.\n" .
+                        "SequenceNode with alternatives [" . implode(', ', $node->alternatives) . "] has conflicting NodeTypes:\n" .
+                        implode("\n", $details) . "\n" .
+                        "All alternatives must have the same NodeType, or the SequenceNode must define its own NodeType using /n, /s, or /r suffix."
+                );
             }
-            
-            throw new LogicException(
-                "Conflicting NodeTypes in sequence '{$sequenceName}' in region '{$region->name}'.\n" .
-                "SequenceNode with alternatives [" . implode(', ', $node->alternatives) . "] has conflicting NodeTypes:\n" .
-                implode("\n", $details) . "\n" .
-                "All alternatives must have the same NodeType, or the SequenceNode must define its own NodeType using /n, /s, or /r suffix."
-            );
         }
 
-        // Add NodeType to tags
-        $nodeType = array_values($nodeTypesMap)[0];
+        // Add NodeType to tags if found
         $tags = $node->tags;
-        $tags[] = $nodeType->value;
+        if (!empty($nodeTypesMap)) {
+            $nodeType = array_values($nodeTypesMap)[0];
+            if (!in_array($nodeType->value, $tags)) {
+                $tags[] = $nodeType->value;
+            }
+        }
 
         return new CompiledSequenceNode(
             $node->alternatives,
@@ -145,7 +149,6 @@ class SequenceNodeEnricher
             $node->anchorName,
             $node->meta,
             $tags,
-            $node->isSpread,
         );
     }
 
@@ -200,8 +203,8 @@ class SequenceNodeEnricher
             $uniqueNodeTypes = array_unique(array_map(fn(NodeType $nt) => $nt->value, $nodeTypes));
             if (count($uniqueNodeTypes) > 1) {
                 throw new LogicException(
-                    "Tag '{$alternative}' is used by rules with different NodeTypes: " . 
-                    implode(', ', $uniqueNodeTypes)
+                    "Tag '{$alternative}' is used by rules with different NodeTypes: " .
+                        implode(', ', $uniqueNodeTypes)
                 );
             }
 

@@ -23,11 +23,14 @@ final class TokenizationContextCompiler
             $patternLibraries[$regionName] = $region->patternLibrary;
         }
 
+        $rootRegion = $grammar->regions[$grammar->rootRegionName];
+        
         $context = new DefaultTokenizationContext(
             rootName: $grammar->rootRegionName,
             applyBofEof: $grammar->requireBofEof,
             regionToPatternLibraryMap: $patternLibraries,
             regionToEventDispatcherMap: [],
+            rootRegionTags: $rootRegion->tags,
         );
 
         if ($applyRowColTracking) {

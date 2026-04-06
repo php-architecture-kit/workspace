@@ -1,0 +1,151 @@
+<?php
+
+declare(strict_types=1);
+
+namespace PhpArchitecture\Parser\Parsing\Factory;
+
+use InvalidArgumentException;
+use PhpArchitecture\Parser\Parsing\Model\Attribute\GroupAttribute;
+use PhpArchitecture\Parser\Parsing\Model\Attribute\NodeAttribute;
+use PhpArchitecture\Parser\Parsing\Model\Attribute\OptionalAttribute;
+use PhpArchitecture\Parser\Parsing\Model\Attribute\RawContentAttribute;
+use PhpArchitecture\Parser\Parsing\Model\Attribute\StructureAttribute;
+use PhpArchitecture\Parser\Parsing\NodeAttrFactoryInterface;
+use PhpArchitecture\Parser\Processing\Context\ParsingContext;
+use PhpArchitecture\Parser\Processing\Model\Matching\MatchedRegion;
+use PhpArchitecture\Parser\Processing\Model\Matching\MatchedSequence;
+use PhpArchitecture\Parser\Processing\Model\Matching\MatchedSequenceNode;
+use PhpArchitecture\Parser\Processing\Model\Parsing\NodeInterface;
+use PhpArchitecture\Parser\Processing\Model\Parsing\NodeType;
+use PhpArchitecture\Parser\Processing\Model\Tokenization\Token;
+use PhpArchitecture\Parser\Processing\Model\Tokenization\TokenRegion;
+
+class NodeAttrFactory implements NodeAttrFactoryInterface
+{
+    public function __construct(
+        private ParsingContext $context,
+    ) {}
+
+    public function fromToken(Token $token, NodeType $nodeType, NodeInterface $parent): void
+    {
+        $attribute = match ($nodeType) {
+            NodeType::Node => new NodeAttribute($token->name, $this->context->nodeFactory()->fromToken($token, $parent), $token->meta, $token->tags),
+            NodeType::Structure => new StructureAttribute(true, $token->name, $token->raw === '' ? null : $token->raw, $token->meta, $token->tags),
+            NodeType::Raw => new RawContentAttribute($token->raw, $token->name, $token->meta, $token->tags),
+        };
+
+        $parent->addAttribute($attribute);
+    }
+
+    public function fromTokenRegion(TokenRegion $region, NodeType $nodeType, NodeInterface $parent): void
+    {
+        $attribute = match ($nodeType) {
+            NodeType::Node => new NodeAttribute($region->name, $this->context->nodeFactory()->fromTokenRegion($region, $parent), $region->meta, $region->tags),
+            NodeType::Structure => new StructureAttribute(true, $region->name, ($content = $region->__toString()) === '' ? null : $content, $region->meta, $region->tags),
+            NodeType::Raw => new RawContentAttribute($region->__toString(), $region->name, $region->meta, $region->tags),
+        };
+
+        $parent->addAttribute($attribute);
+    }
+
+    public function fromMatchedRegion(MatchedRegion $region, NodeType $nodeType, NodeInterface $parent): void
+    {
+        $attribute = match ($nodeType) {
+            NodeType::Node => new NodeAttribute($region->name, $this->context->nodeFactory()->fromMatchedRegion($region, $parent), $region->meta, $region->tags),
+            NodeType::Structure => new StructureAttribute(true, $region->name, ($content = $region->__toString()) === '' ? null : $content, $region->meta, $region->tags),
+            NodeType::Raw => new RawContentAttribute($region->__toString(), $region->name, $region->meta, $region->tags),
+        };
+
+        $parent->addAttribute($attribute);
+    }
+
+    public function fromMatchedSequence(MatchedSequence $matchedSequence, NodeType $nodeType, NodeInterface $parent): void
+    {
+        $attribute = match ($nodeType) {
+            NodeType::Node => new NodeAttribute($matchedSequence->name, $this->context->nodeFactory()->fromMatchedSequence($matchedSequence, $parent), $matchedSequence->meta, $matchedSequence->tags),
+            NodeType::Structure => new StructureAttribute(true, $matchedSequence->name, ($content = $matchedSequence->__toString()) === '' ? null : $content, $matchedSequence->meta, $matchedSequence->tags),
+            NodeType::Raw => new RawContentAttribute($matchedSequence->__toString(), $matchedSequence->name, $matchedSequence->meta, $matchedSequence->tags),
+        };
+
+        $parent->addAttribute($attribute);
+    }
+
+    public function fromMatchedSequenceNode(MatchedSequenceNode $sequenceNode, NodeType $nodeType, NodeInterface $parent): void
+    {
+        if ($nodeType === NodeType::Structure) {
+            $content = $sequenceNode->__toString();
+
+            $parent->addAttribute(new StructureAttribute(
+                !empty($sequenceNode->items),
+                $sequenceNode->name,
+                $content === '' ? null : $content,
+                $sequenceNode->meta,
+                $sequenceNode->tags,
+            ));
+
+            return;
+        }
+
+        if ($nodeType === NodeType::Raw) {
+            $parent->addAttribute(new RawContentAttribute(
+                $sequenceNode->__toString(),
+                $sequenceNode->name,
+                $sequenceNode->meta,
+                $sequenceNode->tags,
+            ));
+
+            return;
+        }
+
+        if ($sequenceNode->max > 1) {
+            $nodes = [];
+            foreach ($sequenceNode->items as $item) {
+                $nodes[] = match ($item::class) {
+                    Token::class => $this->context->nodeFactory()->fromToken($item, $parent),
+                    TokenRegion::class => $this->context->nodeFactory()->fromTokenRegion($item, $parent),
+                    MatchedSequence::class => $this->context->nodeFactory()->fromMatchedSequence($item, $parent),
+                    default => throw new InvalidArgumentException('Unknown item type'),
+                };
+            }
+
+            $parent->addAttribute(new GroupAttribute(
+                $sequenceNode->name,
+                $nodes,
+                $sequenceNode->meta,
+                $sequenceNode->tags,
+            ));
+
+            return;
+        }
+
+        $node = empty($sequenceNode->items) ? null : match ($sequenceNode->items[0]::class) {
+            Token::class => $this->context->nodeFactory()->fromToken($sequenceNode->items[0], $parent),
+            TokenRegion::class => $this->context->nodeFactory()->fromTokenRegion($sequenceNode->items[0], $parent),
+            MatchedSequence::class => $this->context->nodeFactory()->fromMatchedSequence($sequenceNode->items[0], $parent),
+            default => throw new InvalidArgumentException(
+                'Unknown item type: `' . $sequenceNode->items[0]::class
+                    . '`. Expected Token, TokenRegion or MatchedSequence.'
+            ),
+        };
+
+        if ($sequenceNode->min === 0) {
+            $parent->addAttribute(new OptionalAttribute(
+                $sequenceNode->name,
+                $node,
+                $sequenceNode->meta,
+                $sequenceNode->tags,
+            ));
+
+            return;
+        }
+
+        assert($node instanceof NodeInterface);
+
+        $parent->addAttribute(new NodeAttribute(
+            $sequenceNode->name,
+            $node,
+            $sequenceNode->meta,
+            $sequenceNode->tags,
+        ));
+    }
+}

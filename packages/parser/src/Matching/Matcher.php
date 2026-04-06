@@ -52,59 +52,60 @@ class Matcher
         $offset = 0;
         $matchedSequence = $this->matchSequence($rootSequence, $region->stream, $offset);
 
-        if ($matchedSequence === null) {
-            // Build detailed error message
-            $errorMsg = "Root sequence '{$rootSequence->name}' could not be matched for region '{$region->name}'.\n";
-            $errorMsg .= "TokenStream topAskOffset: {$region->stream->topAskOffset}\n\n";
-            
-            // Show sequence structure
-            $errorMsg .= "Expected sequence structure:\n";
-            $nodeDescriptions = [];
-            foreach ($rootSequence->nodes as $idx => $node) {
-                if ($node instanceof SequenceNode) {
-                    $alternatives = implode(' | ', $node->alternatives);
-                    $cardinality = $node->min === $node->max 
-                        ? "exactly {$node->min}" 
-                        : "min:{$node->min}, max:{$node->max}";
-                    $nodeDescriptions[] = "  [{$idx}] ({$alternatives}) - {$cardinality}";
-                } elseif ($node instanceof NestedSequence) {
-                    $nodeDescriptions[] = "  [{$idx}] <nested sequence> - min:{$node->min}, max:{$node->max}";
-                }
-            }
-            $errorMsg .= implode("\n", $nodeDescriptions) . "\n\n";
-            
-            // Show available tokens at start
-            $errorMsg .= "Available tokens in region (first 10):\n";
-            $tokenCount = 0;
-            $tokenOffset = 0;
-            while ($region->stream->has($tokenOffset) && $tokenCount < 10) {
-                $token = $region->stream->peek($tokenOffset);
-                if ($token instanceof Token) {
-                    $displayValue = strlen($token->raw) > 30 ? substr($token->raw, 0, 30) . '...' : $token->raw;
-                    $tagsStr = count($token->tags) > 0 ? ' [' . implode(', ', $token->tags) . ']' : '';
-                    $errorMsg .= "  [{$tokenOffset}] {$token->name}: " . json_encode($displayValue) . "{$tagsStr}\n";
-                } elseif ($token instanceof TokenRegion) {
-                    $tagsStr = count($token->tags) > 0 ? ' [' . implode(', ', $token->tags) . ']' : '';
-                    $errorMsg .= "  [{$tokenOffset}] <region: {$token->name}>{$tagsStr}\n";
-                }
-                $tokenOffset++;
-                $tokenCount++;
-            }
-            
-            if ($region->stream->has($tokenOffset)) {
-                $totalTokens = 0;
-                $countOffset = 0;
-                while ($region->stream->has($countOffset)) {
-                    $countOffset++;
-                    $totalTokens++;
-                }
-                $errorMsg .= "  ... and " . ($totalTokens - 10) . " more tokens\n";
-            }
-            
-            throw new LogicException($errorMsg);
+        if ($matchedSequence !== null) {
+            $this->context->addMatchedSequence($matchedSequence);
+            return $matchedSequence;
         }
 
-        return $matchedSequence;
+        // Build detailed error message
+        $errorMsg = "Root sequence '{$rootSequence->name}' could not be matched for region '{$region->name}'.\n";
+        $errorMsg .= "TokenStream topAskOffset: {$region->stream->topAskOffset}\n\n";
+
+        // Show sequence structure
+        $errorMsg .= "Expected sequence structure:\n";
+        $nodeDescriptions = [];
+        foreach ($rootSequence->nodes as $idx => $node) {
+            if ($node instanceof SequenceNode) {
+                $alternatives = implode(' | ', $node->alternatives);
+                $cardinality = $node->min === $node->max
+                    ? "exactly {$node->min}"
+                    : "min:{$node->min}, max:{$node->max}";
+                $nodeDescriptions[] = "  [{$idx}] ({$alternatives}) - {$cardinality}";
+            } elseif ($node instanceof NestedSequence) {
+                $nodeDescriptions[] = "  [{$idx}] <nested sequence> - min:{$node->min}, max:{$node->max}";
+            }
+        }
+        $errorMsg .= implode("\n", $nodeDescriptions) . "\n\n";
+
+        // Show available tokens at start
+        $errorMsg .= "Available tokens in region (first 10):\n";
+        $tokenCount = 0;
+        $tokenOffset = 0;
+        while ($region->stream->has($tokenOffset) && $tokenCount < 10) {
+            $token = $region->stream->peek($tokenOffset);
+            if ($token instanceof Token) {
+                $displayValue = strlen($token->raw) > 30 ? substr($token->raw, 0, 30) . '...' : $token->raw;
+                $tagsStr = count($token->tags) > 0 ? ' [' . implode(', ', $token->tags) . ']' : '';
+                $errorMsg .= "  [{$tokenOffset}] {$token->name}: " . json_encode($displayValue) . "{$tagsStr}\n";
+            } elseif ($token instanceof TokenRegion) {
+                $tagsStr = count($token->tags) > 0 ? ' [' . implode(', ', $token->tags) . ']' : '';
+                $errorMsg .= "  [{$tokenOffset}] <region: {$token->name}>{$tagsStr}\n";
+            }
+            $tokenOffset++;
+            $tokenCount++;
+        }
+
+        if ($region->stream->has($tokenOffset)) {
+            $totalTokens = 0;
+            $countOffset = 0;
+            while ($region->stream->has($countOffset)) {
+                $countOffset++;
+                $totalTokens++;
+            }
+            $errorMsg .= "  ... and " . ($totalTokens - 10) . " more tokens\n";
+        }
+
+        throw new LogicException($errorMsg);
     }
 
     private function processWithoutRoot(TokenRegion $region): MatchedRegion
@@ -149,7 +150,7 @@ class Matcher
 
         $firstToken = $stream->peek($offset);
         $firstTokenName = $firstToken instanceof Token ? $firstToken->name : $firstToken->name;
-        
+
         // Use precomputed expanded first valid tokens from SequenceLibrary
         $expandedValidTokens = $this->context->getSequenceLibrary()->getExpandedFirstValidTokens($sequence->name);
 
@@ -300,7 +301,7 @@ class Matcher
     /**
      * @return null|MatchedSequenceNode
      */
-    private function matchSequenceNode(SequenceNode $node, TokenStream $stream, int &$offset): ?MatchedSequenceNode
+    private function matchSequenceNode(SequenceNode $node, TokenStream $stream, int &$offset): null|MatchedSequenceNode
     {
         $count = 0;
         $start = $offset;
@@ -320,12 +321,13 @@ class Matcher
                         $matchedSequence = $this->matchSequence($namedSequence, $stream, $offset);
                         if ($matchedSequence !== null) {
                             $items[] = $matchedSequence;
+
                             $matched = true;
                             unset($this->currentOffsetStack[$currentOffset]);
                             $count++;
                             break;
                         }
-                        
+
                         $token = $stream->matchAny($offset, [$alternative]);
                         if ($token !== null) {
                             $items[] = $token;
@@ -343,22 +345,6 @@ class Matcher
                         $count++;
                         break;
                     }
-                    
-                    $taggedSequences = $this->context->getSequenceLibrary()->getSequencesByTag($alternative);
-                    foreach ($taggedSequences as $sequence) {
-                        if (!in_array($sequence->name, $this->currentOffsetStack[$currentOffset] ?? [])) {
-                            $this->currentOffsetStack[$currentOffset][] = $sequence->name;
-
-                            $matchedSequence = $this->matchSequence($sequence, $stream, $offset);
-                            if ($matchedSequence !== null) {
-                                $items[] = $matchedSequence;
-                                $matched = true;
-                                unset($this->currentOffsetStack[$currentOffset]);
-                                $count++;
-                                break 2;
-                            }
-                        }
-                    }
                 }
             }
 
@@ -375,9 +361,10 @@ class Matcher
         return new MatchedSequenceNode(
             $node->anchorName ?? implode('|', $node->alternatives),
             $items,
+            $node->min,
+            $node->max,
             $node->meta,
             $node->tags,
-            $node->isSpread,
         );
     }
 }

@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace PhpArchitecture\Parser\Parsing\Factory;
 
+use InvalidArgumentException;
+use PhpArchitecture\Parser\Matching\Matcher;
+use PhpArchitecture\Parser\Parsing\Model\Attribute\RawContentAttribute;
+use PhpArchitecture\Parser\Parsing\Model\Attribute\StructureAttribute;
 use PhpArchitecture\Parser\Parsing\Model\Node;
-use PhpArchitecture\Parser\Parsing\Model\RawContent;
-use PhpArchitecture\Parser\Parsing\Model\RegionRawContent;
-use PhpArchitecture\Parser\Parsing\Model\Structure;
 use PhpArchitecture\Parser\Parsing\NodeFactoryInterface;
+use PhpArchitecture\Parser\Parsing\Resolver\NodeTypeResolver;
+use PhpArchitecture\Parser\Processing\Context\ParsingContext;
 use PhpArchitecture\Parser\Processing\Model\Matching\MatchedRegion;
 use PhpArchitecture\Parser\Processing\Model\Matching\MatchedSequence;
 use PhpArchitecture\Parser\Processing\Model\Matching\MatchedSequenceNode;
@@ -19,218 +22,124 @@ use PhpArchitecture\Parser\Processing\Model\Tokenization\TokenRegion;
 
 class NodeFactory implements NodeFactoryInterface
 {
-    public function fromToken(Token $token): NodeInterface
+    public function __construct(
+        private readonly ParsingContext $context,
+    ) {}
+
+    public function fromToken(Token $token, NodeInterface $parent): NodeInterface
     {
-        if ($token->hasTag(NodeType::Node->value)) {
-            return new Node(
-                $token->name,
-                ['content' => $token->raw],
-                [],
-                $token->meta,
-                $token->tags
-            );
-        }
+        $nodeType = NodeTypeResolver::resolveNodeType($token);
 
-        if ($token->hasTag(NodeType::Structure->value)) {
-            return new Structure(
-                $token->name,
-                true,
-                $token->raw,
-                $token->meta,
-                $token->tags
-            );
-        }
-
-        return new RawContent(
+        return new Node(
             $token->name,
-            $token->raw,
+            [
+                match ($nodeType) {
+                    NodeType::Structure => new StructureAttribute($token->raw !== '', StructureAttribute::DEFAULT_NAME, $token->raw === '' ? null : $token->raw),
+                    NodeType::Raw, NodeType::Node => new RawContentAttribute($token->raw),
+                }
+            ],
+            $parent,
             $token->meta,
-            $token->tags
+            $token->tags,
         );
     }
 
-    public function fromTokenRegion(TokenRegion $region): NodeInterface
+    public function fromTokenRegion(TokenRegion $region, ?NodeInterface $parent): NodeInterface
     {
-        if ($region->hasTag(NodeType::Node->value)) {
-            return new Node(
-                $region->name,
-                [],
-                $region->meta,
-                $region->tags
-            );
+        $regionMatchingContext = $this->context->matchingContextForRegion($region);
+        if (null === $regionMatchingContext) {
+            return $this->createNodeFromTokenRegion($region, $parent);
         }
 
-        if ($region->hasTag(NodeType::Structure->value)) {
-            return new Structure(
-                $region->name,
-                true,
-                $region->__toString(),
-                $region->meta,
-                $region->tags
-            );
+        $matcher = new Matcher($regionMatchingContext);
+        $matchedSeqOrRegion = $matcher->process($region);
+
+        if ($matchedSeqOrRegion instanceof MatchedRegion) {
+            return $this->createNodeFromMatchedRegion($matchedSeqOrRegion, $parent);
         }
 
-        $openerInstance = null;
-        if (
-            $region->getMeta(RegionRawContent::REGION_INCLUDES_STRUCTURE_OPENER_KEY, false)
-            && $region->stream->first()->hasTag(NodeType::Structure->value)
-        ) {
-            $opener = $region->stream->first();
-            $openerInstance = new Structure(
-                $opener->name,
-                true,
-                $opener->raw,
-                $opener->meta,
-                $opener->tags
-            );
-            $region->stream->remove(0);
-        }
-
-        $closerInstance = null;
-        if (
-            $region->getMeta(RegionRawContent::REGION_INCLUDES_STRUCTURE_CLOSER_KEY, false)
-            && $region->stream->last()->hasTag(NodeType::Structure->value)
-        ) {
-            $closer = $region->stream->last();
-            $closerInstance = new Structure(
-                $closer->name,
-                true,
-                $closer->raw,
-                $closer->meta,
-                $closer->tags
-            );
-            $region->stream->remove($region->stream->lastOffset());
-        }
-
-        return new RegionRawContent(
-            $region->name,
-            $region->__toString(),
-            $openerInstance,
-            $closerInstance,
-            $region->meta,
-            $region->tags,
-        );
+        return $this->createNodeFromMatchedSequence($matchedSeqOrRegion, $parent);
     }
 
-    public function fromMatchedRegion(MatchedRegion $region): NodeInterface
+    public function fromMatchedRegion(MatchedRegion $region, NodeInterface $parent): NodeInterface
     {
-        if ($region->hasTag(NodeType::Node->value)) {
-            return new Node(
-                $region->name,
-                [],
-                $region->meta,
-                $region->tags,
-            );
-        }
-
-        if ($region->hasTag(NodeType::Structure->value)) {
-            return new Structure(
-                $region->name,
-                true,
-                $region->__toString(),
-                $region->meta,
-                $region->tags,
-            );
-        }
-
-        $openerInstance = null;
-        if (
-            $region->getMeta(RegionRawContent::REGION_INCLUDES_STRUCTURE_OPENER_KEY, false)
-            && $region->firstItem()->hasTag(NodeType::Structure->value)
-        ) {
-            $opener = $region->firstItem();
-            $openerInstance = new Structure(
-                $opener->name,
-                true,
-                $opener->raw,
-                $opener->meta,
-                $opener->tags
-            );
-            $region->removeItem(0);
-        }
-
-        $closerInstance = null;
-        if (
-            $region->getMeta(RegionRawContent::REGION_INCLUDES_STRUCTURE_CLOSER_KEY, false)
-            && $region->lastItem()->hasTag(NodeType::Structure->value)
-        ) {
-            $closer = $region->lastItem();
-            $closerInstance = new Structure(
-                $closer->name,
-                true,
-                $closer->raw,
-                $closer->meta,
-                $closer->tags
-            );
-            $region->removeItem($region->lastIndex());
-        }
-
-        return new RegionRawContent(
-            $region->name,
-            $region->__toString(),
-            $openerInstance,
-            $closerInstance,
-            $region->meta,
-            $region->tags,
-        );
+        return $this->createNodeFromMatchedRegion($region, $parent);
     }
 
-    public function fromMatchedSequence(MatchedSequence $matchedSequence): NodeInterface
+    public function fromMatchedSequence(MatchedSequence $matchedSequence, NodeInterface $parent): NodeInterface
     {
-        if ($matchedSequence->hasTag(NodeType::Node->value)) {
-            return new Node(
-                $matchedSequence->name,
-                [],
-                $matchedSequence->meta,
-                $matchedSequence->tags,
-            );
-        }
-
-        if ($matchedSequence->hasTag(NodeType::Structure->value)) {
-            return new Structure(
-                $matchedSequence->name,
-                true,
-                $matchedSequence->__toString(),
-                $matchedSequence->meta,
-                $matchedSequence->tags,
-            );
-        }
-
-        return new RawContent(
-            $matchedSequence->name,
-            $matchedSequence->__toString(),
-            $matchedSequence->meta,
-            $matchedSequence->tags,
-        );
+        return $this->createNodeFromMatchedSequence($matchedSequence, $parent);
     }
 
-    public function fromMatchedSequenceNode(MatchedSequenceNode $node): NodeInterface
+    private function createNodeFromTokenRegion(TokenRegion $region, ?NodeInterface $parent = null): NodeInterface
     {
-        if ($node->hasTag(NodeType::Node->value)) {
-            return new Node(
-                $node->name,
-                [],
-                $node->meta,
-                $node->tags,
-            );
+        $node = new Node($region->name, [], $parent, $region->meta, $region->tags);
+
+        $this->fillRegionBasedNodeWithAttributes($node, NodeTypeResolver::resolveNodeType($region), $region->stream->tokens);
+
+        return $node;
+    }
+
+    private function createNodeFromMatchedRegion(MatchedRegion $region, ?NodeInterface $parent = null): NodeInterface
+    {
+        $node = new Node($region->name, [], $parent, $region->meta, $region->tags);
+
+        $this->fillRegionBasedNodeWithAttributes($node, NodeTypeResolver::resolveNodeType($region), $region->items);
+
+        return $node;
+    }
+
+    private function createNodeFromMatchedSequence(MatchedSequence $sequence, ?NodeInterface $parent = null): NodeInterface
+    {
+        $node = new Node($sequence->name, [], $parent, $sequence->meta, $sequence->tags);
+
+        $this->fillSequenceBasedNodeWithAttributes($node, $sequence->items);
+
+        return $node;
+    }
+
+    /** @param array<Token|TokenRegion|MatchedSequence> $items */
+    private function fillRegionBasedNodeWithAttributes(NodeInterface $regionBasedNode, NodeType $regionNodeType, array $items): void
+    {
+        if ($regionNodeType === NodeType::Structure) {
+            $content = implode('', array_map(static fn($item) => $item->__toString(), $items));
+            $regionBasedNode->addAttribute(new StructureAttribute(
+                !empty($sequenceNode->items),
+                StructureAttribute::DEFAULT_NAME,
+                $content === '' ? null : $content,
+            ));
+
+            return;
         }
 
-        if ($node->hasTag(NodeType::Structure->value)) {
-            $nodeContent = $node->__toString();
-            return new Structure(
-                $node->name,
-                !empty($node->items),
-                $nodeContent === '' ? null : $nodeContent,
-                $node->meta,
-                $node->tags,
-            );
+        if ($regionNodeType === NodeType::Raw) {
+            $content = implode('', array_map(static fn($item) => $item->__toString(), $items));
+            $regionBasedNode->addAttribute(new RawContentAttribute(
+                $content
+            ));
+
+            return;
         }
 
-        return new RawContent(
-            $node->name,
-            $node->__toString(),
-            $node->meta,
-            $node->tags,
-        );
+        foreach ($items as $item) {
+            $nodeType = NodeTypeResolver::resolveNodeType($item);
+
+            match ($item::class) {
+                Token::class => $this->context->nodeAttrFactory()->fromToken($item, $nodeType, $regionBasedNode),
+                TokenRegion::class => $this->context->nodeAttrFactory()->fromTokenRegion($item, $nodeType, $regionBasedNode),
+                MatchedSequence::class => $this->context->nodeAttrFactory()->fromMatchedSequence($item, $nodeType, $regionBasedNode),
+                default => throw new InvalidArgumentException('Unknown item type'),
+            };
+        }
+    }
+
+    /** @param array<MatchedSequenceNode> $items */
+    private function fillSequenceBasedNodeWithAttributes(NodeInterface $sequenceBasedNode, array $items): void
+    {
+        foreach ($items as $item) {
+            $nodeType = NodeTypeResolver::resolveNodeType($item);
+
+            $this->context->nodeAttrFactory()->fromMatchedSequenceNode($item, $nodeType, $sequenceBasedNode);
+        }
     }
 }

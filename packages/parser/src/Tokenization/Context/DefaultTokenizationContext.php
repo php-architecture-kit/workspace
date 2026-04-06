@@ -44,8 +44,12 @@ class DefaultTokenizationContext implements TokenizationContext
         public readonly int $lastTokenAddingRetryLimit = 3,
         private array $regionToPatternLibraryMap = [],
         private array $regionToEventDispatcherMap = [],
+        array $rootRegionTags = [],
     ) {
         $this->output = TokenRegion::new($this->rootName);
+        foreach ($rootRegionTags as $tag) {
+            $this->output->addTag($tag);
+        }
         $this->currentRegion = $this->output;
 
         $this->patternLibrary = $this->regionToPatternLibraryMap[$this->rootName]

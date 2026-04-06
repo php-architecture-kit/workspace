@@ -5,9 +5,10 @@ declare(strict_types=1);
 namespace PhpArchitecture\Parser\Parsing\Context;
 
 use PhpArchitecture\Parser\Grammar\Compiled\Model\CompiledGrammar;
-use PhpArchitecture\Parser\Matching\Context\DefaultMatcherContext;
+use PhpArchitecture\Parser\Matching\Context\DefaultMatchingContext;
+use PhpArchitecture\Parser\Parsing\Factory\NodeAttrFactory;
 use PhpArchitecture\Parser\Parsing\Factory\NodeFactory;
-use PhpArchitecture\Parser\Parsing\Model\Node;
+use PhpArchitecture\Parser\Parsing\NodeAttrFactoryInterface;
 use PhpArchitecture\Parser\Parsing\NodeFactoryInterface;
 use PhpArchitecture\Parser\Processing\Context\MatchingContext;
 use PhpArchitecture\Parser\Processing\Context\ParsingContext;
@@ -23,27 +24,14 @@ class DefaultParsingContext implements ParsingContext
 
     public function __construct(
         private readonly CompiledGrammar $grammar,
-        private readonly NodeFactoryInterface $nodeFactory = new NodeFactory(),
         private readonly bool $rowColTracking = true,
+        private ?NodeFactoryInterface $nodeFactory = null,
+        private ?NodeAttrFactoryInterface $nodeAttrFactory = null,
     ) {
         $this->tokenizationContext = (new TokenizationContextCompiler())
             ->compile($grammar, $rowColTracking);
-    }
-
-    public function addNode(?NodeInterface $parent, NodeInterface $node): void
-    {
-        if ($parent === null) {
-            $this->rootNode = $node;
-            return;
-        }
-
-        assert($parent instanceof Node);
-        $parent->attributes[] = $node;
-    }
-
-    public function getOutput(): NodeInterface
-    {
-        return $this->rootNode;
+        $this->nodeFactory ??= new NodeFactory($this);
+        $this->nodeAttrFactory ??= new NodeAttrFactory($this);
     }
 
     public function grammar(): CompiledGrammar
@@ -56,15 +44,24 @@ class DefaultParsingContext implements ParsingContext
         return $this->nodeFactory;
     }
 
+    public function nodeAttrFactory(): NodeAttrFactoryInterface
+    {
+        return $this->nodeAttrFactory;
+    }
+
     public function matchingContextForRegion(TokenRegion $region): ?MatchingContext
     {
         $compiledRegion = $this->grammar->regions[$region->name] ?? null;
-        
+
         if ($compiledRegion === null) {
             return null;
         }
-        
-        return new DefaultMatcherContext($region->name, $compiledRegion->sequenceLibrary);
+
+        if (!$compiledRegion->sequenceLibrary->rootSequence && empty($compiledRegion->sequenceLibrary->sequences)) {
+            return null;
+        }
+
+        return new DefaultMatchingContext($region->name, $compiledRegion->sequenceLibrary);
     }
 
     public function tokenizationContext(): TokenizationContext

@@ -191,7 +191,11 @@ class Rule
         $instance = (new self(
             $name,
             RuleType::Choice,
-            new SequenceRule([new Model\Sequence\SequenceNode($rulesNames, $cardinality, isSpread: true)]),
+            new SequenceRule(
+                [
+                    new Model\Sequence\SequenceNode($rulesNames, $cardinality)
+                ]
+            ),
             $type,
             $tags,
         ));

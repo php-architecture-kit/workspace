@@ -23,7 +23,6 @@ final class SequenceNode
         public bool $isLookbehind = false,
         public ?string $anchorName = null,
         public array $tags = [],
-        public bool $isSpread = false,
     ) {
         if (in_array('n', $tags)) {
             $this->nodeType = NodeType::Node;
@@ -45,7 +44,6 @@ final class SequenceNode
      * - exactlyOne
      * - >lookahead
      * - <lookbehind
-     * - ...spread
      * - token+[anchorName]
      * - token+[anchorName]/t
      * - token+/s
@@ -53,20 +51,19 @@ final class SequenceNode
     public static function fromString(string $sequenceNode): self
     {
         if (!preg_match(
-            '/^(?<spread>\.\.\.)?(?<lookahead>>)?(?<lookbehind><)?(?<optional>\?)?(?<name>[a-zA-Z\s\-_|][a-zA-Z0-9\s\-_|]*)(?<quantifier>[+*])?(?:\[(?<anchor>[a-zA-Z0-9\s\-_]+)\])?(?:\/(?<tags>[a-zA-Z]+))?$/',
+            '/^(?<lookahead>>)?(?<lookbehind><)?(?<optional>\?)?(?<name>[a-zA-Z\s\-_|][a-zA-Z0-9\s\-_|]*)(?<quantifier>[+*])?(?:\[(?<anchor>[a-zA-Z0-9\s\-_]+)\])?(?:\/(?<tags>[a-zA-Z]+))?$/',
             $sequenceNode,
             $m,
         )) {
             throw new InvalidArgumentException("Invalid sequence node: `{$sequenceNode}`");
         }
 
-        $isSpread = !empty($m['spread']);
         $isLookahead = !empty($m['lookahead']);
         $isLookbehind = !empty($m['lookbehind']);
-        
-        $specialModifiersCount = ($isSpread ? 1 : 0) + ($isLookahead ? 1 : 0) + ($isLookbehind ? 1 : 0);
+
+        $specialModifiersCount = ($isLookahead ? 1 : 0) + ($isLookbehind ? 1 : 0);
         if ($specialModifiersCount > 1) {
-            throw new InvalidArgumentException("Invalid sequence node: `{$sequenceNode}`. Only one of spread (...), lookahead (>), or lookbehind (<) can be used at the same time.");
+            throw new InvalidArgumentException("Invalid sequence node: `{$sequenceNode}`. Only one of lookahead (>), or lookbehind (<) can be used at the same time.");
         }
 
         $name = $m['name'] ?? '';
@@ -89,16 +86,16 @@ final class SequenceNode
         };
 
         if (
-            ($isLookahead || $isLookbehind || $isSpread)
+            ($isLookahead || $isLookbehind)
             && $cardinality->max() !== 1
         ) {
-            throw new InvalidArgumentException("Lookahead, lookbehind, and spread are not allowed to be repeated. They must be presented max 1 time. Sequence node: `{$sequenceNode}`.");
+            throw new InvalidArgumentException("Lookahead, and lookbehind are not allowed to be repeated. They must be presented max 1 time. Sequence node: `{$sequenceNode}`.");
         }
 
         $anchorName = !empty($m['anchor']) ? $m['anchor'] : null;
         $tags = !empty($m['tags']) ? str_split($m['tags']) : [];
 
-        return new self($alternatives, $cardinality, $isLookahead, $isLookbehind, $anchorName, $tags, $isSpread);
+        return new self($alternatives, $cardinality, $isLookahead, $isLookbehind, $anchorName, $tags);
     }
 
     /**

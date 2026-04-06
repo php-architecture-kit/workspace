@@ -6,16 +6,14 @@ namespace PhpArchitecture\Parser\Parsing;
 
 use PhpArchitecture\Parser\Processing\Model\Matching\MatchedRegion;
 use PhpArchitecture\Parser\Processing\Model\Matching\MatchedSequence;
-use PhpArchitecture\Parser\Processing\Model\Matching\MatchedSequenceNode;
 use PhpArchitecture\Parser\Processing\Model\Parsing\NodeInterface;
 use PhpArchitecture\Parser\Processing\Model\Tokenization\Token;
 use PhpArchitecture\Parser\Processing\Model\Tokenization\TokenRegion;
 
 interface NodeFactoryInterface
 {
-    public function fromToken(Token $token): NodeInterface;
-    public function fromTokenRegion(TokenRegion $region): NodeInterface;
-    public function fromMatchedRegion(MatchedRegion $region): NodeInterface;
-    public function fromMatchedSequence(MatchedSequence $matchedSequence): NodeInterface;
-    public function fromMatchedSequenceNode(MatchedSequenceNode $matchedSequenceNode): NodeInterface;
+    public function fromToken(Token $token, NodeInterface $parent): NodeInterface;
+    public function fromTokenRegion(TokenRegion $region, ?NodeInterface $parent): NodeInterface;
+    public function fromMatchedRegion(MatchedRegion $region, NodeInterface $parent): NodeInterface;
+    public function fromMatchedSequence(MatchedSequence $matchedSequence, NodeInterface $parent): NodeInterface;
 }

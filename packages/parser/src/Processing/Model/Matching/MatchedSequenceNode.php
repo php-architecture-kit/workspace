@@ -24,9 +24,10 @@ class MatchedSequenceNode implements MetaInterface, Stringable
     public function __construct(
         public private(set) string $name,
         public private(set) array $items,
+        public private(set) int $min,
+        public private(set) int $max,
         array $meta,
         array $tags,
-        public private(set) bool $isSpread = false,
     ) {
         $this->meta = $meta;
         $this->tags = $tags;

@@ -17,6 +17,8 @@ use PhpArchitecture\Parser\Processing\Model\Parsing\NodeType;
 
 final class EndRegionEventListener implements TokenizationEventListener, RuleMatchedEventListener
 {
+    public const KEY_CAUSED_BY = 'endCausedByEvent';
+
     public function __construct(
         public readonly Rule $rule,
         public readonly bool $negated = false,
@@ -66,8 +68,8 @@ final class EndRegionEventListener implements TokenizationEventListener, RuleMat
         }
 
         $currentRegion->setMeta(
-            RegionRawContent::REGION_INCLUDES_STRUCTURE_CLOSER_KEY,
-            $event instanceof TokenAddedEvent && $this->rule->nodeType === NodeType::Structure
+            self::KEY_CAUSED_BY,
+            $event
         );
     }
 

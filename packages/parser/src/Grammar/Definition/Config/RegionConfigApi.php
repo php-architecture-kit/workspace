@@ -71,7 +71,7 @@ trait RegionConfigApi
         }
 
         if ($applyAddRuleMiddlewares === false) {
-            $this->config->rootSequence = SequenceRule::fromString($sequence);
+            $this->config->rootSequence = SequenceRule::fromString($sequence, false);
             return $this;
         }
 

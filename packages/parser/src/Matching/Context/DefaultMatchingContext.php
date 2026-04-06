@@ -19,7 +19,7 @@ use PhpArchitecture\Parser\Processing\Model\Tokenization\Token;
 use PhpArchitecture\Parser\Processing\Model\Tokenization\TokenRegion;
 use PhpArchitecture\Parser\Shared\Meta\MetaTrait;
 
-class DefaultMatcherContext implements MatchingContext
+class DefaultMatchingContext implements MatchingContext
 {
     use MetaTrait;
 

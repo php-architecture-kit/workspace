@@ -8,10 +8,13 @@ use PhpArchitecture\Parser\Grammar\Compiled\GrammarCompiler;
 use PhpArchitecture\Parser\Grammar\Registry\GrammarDefinitionInterface;
 use PhpArchitecture\Parser\Parser;
 use PhpArchitecture\Parser\Parsing\Context\DefaultParsingContext;
+use PhpArchitecture\Parser\Parsing\Model\Attribute\GroupAttribute;
+use PhpArchitecture\Parser\Parsing\Model\Attribute\NodeAttribute;
+use PhpArchitecture\Parser\Parsing\Model\Attribute\OptionalAttribute;
+use PhpArchitecture\Parser\Parsing\Model\Attribute\RawContentAttribute;
+use PhpArchitecture\Parser\Parsing\Model\Attribute\StructureAttribute;
 use PhpArchitecture\Parser\Parsing\Model\Node;
-use PhpArchitecture\Parser\Parsing\Model\RawContent;
-use PhpArchitecture\Parser\Parsing\Model\RegionRawContent;
-use PhpArchitecture\Parser\Parsing\Model\Structure;
+use PhpArchitecture\Parser\Processing\Model\Parsing\NodeAttributeInterface;
 use PhpArchitecture\Parser\Processing\Model\Parsing\NodeInterface;
 use PhpArchitecture\Parser\Tokenization\Context\TokenizationContextCompiler;
 use PhpArchitecture\Parser\Tokenization\Lexer;
@@ -88,7 +91,7 @@ final class ParseCommand extends Command
         return Command::SUCCESS;
     }
 
-    private function formatTree(NodeInterface $node, ?int $maxDepth, int $currentDepth = 0): string
+    private function formatTree(mixed $node, ?int $maxDepth, int $currentDepth = 0, bool $isLast = true): string
     {
         if ($maxDepth !== null && $currentDepth > $maxDepth) {
             return '';
@@ -96,37 +99,48 @@ final class ParseCommand extends Command
 
         $result = '';
         $indent = str_repeat('  ', $currentDepth);
-        $prefix = $currentDepth === 0 ? '' : '├─ ';
+        $prefix = $currentDepth === 0 ? '' : ($isLast ? '└─ ' : '├─ ');
 
-        if ($node instanceof Node) {
+        if ($node instanceof OptionalAttribute) {
+            $metaInfo = !empty($node->meta) ? ' [meta: ' . json_encode($node->meta) . ']' : '';
+            $tagsInfo = !empty($node->tags) ? ' [tags: ' . implode(', ', $node->tags) . ']' : '';
+            $presentInfo = $node->node !== null ? 'present' : 'absent';
+            $result .= $indent . $prefix . "OptionalAttribute: {$node->name} ({$presentInfo}){$metaInfo}{$tagsInfo}\n";
+            if ($node->node !== null) {
+                $result .= $this->formatTree($node->node, $maxDepth, $currentDepth + 1, true);
+            }
+        } elseif ($node instanceof NodeAttribute) {
+            $metaInfo = !empty($node->meta) ? ' [meta: ' . json_encode($node->meta) . ']' : '';
+            $tagsInfo = !empty($node->tags) ? ' [tags: ' . implode(', ', $node->tags) . ']' : '';
+            $result .= $indent . $prefix . "NodeAttribute: {$node->name}{$metaInfo}{$tagsInfo}\n";
+            $result .= $this->formatTree($node->node, $maxDepth, $currentDepth + 1, true);
+        } elseif ($node instanceof GroupAttribute) {
+            $metaInfo = !empty($node->meta) ? ' [meta: ' . json_encode($node->meta) . ']' : '';
+            $tagsInfo = !empty($node->tags) ? ' [tags: ' . implode(', ', $node->tags) . ']' : '';
+            $result .= $indent . $prefix . "GroupAttribute: {$node->name} (count: " . count($node->nodes) . "){$metaInfo}{$tagsInfo}\n";
+            $childCount = count($node->nodes);
+            foreach ($node->nodes as $index => $child) {
+                $result .= $this->formatTree($child, $maxDepth, $currentDepth + 1, $index === $childCount - 1);
+            }
+        } elseif ($node instanceof RawContentAttribute) {
+            $displayValue = strlen($node->content) > 50 ? substr($node->content, 0, 50) . '...' : $node->content;
+            $metaInfo = !empty($node->meta) ? ' [meta: ' . json_encode($node->meta) . ']' : '';
+            $tagsInfo = !empty($node->tags) ? ' [tags: ' . implode(', ', $node->tags) . ']' : '';
+            $result .= $indent . $prefix . "RawContentAttribute: {$node->name} = " . json_encode($displayValue) . "{$metaInfo}{$tagsInfo}\n";
+        } elseif ($node instanceof StructureAttribute) {
+            $displayValue = strlen($node->content) > 50 ? substr($node->content, 0, 50) . '...' : $node->content;
+            $metaInfo = !empty($node->meta) ? ' [meta: ' . json_encode($node->meta) . ']' : '';
+            $tagsInfo = !empty($node->tags) ? ' [tags: ' . implode(', ', $node->tags) . ']' : '';
+            $presentInfo = $node->present ? 'present' : 'absent';
+            $result .= $indent . $prefix . "StructureAttribute: {$node->name} ({$presentInfo}) = " . json_encode($displayValue) . "{$metaInfo}{$tagsInfo}\n";
+        } elseif ($node instanceof Node) {
             $metaInfo = !empty($node->meta) ? ' [meta: ' . json_encode($node->meta) . ']' : '';
             $tagsInfo = !empty($node->tags) ? ' [tags: ' . implode(', ', $node->tags) . ']' : '';
             $result .= $indent . $prefix . "Node: {$node->name}{$metaInfo}{$tagsInfo}\n";
-            foreach ($node->attributes as $child) {
-                $result .= $this->formatTree($child, $maxDepth, $currentDepth + 1);
+            $childCount = count($node->attributes);
+            foreach ($node->attributes as $index => $child) {
+                $result .= $this->formatTree($child, $maxDepth, $currentDepth + 1, $index === $childCount - 1);
             }
-        } elseif ($node instanceof RegionRawContent) {
-            $displayValue = strlen($node->content) > 50 ? substr($node->content, 0, 50) . '...' : $node->content;
-            $metaInfo = !empty($node->meta) ? ' [meta: ' . json_encode($node->meta) . ']' : '';
-            $tagsInfo = !empty($node->tags) ? ' [tags: ' . implode(', ', $node->tags) . ']' : '';
-            $result .= $indent . $prefix . "RegionRawContent: {$node->name} = " . json_encode($displayValue) . "{$metaInfo}{$tagsInfo}\n";
-            if ($node->opener !== null) {
-                $result .= $this->formatTree($node->opener, $maxDepth, $currentDepth + 1);
-            }
-            if ($node->closer !== null) {
-                $result .= $this->formatTree($node->closer, $maxDepth, $currentDepth + 1);
-            }
-        } elseif ($node instanceof RawContent) {
-            $displayValue = strlen($node->content) > 50 ? substr($node->content, 0, 50) . '...' : $node->content;
-            $metaInfo = !empty($node->meta) ? ' [meta: ' . json_encode($node->meta) . ']' : '';
-            $tagsInfo = !empty($node->tags) ? ' [tags: ' . implode(', ', $node->tags) . ']' : '';
-            $result .= $indent . $prefix . "RawContent: {$node->name} = " . json_encode($displayValue) . "{$metaInfo}{$tagsInfo}\n";
-        } elseif ($node instanceof Structure) {
-            $displayValue = strlen($node->content) > 50 ? substr($node->content, 0, 50) . '...' : $node->content;
-            $presentInfo = $node->present ? 'present' : 'absent';
-            $metaInfo = !empty($node->meta) ? ' [meta: ' . json_encode($node->meta) . ']' : '';
-            $tagsInfo = !empty($node->tags) ? ' [tags: ' . implode(', ', $node->tags) . ']' : '';
-            $result .= $indent . $prefix . "Structure: {$node->name} ({$presentInfo}) = " . json_encode($displayValue) . "{$metaInfo}{$tagsInfo}\n";
         }
 
         return $result;
@@ -143,7 +157,7 @@ final class ParseCommand extends Command
         return $node->__toString();
     }
 
-    private function nodeToArray(NodeInterface $node): array
+    private function nodeToArray(mixed $node): array
     {
         $baseData = [
             'name' => $node->name ?? 'unknown',
@@ -166,20 +180,27 @@ final class ParseCommand extends Command
             if (count($children) > 0) {
                 $baseData['attributes'] = $children;
             }
-        } elseif ($node instanceof RegionRawContent) {
-            $baseData['type'] = 'RegionRawContent';
-            $baseData['content'] = $node->content;
-            if ($node->opener !== null) {
-                $baseData['opener'] = $this->nodeToArray($node->opener);
+        } elseif ($node instanceof NodeAttribute) {
+            $baseData['type'] = 'NodeAttribute';
+            $baseData['node'] = $this->nodeToArray($node->node);
+        } elseif ($node instanceof GroupAttribute) {
+            $baseData['type'] = 'GroupAttribute';
+            $nodes = [];
+            foreach ($node->nodes as $child) {
+                $nodes[] = $this->nodeToArray($child);
             }
-            if ($node->closer !== null) {
-                $baseData['closer'] = $this->nodeToArray($node->closer);
+            $baseData['nodes'] = $nodes;
+        } elseif ($node instanceof OptionalAttribute) {
+            $baseData['type'] = 'OptionalAttribute';
+            $baseData['present'] = $node->node !== null;
+            if ($node->node !== null) {
+                $baseData['node'] = $this->nodeToArray($node->node);
             }
-        } elseif ($node instanceof RawContent) {
-            $baseData['type'] = 'RawContent';
+        } elseif ($node instanceof RawContentAttribute) {
+            $baseData['type'] = 'RawContentAttribute';
             $baseData['content'] = $node->content;
-        } elseif ($node instanceof Structure) {
-            $baseData['type'] = 'Structure';
+        } elseif ($node instanceof StructureAttribute) {
+            $baseData['type'] = 'StructureAttribute';
             $baseData['present'] = $node->present;
             $baseData['content'] = $node->content;
         }

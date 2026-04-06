@@ -44,6 +44,26 @@ final class SequenceRule implements RuleDefinition
     }
 
     /**
+     * @param ?callable(SequenceNode):bool $filter
+     * @return SequenceNode[]
+     */
+    public function getAllSequenceNodes(?callable $filter = null): array
+    {
+        $nodes = [];
+        foreach ($this->nodes as $node) {
+            if ($node instanceof NestedSequence) {
+                $nodes = array_merge($nodes, $node->getAllSequenceNodes($filter));
+            } elseif ($node instanceof SequenceNode) {
+                if (!$filter || $filter($node)) {
+                    $nodes[] = $node;
+                }
+            }
+        }
+
+        return $nodes;
+    }
+
+    /**
      * @return string[]
      */
     public function getFirstValidNodeNodeNames(): array
