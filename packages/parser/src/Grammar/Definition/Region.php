@@ -53,7 +53,7 @@ class Region
         );
     }
 
-    public function add(EventSubscriber|GrammarMiddleware|Region|Rule ...$items): self
+    public function add(Definition|EventSubscriber|GrammarMiddleware|Region|Rule ...$items): self
     {
         foreach ($items as $item) {
             if ($item instanceof GrammarMiddleware) {
@@ -64,6 +64,8 @@ class Region
                 $this->addRule($item);
             } elseif ($item instanceof EventSubscriber) {
                 $this->addEventSubscriber($item);
+            } elseif ($item instanceof Definition) {
+                $this->addDefinition($item);
             }
         }
 
@@ -85,6 +87,19 @@ class Region
         }
 
         return $regions;
+    }
+
+    private function addDefinition(Definition $definition): self
+    {
+        foreach ($definition->inheritedRuleDefs as $rule) {
+            $this->addRule($rule, true);
+        }
+
+        foreach ($definition->inheritedRegDefs as $region) {
+            $this->addRegion($region, true);
+        }
+
+        return $this;
     }
 
     public function addEventSubscriber(EventSubscriber $eventSubscriber, bool $applyMiddlewares = true): self

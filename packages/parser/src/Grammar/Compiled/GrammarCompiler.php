@@ -22,12 +22,15 @@ use PhpArchitecture\Parser\Grammar\Compiled\Compiler\TagToChoiceCompiler;
 use PhpArchitecture\Parser\Grammar\Compiled\Model\CompiledEventSubscriber;
 use PhpArchitecture\Parser\Grammar\Compiled\Model\CompiledGrammar;
 use PhpArchitecture\Parser\Grammar\Compiled\Model\CompiledRegion;
+use PhpArchitecture\Parser\Grammar\Definition\Definition;
 use PhpArchitecture\Parser\Grammar\Definition\Grammar;
 use PhpArchitecture\Parser\Grammar\Definition\Region;
 use PhpArchitecture\Parser\Processing\Event\Matching\Contract\MatchingEventListener;
 use PhpArchitecture\Parser\Processing\Context\TokenizationContext;
 use PhpArchitecture\Parser\Processing\Event\Tokenization\Contract\TokenizationEvent;
 use PhpArchitecture\Parser\Processing\Event\Tokenization\Contract\TokenizationEventListener;
+use PhpArchitecture\Parser\Processing\Model\Ast\Definition\FormatDefinition;
+use PhpArchitecture\Parser\Processing\Model\Ast\Definition\NodeDefinition;
 use PhpArchitecture\Parser\Processing\Model\Matching\Sequence;
 use PhpArchitecture\Parser\Processing\Model\Matching\SequenceLibrary;
 use PhpArchitecture\Parser\Processing\Model\Tokenization\Pattern;
@@ -242,12 +245,22 @@ class GrammarCompiler
             }
         }
 
+        $definition = $region->config->definition !== null
+            ? $this->compileDefinition($region->config->definition)
+            : null;
+
         return new CompiledRegion(
             $region->name,
             $compiledEventSubscribers,
             new PatternLibrary($patterns),
             new SequenceLibrary($sequences, $rootSequence),
+            $definition,
             $region->getAllTags(),
         );
+    }
+
+    private function compileDefinition(Definition $definition): NodeDefinition
+    {
+        return new NodeDefinition($definition->name, [], [], [], new FormatDefinition(), []);
     }
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace PhpArchitecture\Parser\Grammar\Definition\Config;
 
+use PhpArchitecture\Parser\Grammar\Definition\Definition;
 use PhpArchitecture\Parser\Grammar\Definition\EventSubscriber;
 use PhpArchitecture\Parser\Grammar\Definition\Grammar;
 use PhpArchitecture\Parser\Grammar\Definition\Model\Sequence\SequenceRule;
@@ -35,5 +36,6 @@ class RegionConfig
 
         // parsing
         public NodeType $nodeType = NodeType::Node,
+        public ?Definition $definition = null,
     ) {}
 }

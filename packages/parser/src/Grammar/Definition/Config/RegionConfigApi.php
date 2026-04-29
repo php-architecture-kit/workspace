@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace PhpArchitecture\Parser\Grammar\Definition\Config;
 
+use PhpArchitecture\Parser\Grammar\Definition\Definition;
 use PhpArchitecture\Parser\Grammar\Definition\EventListener\Tokenization\EndRegionEventListener;
 use PhpArchitecture\Parser\Grammar\Definition\EventListener\Tokenization\StartRegionEventListener;
 use PhpArchitecture\Parser\Grammar\Definition\EventSubscriber;
@@ -157,5 +158,13 @@ trait RegionConfigApi
         $this->config->nodeType = $type;
 
         return $this;
+    }
+
+    public function asAstNode(string $name): Definition
+    {
+        $def = new Definition($name, [$this]);
+        $this->config->definition = $def;
+
+        return $def;
     }
 }

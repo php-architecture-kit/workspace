@@ -257,4 +257,9 @@ class Rule
         $this->nodeType = $type;
         return $this;
     }
+
+    public function asAstNode(string $name): Definition
+    {
+        return new Definition($name, [$this]);
+    }
 }

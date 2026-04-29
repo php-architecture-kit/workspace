@@ -43,7 +43,8 @@ class JsonRfc8259 extends Whitespace
                 ->closeWith(
                     Rule::token("end-array", "]", type: NodeType::Structure),
                 )
-                ->addTag("value"),
+                ->addTag("value")
+                ->asAstNode('Array'),
 
             Rule::token("begin-object", "{", type: NodeType::Structure)
                 ->startRegion('object')
@@ -52,16 +53,19 @@ class JsonRfc8259 extends Whitespace
                     // $this->addTriviaMiddleware(),
                     Rule::token("name-separator", ":", type: NodeType::Structure),
                     Rule::token("value-separator", ",", type: NodeType::Structure),
-                    Rule::seq("member", "string[identifier] ws* name-separator ws* value"),
+                    Rule::seq("member", "string[identifier] ws* name-separator ws* value")
+                        ->asAstNode('Member'),
                     Rule::seq("members", "member (ws* value-separator ws* member)*")
                 )
                 ->withRootSequence("begin-object ws* ?members ws* end-object")
                 ->closeWith(
                     Rule::token("end-object", "}", type: NodeType::Structure),
                 )
-                ->addTag("value"),
+                ->addTag("value")
+                ->asAstNode('Object'),
 
-            Rule::choice("primitive", ["false", "null", "true", "number", "string"], tags: ["value"]),
+            Rule::choice("primitive", ["false", "null", "true", "number", "string"], tags: ["value"])
+                ->asAstNode('Primitive'),
 
             Rule::keyword("null"),
             Rule::keyword("false"),
