@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace PhpArchitecture\Parser\Processing\Model\AST;
 
 use PhpArchitecture\Graph\Graph;
-use PhpArchitecture\Graph\GraphConfig;
+use PhpArchitecture\Graph\Config\GraphConfig;
 
 class AstGraph extends Graph
 {
