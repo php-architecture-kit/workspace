@@ -10,10 +10,6 @@
 	path = packages/domain-core
 	url = git@github.com:php-architecture-kit/domain-core.git
 
-[submodule "event-dispatcher"]
-	path = packages/event-dispatcher
-	url = git@github.com:php-architecture-kit/event-dispatcher.git
-
 [submodule "graph"]
 	path = packages/graph
 	url = git@github.com:php-architecture-kit/graph.git

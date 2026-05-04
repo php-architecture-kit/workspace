@@ -24,7 +24,7 @@ class JsonRfc8259 extends Whitespace
     {
         $grammar = parent::grammar();
 
-        $jsonText = new Region("json")
+        $jsonText = (new Region("json"))
             ->setInheritanceFromGlobal()
             ->withRootSequence("ws* value ws*");
 
@@ -62,7 +62,11 @@ class JsonRfc8259 extends Whitespace
                     Rule::token("end-object", "}", type: NodeType::Structure),
                 )
                 ->addTag("value")
-                ->asAstNode('Object'),
+                ->asAstNode(
+                    'Object',
+                    // (new Definition())
+                    //     ->withChildren('members')
+                ),
 
             Rule::choice("primitive", ["false", "null", "true", "number", "string"], tags: ["value"])
                 ->asAstNode('Primitive'),

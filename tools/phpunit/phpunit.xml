@@ -24,9 +24,6 @@
         <testsuite name="Domain Core Package Test Suite">
             <directory>../../packages/domain-core/tests</directory>
         </testsuite>
-        <testsuite name="Event Dispatcher Package Test Suite">
-            <directory>../../packages/event-dispatcher/tests</directory>
-        </testsuite>
         <testsuite name="Graph Package Test Suite">
             <directory>../../packages/graph/tests</directory>
         </testsuite>
