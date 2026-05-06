@@ -33,6 +33,9 @@
         <testsuite name="Parser Package Test Suite">
             <directory>../../packages/parser/tests</directory>
         </testsuite>
+        <testsuite name="State Machine Package Test Suite">
+            <directory>../../packages/state-machine/tests</directory>
+        </testsuite>
     </testsuites>
 
     <source restrictNotices="true" restrictWarnings="true">

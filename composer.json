@@ -9,8 +9,6 @@
     "license": "MIT",
     "autoload": {
         "psr-4": {
-            "PhpArchitecture\\Graph\\": "packages/graph/src/",
-            "PhpArchitecture\\Technical\\": "packages/technical/src/",
             "PhpArchitecture\\Parser\\": "packages/parser/src/"
         }
     },
@@ -22,7 +20,8 @@
             "PhpArchitecture\\Graph\\Tests\\": "packages/graph/tests/",
             "PhpArchitecture\\Uuid\\Tests\\": "packages/uuid/tests/",
             "Tests\\PhpArchitecture\\Parser\\": "packages/parser/tests/",
-            "Benchmarks\\PhpArchitecture\\Uuid\\": "benchmarks/uuid/"
+            "Benchmarks\\PhpArchitecture\\Uuid\\": "benchmarks/uuid/",
+            "PhpArchitecture\\StateMachine\\Tests\\": "packages/state-machine/tests/"
         }
     },
     "repositories": [
@@ -40,7 +39,10 @@
         "php-architecture-kit/actor": "@dev",
         "php-architecture-kit/clock": "@dev",
         "php-architecture-kit/domain-core": "@dev",
-        "php-architecture-kit/uuid": "@dev"
+        "php-architecture-kit/uuid": "@dev",
+        "php-architecture-kit/graph": "@dev",
+        "php-architecture-kit/technical": "@dev",
+        "php-architecture-kit/state-machine": "@dev"
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "*",
