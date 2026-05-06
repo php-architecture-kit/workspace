@@ -41,7 +41,7 @@ class Transition implements TransitionInterface
             $from,
             $to,
             $condition,
-            $tags
+            $tags,
         );
     }
 
@@ -60,7 +60,7 @@ class Transition implements TransitionInterface
             $from,
             $to,
             $condition,
-            $tags
+            $tags,
         );
     }
 

@@ -79,13 +79,13 @@ class RuleToSequenceCompiler implements RuleCompilerInterface
                         : $this->compileSequenceNode($def),
                     $alternatives,
                 ),
-                $definition->alternativeSequences
+                $definition->alternativeSequences,
             ),
             $definition->cardinality->min(),
             $definition->cardinality->max(),
             $definition->isLookahead,
             $definition->isLookbehind,
-            $definition->tags
+            $definition->tags,
         );
     }
 

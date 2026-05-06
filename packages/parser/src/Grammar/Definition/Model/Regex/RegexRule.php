@@ -19,7 +19,7 @@ final class RegexRule implements RuleDefinition
         $flags = $caseSensitive ? 'u' : 'ui';
 
         return new self(
-            '~\G' . $string . '~' . $flags
+            '~\G' . $string . '~' . $flags,
         );
     }
 }

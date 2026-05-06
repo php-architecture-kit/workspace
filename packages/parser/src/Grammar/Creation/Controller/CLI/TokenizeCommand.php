@@ -227,11 +227,12 @@ final class TokenizeCommand extends Command
                 if ($token->hasMeta(\PhpArchitecture\Parser\Processing\Model\Tokenization\Position::KEY_START)) {
                     $startPos = $token->getMeta(\PhpArchitecture\Parser\Processing\Model\Tokenization\Position::KEY_START);
                     $endPos = $token->getMeta(\PhpArchitecture\Parser\Processing\Model\Tokenization\Position::KEY_END);
-                    $positionStr .= sprintf(" | row/col: %d:%d-%d:%d", 
-                        $startPos->row, 
+                    $positionStr .= sprintf(
+                        " | row/col: %d:%d-%d:%d",
+                        $startPos->row,
                         $startPos->column,
                         $endPos->row,
-                        $endPos->column
+                        $endPos->column,
                     );
                 }
                 
@@ -250,7 +251,7 @@ final class TokenizeCommand extends Command
                     json_encode($displayValue),
                     $positionStr,
                     $item['region'],
-                    $tagsStr
+                    $tagsStr,
                 );
             }
         }

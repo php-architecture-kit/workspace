@@ -24,7 +24,6 @@ use PhpArchitecture\Parser\Shared\Meta\MetaTrait;
 class DefaultTokenizationContext implements TokenizationContext
 {
     use MetaTrait;
-
     private TokenRegion $currentRegion;
     private TokenizationEventDispatcher $dispatcher;
     private PatternLibrary $patternLibrary;

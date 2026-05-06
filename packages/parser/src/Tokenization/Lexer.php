@@ -62,8 +62,8 @@ final class Lexer
                             name: $tokenName,
                             raw: $value,
                             startPosition: $currentPos + $pos,
-                            endPosition: $currentPos + $pos + $length
-                        )->replaceTags($bestMatch['tags'])
+                            endPosition: $currentPos + $pos + $length,
+                        )->replaceTags($bestMatch['tags']),
                     );
 
                     if (!$added) {
@@ -88,7 +88,7 @@ final class Lexer
                 }
 
                 $added = $this->context->addToken(
-                    Token::unknown(character: $char, position: $currentPos)
+                    Token::unknown(character: $char, position: $currentPos),
                 );
 
                 if (!$added) {

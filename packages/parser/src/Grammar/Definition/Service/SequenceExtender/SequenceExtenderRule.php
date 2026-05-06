@@ -55,7 +55,7 @@ class SequenceExtenderRule
             $this->matcher,
             'remove',
             'exact',
-            static fn() => null
+            static fn() => null,
         );
     }
 

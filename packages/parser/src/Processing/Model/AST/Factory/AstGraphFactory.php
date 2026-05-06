@@ -22,7 +22,7 @@ class AstGraphFactory
     }
 
     public function createNodeRecursive(
-        NodeDefinition $definition, 
+        NodeDefinition $definition,
         Node $node,
         AstGraph $graph,
     ): AstNode {

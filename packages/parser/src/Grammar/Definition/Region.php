@@ -126,7 +126,7 @@ class Region
         $this->middlewares[$newMiddleware->method()][$newMiddleware->hash()] = $newMiddleware;
         uasort(
             $this->middlewares[$newMiddleware->method()],
-            static fn(GrammarMiddleware $a, GrammarMiddleware $b) => $a->priority() <=> $b->priority()
+            static fn(GrammarMiddleware $a, GrammarMiddleware $b) => $a->priority() <=> $b->priority(),
         );
 
         return $this;

@@ -33,7 +33,7 @@ class DynamicTokenCompiler implements GrammarPrecompilerInterface
                         $callbackDefinition->triggerRule,
                         $rule,
                         $region,
-                    )
+                    ),
                 );
                 $eventSubscriberHash = $eventSubscriber->hash();
 

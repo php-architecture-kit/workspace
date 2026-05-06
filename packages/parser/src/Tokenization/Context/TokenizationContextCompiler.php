@@ -9,6 +9,7 @@ use PhpArchitecture\Parser\Processing\Context\TokenizationContext;
 use PhpArchitecture\Parser\Processing\Event\Tokenization\TokenMatchedEvent;
 use PhpArchitecture\Parser\Processing\Event\Tokenization\TokenRegionEndedEvent;
 use PhpArchitecture\Parser\Processing\Extension\Tokenization\IdentifyRowsAndColumns;
+use ReflectionProperty;
 
 final class TokenizationContextCompiler
 {
@@ -46,7 +47,7 @@ final class TokenizationContextCompiler
                 $dispatcher->registerEventListener(
                     $subscriber->listener,
                     $subscriber->eventClassName,
-                    $subscriber->onlyForRuleName
+                    $subscriber->onlyForRuleName,
                 );
             }
 
@@ -58,10 +59,10 @@ final class TokenizationContextCompiler
             $eventDispatchers[$regionName] = $dispatcher;
         }
 
-        $reflection = new \ReflectionProperty($context, 'regionToEventDispatcherMap');
+        $reflection = new ReflectionProperty($context, 'regionToEventDispatcherMap');
         $reflection->setValue($context, $eventDispatchers);
 
-        $dispatcherReflection = new \ReflectionProperty($context, 'dispatcher');
+        $dispatcherReflection = new ReflectionProperty($context, 'dispatcher');
         $rootDispatcher = $eventDispatchers[$grammar->rootRegionName] ?? reset($eventDispatchers);
         $dispatcherReflection->setValue($context, $rootDispatcher);
 

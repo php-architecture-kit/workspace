@@ -27,7 +27,6 @@ final class SequenceLibrary
      * @var array<string,Sequence[]>
      */
     public array $tagToSequencesMap = [];
-
     public ?Sequence $rootSequence = null;
 
     /** 

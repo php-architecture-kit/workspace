@@ -131,7 +131,7 @@ final class SequenceExtenderTest extends TestCase
                 $node->isLookahead,
                 $node->isLookbehind,
                 $node->anchorName,
-                $node->tags
+                $node->tags,
             ));
 
         $sequence = SequenceRule::fromString('token separator value');

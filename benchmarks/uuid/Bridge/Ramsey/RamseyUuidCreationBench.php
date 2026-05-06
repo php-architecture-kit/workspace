@@ -7,6 +7,7 @@ namespace Benchmarks\PhpArchitecture\Uuid\Bridge\Ramsey;
 use Benchmarks\PhpArchitecture\Uuid\Contract\UuidCreationBench;
 use PhpBench\Attributes as Bench;
 use Ramsey\Uuid\Uuid;
+use Exception;
 
 class RamseyUuidCreationBench extends UuidCreationBench
 {
@@ -26,11 +27,11 @@ class RamseyUuidCreationBench extends UuidCreationBench
     {
         try {
             Uuid::fromString(self::INVALID_UUID);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return $e->getMessage();
         }
 
-        throw new \Exception('Expected exception not thrown');
+        throw new Exception('Expected exception not thrown');
     }
 
     #[Bench\Skip]
@@ -49,11 +50,11 @@ class RamseyUuidCreationBench extends UuidCreationBench
     {
         try {
             Uuid::fromBytes(self::INVALID_BINARY);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return $e->getMessage();
         }
 
-        throw new \Exception('Expected exception not thrown');
+        throw new Exception('Expected exception not thrown');
     }
 
     public function benchUuidV1CreationWithoutParameters(array $params = []): string

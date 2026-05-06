@@ -87,8 +87,8 @@ class TokenizationEventDispatcher
                 $this->listeners[$namespace][$eventClassName] = array_values(
                     array_filter(
                         $listeners,
-                        static fn(TokenizationEventListener $l) => $l !== $listener
-                    )
+                        static fn(TokenizationEventListener $l) => $l !== $listener,
+                    ),
                 );
             }
         }

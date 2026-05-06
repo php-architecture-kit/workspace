@@ -7,6 +7,7 @@ namespace PhpArchitecture\Parser\Grammar\Definition\Service\SequenceExtender;
 use Closure;
 use PhpArchitecture\Parser\Grammar\Definition\Model\Sequence\NestedSequence;
 use PhpArchitecture\Parser\Grammar\Definition\Model\Sequence\SequenceNode;
+use LogicException;
 
 class SequenceExtenderRuleContext
 {
@@ -46,7 +47,7 @@ class SequenceExtenderRuleContext
     public function applyRecursively(): self
     {
         if ($this->registered) {
-            throw new \LogicException('Rule already registered. Call applyRecursively() before which() or always().');
+            throw new LogicException('Rule already registered. Call applyRecursively() before which() or always().');
         }
 
         $this->recursive = true;
@@ -59,7 +60,7 @@ class SequenceExtenderRuleContext
     public function which(callable $contextMatcher): SequenceExtender
     {
         if ($this->registered) {
-            throw new \LogicException('Rule already registered. Call which() before registerRule().');
+            throw new LogicException('Rule already registered. Call which() before registerRule().');
         }
 
         $this->extender->addRule(
@@ -68,7 +69,7 @@ class SequenceExtenderRuleContext
             $this->position,
             $this->callback,
             $contextMatcher,
-            $this->recursive
+            $this->recursive,
         );
         $this->registered = true;
 
@@ -78,7 +79,7 @@ class SequenceExtenderRuleContext
     public function always(): SequenceExtender
     {
         if ($this->registered) {
-            throw new \LogicException('Rule already registered.');
+            throw new LogicException('Rule already registered.');
         }
 
         $this->registerRule();
@@ -96,7 +97,7 @@ class SequenceExtenderRuleContext
             $this->position,
             $this->callback,
             null,
-            $this->recursive
+            $this->recursive,
         );
         $this->registered = true;
     }

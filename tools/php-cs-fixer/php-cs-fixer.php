@@ -11,9 +11,9 @@ return (new PhpCsFixer\Config())
     ->setRiskyAllowed(true)
     ->setRules([
         'global_namespace_import' => [
-            'import_classes' => false,
-            'import_constants' => false,
-            'import_functions' => false,
+            'import_classes' => true,
+            'import_constants' => true,
+            'import_functions' => true,
         ],
         'psr_autoloading' => true,
         'fully_qualified_strict_types' => false,

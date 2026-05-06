@@ -81,8 +81,8 @@ class MatchingEventDispatcher
                 $this->listeners[$namespace][$eventClassName] = array_values(
                     array_filter(
                         $listeners,
-                        static fn(MatchingEventListener $l) => $l !== $listener
-                    )
+                        static fn(MatchingEventListener $l) => $l !== $listener,
+                    ),
                 );
             }
         }

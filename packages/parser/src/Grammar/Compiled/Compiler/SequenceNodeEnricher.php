@@ -126,7 +126,7 @@ class SequenceNodeEnricher
                     "Conflicting NodeTypes in sequence '{$sequenceName}' in region '{$region->name}'.\n" .
                         "SequenceNode with alternatives [" . implode(', ', $node->alternatives) . "] has conflicting NodeTypes:\n" .
                         implode("\n", $details) . "\n" .
-                        "All alternatives must have the same NodeType, or the SequenceNode must define its own NodeType using /n, /s, or /r suffix."
+                        "All alternatives must have the same NodeType, or the SequenceNode must define its own NodeType using /n, /s, or /r suffix.",
                 );
             }
         }
@@ -192,7 +192,7 @@ class SequenceNodeEnricher
             // Collect NodeTypes from rules with this tag
             $nodeTypes = array_filter(
                 array_map(fn($rule) => $rule->nodeType, $rulesWithTag),
-                fn($nt) => $nt !== null
+                fn($nt) => $nt !== null,
             );
 
             if (empty($nodeTypes)) {
@@ -204,7 +204,7 @@ class SequenceNodeEnricher
             if (count($uniqueNodeTypes) > 1) {
                 throw new LogicException(
                     "Tag '{$alternative}' is used by rules with different NodeTypes: " .
-                        implode(', ', $uniqueNodeTypes)
+                        implode(', ', $uniqueNodeTypes),
                 );
             }
 

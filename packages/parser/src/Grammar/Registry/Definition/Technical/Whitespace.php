@@ -31,7 +31,6 @@ class Whitespace implements GrammarDefinitionInterface
             Rule::token("tab", "\t", ['_ws']),
             Rule::token("cr", "\r", ['_ws']),
             Rule::token("newline", "\n", ['_ws']),
-
             Rule::taggedWith('_ws')
                 ->startRegion('whitespace_region', true)
                 ->add(
@@ -43,7 +42,6 @@ class Whitespace implements GrammarDefinitionInterface
                     Rule::token("cr", "\r", ['_ws']),
                     Rule::token("newline", "\n", ['_ws'])
                         ->closeRegion(true, true, false),
-
                     EventSubscriber::on(
                         TokenRegionEndedEvent::class,
                         static function (TokenRegionEndedEvent $event, TokenizationContext $context): void {
@@ -84,8 +82,8 @@ class Whitespace implements GrammarDefinitionInterface
                                     $event->region->rename('inline-ws');
                                 }
                             }
-                        }
-                    )
+                        },
+                    ),
                 )
                 ->closeWith(Rule::taggedWith("_ws"), true, false)
                 ->setNodeType(NodeType::Raw)

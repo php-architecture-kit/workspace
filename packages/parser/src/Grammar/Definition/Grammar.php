@@ -30,7 +30,7 @@ class Grammar
 
         return array_merge(
             $output,
-            $this->global->getRegionsRecursively()
+            $this->global->getRegionsRecursively(),
         );
     }
 

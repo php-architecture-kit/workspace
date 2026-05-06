@@ -22,7 +22,6 @@ use PhpArchitecture\Parser\Shared\Meta\MetaTrait;
 class DefaultMatchingContext implements MatchingContext
 {
     use MetaTrait;
-
     private MatchingEventDispatcher $dispatcher;
     private MatchedRegion $output;
 

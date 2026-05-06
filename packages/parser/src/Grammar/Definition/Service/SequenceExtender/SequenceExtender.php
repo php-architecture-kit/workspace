@@ -187,7 +187,7 @@ class SequenceExtender
                     $node->cardinality,
                     $node->isLookahead,
                     $node->isLookbehind,
-                    $node->tags
+                    $node->tags,
                 );
             } else {
                 $processedNodes[] = $node;

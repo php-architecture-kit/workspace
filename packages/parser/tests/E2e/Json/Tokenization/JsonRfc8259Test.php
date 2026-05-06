@@ -31,7 +31,7 @@ class JsonRfc8259Test extends TestCase
         
         $lexer = new Lexer($context);
         $output = $lexer->process(
-            new StringStream(file_get_contents(__DIR__ . '/../../../Data/Json/rfc8259/testfile_1.json'))
+            new StringStream(file_get_contents(__DIR__ . '/../../../Data/Json/rfc8259/testfile_1.json')),
         );
 
         // Create detailed output file
@@ -93,7 +93,7 @@ class JsonRfc8259Test extends TestCase
                 fwrite($fp, sprintf(
                     "\n%s╔═══ REGION START: %-20s ═══╗\n",
                     $indent,
-                    $region->name
+                    $region->name,
                 ));
             } elseif (isset($item['region_end'])) {
                 $region = $item['region_end'];
@@ -101,7 +101,7 @@ class JsonRfc8259Test extends TestCase
                 fwrite($fp, sprintf(
                     "%s╚═══ REGION END: %-20s ═══╝\n\n",
                     $indent,
-                    $region->name
+                    $region->name,
                 ));
             } elseif (isset($item['token'])) {
                 $token = $item['token'];
@@ -136,7 +136,7 @@ class JsonRfc8259Test extends TestCase
                     json_encode($displayValue),
                     $token->startPosition,
                     $token->endPosition,
-                    $item['region']
+                    $item['region'],
                 ));
             }
         }

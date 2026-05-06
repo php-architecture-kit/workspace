@@ -44,7 +44,7 @@ class Addresses extends AggregateRoot
             if (!$instance->policy->isAddressAllowed($instance, $address)) {
                 throw new InvalidStateCausedException(
                     'The address policy violated: ' .
-                        $instance->policy->getPolicyViolationMessage($instance, $address)
+                        $instance->policy->getPolicyViolationMessage($instance, $address),
                 );
             }
         }

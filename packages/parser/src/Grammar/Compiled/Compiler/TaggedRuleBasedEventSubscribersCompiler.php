@@ -51,7 +51,7 @@ class TaggedRuleBasedEventSubscribersCompiler implements GrammarCompilerInterfac
     {
         return array_filter(
             $region->rules,
-            fn(Rule $rule) => $rule->type === RuleType::Tag
+            fn(Rule $rule) => $rule->type === RuleType::Tag,
         );
     }
 
@@ -63,7 +63,7 @@ class TaggedRuleBasedEventSubscribersCompiler implements GrammarCompilerInterfac
     {
         return array_filter(
             $region->eventSubscribers,
-            static fn(EventSubscriber $es) => $es->onlyForRuleName !== null && in_array($es->onlyForRuleName, $wantedRules, true)
+            static fn(EventSubscriber $es) => $es->onlyForRuleName !== null && in_array($es->onlyForRuleName, $wantedRules, true),
         );
     }
 }

@@ -69,8 +69,8 @@ final class TokenRegion implements Stringable
             '',
             array_map(
                 static fn(Token|TokenRegion $token): string => $token->__toString(),
-                $this->stream->tokens
-            )
+                $this->stream->tokens,
+            ),
         );
     }
 }

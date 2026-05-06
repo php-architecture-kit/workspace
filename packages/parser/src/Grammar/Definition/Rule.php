@@ -28,9 +28,9 @@ class Rule
 
     /** @var EventSubscriber[] */
     public private(set) array $eventSubscribers = [];
+
     /** @var Rule[] */
     public private(set) array $inheritedRuleDefs = [];
-
     public private(set) int $priority = 0;
 
     /**
@@ -127,7 +127,7 @@ class Rule
             RuleType::Tag,
             new TaggedRule($tag),
             null,
-            []
+            [],
         );
     }
 
@@ -194,7 +194,7 @@ class Rule
             new SequenceRule(
                 [
                     new Model\Sequence\SequenceNode($rulesNames, $cardinality)
-                ]
+                ],
             ),
             $type,
             $tags,
@@ -214,7 +214,7 @@ class Rule
             ->priority(
                 is_object($listener) && method_exists($listener, 'priority')
                     ? $listener->priority()
-                    : $priority
+                    : $priority,
             );
 
         return $this;
@@ -246,7 +246,7 @@ class Rule
                 false,
                 $allowIfMatchAlsoStartedRegion,
                 $repeatMatchTokenizationAfterRegionClose,
-            )
+            ),
         );
 
         return $this;

@@ -16,8 +16,8 @@ class AstGraph extends Graph
                 allowSelfLoop: false,
                 allowMultiEdge: true,
                 allowCyclicEdge: false,
-                weightConfig: null
-            )
+                weightConfig: null,
+            ),
         );
     }
 }

@@ -23,7 +23,7 @@ final class AddTaggedRuleRegionRefMiddleware extends AddRuleMiddleware
                     }
 
                     return $rule;
-                }
+                },
             ),
             90,
         );

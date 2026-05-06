@@ -115,7 +115,7 @@ class NodeFactory implements NodeFactoryInterface
         if ($regionNodeType === NodeType::Raw) {
             $content = implode('', array_map(static fn($item) => $item->__toString(), $items));
             $regionBasedNode->addAttribute(new RawContentAttribute(
-                $content
+                $content,
             ));
 
             return;

@@ -27,9 +27,9 @@ class InnerGrammarEventListenerCompiler implements RegionPrecompilerInterface
                 TokenRegionEndedEvent::class,
                 new RetokenizeRegionEventListener(
                     $region->name,
-                    $this->compiler->compile($region->config->innerGrammar)
-                )
-            )
+                    $this->compiler->compile($region->config->innerGrammar),
+                ),
+            ),
         );
     }
 }

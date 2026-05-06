@@ -22,7 +22,7 @@ final class AddInheritedRuleMiddleware extends AddRuleMiddleware
                     }
 
                     return $rule;
-                }
+                },
             ),
             100,
         );

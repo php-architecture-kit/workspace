@@ -9,6 +9,7 @@ use PhpArchitecture\Parser\Grammar\Definition\Model\RuleDefinition;
 use PhpArchitecture\Parser\Grammar\Definition\Model\RuleType;
 use PhpArchitecture\Parser\Grammar\Definition\Rule;
 use PhpArchitecture\Parser\Processing\Model\Tokenization\Token;
+use InvalidArgumentException;
 
 final class CallbackRule implements RuleDefinition
 {
@@ -32,13 +33,13 @@ final class CallbackRule implements RuleDefinition
         $regexRule = ($this->callback)($rule, $trigger);
 
         if (!$regexRule instanceof RegexRule) {
-            throw new \InvalidArgumentException('Callback must return RegexRule');
+            throw new InvalidArgumentException('Callback must return RegexRule');
         }
 
         return new Rule(
             $rule->name,
             RuleType::Expression,
-            $regexRule
+            $regexRule,
         );
     }
 }

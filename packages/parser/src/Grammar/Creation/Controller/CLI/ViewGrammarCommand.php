@@ -85,7 +85,7 @@ final class ViewGrammarCommand extends Command
                 ['Root Region', $grammar->rootRegion->name],
                 ['Require BOF/EOF', $grammar->requireBofEof ? 'Yes' : 'No'],
                 ['Total Regions', count($grammar->getAllRegions())],
-            ]
+            ],
         );
     }
 

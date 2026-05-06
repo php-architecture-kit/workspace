@@ -11,6 +11,8 @@ use PhpArchitecture\Uuid\Exception\InvalidUuidException;
 use PhpArchitecture\Uuid\Provider\UuidProviderRegistry;
 use PhpArchitecture\Uuid\Uuid;
 use PhpBench\Attributes as Bench;
+use Exception;
+use Generator;
 
 #[Bench\BeforeMethods('setUpIteration')]
 class UuidCreationBench extends Contract
@@ -19,14 +21,14 @@ class UuidCreationBench extends Contract
     private static ?RamseyUuidProvider $ramseyProvider = null;
     private static ?SymfonyUuidProvider $symfonyProvider = null;
 
-    public function provideProviders(): \Generator
+    public function provideProviders(): Generator
     {
         yield 'autodetect' => ['mode' => 'autodetect'];
         yield 'ramsey' => ['mode' => 'ramsey'];
         yield 'symfony' => ['mode' => 'symfony'];
     }
 
-    public function provideRamseyOnly(): \Generator
+    public function provideRamseyOnly(): Generator
     {
         yield 'ramsey' => ['mode' => 'ramsey'];
     }
@@ -70,7 +72,7 @@ class UuidCreationBench extends Contract
             return $e->getMessage();
         }
 
-        throw new \Exception('Expected exception not thrown');
+        throw new Exception('Expected exception not thrown');
     }
 
     #[Bench\ParamProviders('provideProviders')]
@@ -94,7 +96,7 @@ class UuidCreationBench extends Contract
             return $e->getMessage();
         }
 
-        throw new \Exception('Expected exception not thrown');
+        throw new Exception('Expected exception not thrown');
     }
 
     #[Bench\ParamProviders('provideProviders')]

@@ -15,7 +15,6 @@ class StructureAttribute implements NodeAttributeInterface, MetaInterface
     use TagsTrait;
 
     public const DEFAULT_NAME = '__raw__';
-
     public string $content;
 
     /**

@@ -41,13 +41,13 @@ class TagToChoiceCompiler implements GrammarCompilerInterface
     /** @return array<string,string[]> */
     private function getTagsMap(Region $region): array
     {
-        /** @return array<string,string[]> */
+        /* @return array<string,string[]> */
         return array_map(
             'array_unique',
             array_merge_recursive(
                 $this->getTagNestedRegionMap($region),
                 $this->getTagRuleMap($region),
-            )
+            ),
         );
     }
 
@@ -94,8 +94,8 @@ class TagToChoiceCompiler implements GrammarCompilerInterface
             },
             array_filter(
                 $region->eventSubscribers,
-                static fn(EventSubscriber $subscriber): bool => $subscriber->listener instanceof StartRegionEventListener
-            )
+                static fn(EventSubscriber $subscriber): bool => $subscriber->listener instanceof StartRegionEventListener,
+            ),
         ));
     }
 }

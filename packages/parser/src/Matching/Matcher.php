@@ -175,7 +175,7 @@ class Matcher
             $count = count(array_filter($this->currentStack, static fn(string $name) => $name === $sequence->name));
             if ($count > self::RECURSION_LIMIT) {
                 throw new LogicException(
-                    "Recursive loop detected. Sequence '{$sequence->name}' is called recursively over " . self::RECURSION_LIMIT . " times. Stack: " . implode(' -> ', $this->currentStack)
+                    "Recursive loop detected. Sequence '{$sequence->name}' is called recursively over " . self::RECURSION_LIMIT . " times. Stack: " . implode(' -> ', $this->currentStack),
                 );
             }
         }

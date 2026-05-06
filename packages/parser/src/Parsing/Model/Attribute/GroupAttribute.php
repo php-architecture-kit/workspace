@@ -39,7 +39,7 @@ class GroupAttribute implements NodeAttributeInterface, MetaInterface
     {
         return implode('', array_map(
             static fn(NodeInterface $node) => $node->__toString(),
-            $this->nodes
+            $this->nodes,
         ));
     }
 }

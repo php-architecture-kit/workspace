@@ -33,7 +33,7 @@ class RegionInheritanceCompiler implements GrammarPrecompilerInterface, GrammarC
                     $sourceRegion,
                     $scope & ~Region::REGIONS,
                     Region::NONE,
-                    Region::MERGE_DEFAULT_OVERRIDE
+                    Region::MERGE_DEFAULT_OVERRIDE,
                 );
             }
         }

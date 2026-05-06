@@ -51,8 +51,8 @@ final class IdentifyRowsAndColumns implements TokenizationEventListener
             Position::KEY_START,
             new Position(
                 $context->getMeta(self::CURRENT_ROW),
-                $context->getMeta(self::CURRENT_COLUMN)
-            )
+                $context->getMeta(self::CURRENT_COLUMN),
+            ),
         );
 
         if ($newlines > 0) {
@@ -69,8 +69,8 @@ final class IdentifyRowsAndColumns implements TokenizationEventListener
                         Position::KEY_END,
                         new Position(
                             $context->getMeta(self::CURRENT_ROW) - 1,
-                            $lastColumn + $valueLength - 1
-                        )
+                            $lastColumn + $valueLength - 1,
+                        ),
                     );
                 }
             }
@@ -80,16 +80,16 @@ final class IdentifyRowsAndColumns implements TokenizationEventListener
                 Position::KEY_END,
                 new Position(
                     $endsWithNewline ? $context->getMeta(self::CURRENT_ROW) - 1 : $context->getMeta(self::CURRENT_ROW),
-                    $lastPartLength > 0 ? $lastPartLength : 1
-                )
+                    $lastPartLength > 0 ? $lastPartLength : 1,
+                ),
             );
         } else {
             $token->setMeta(
                 Position::KEY_END,
                 new Position(
                     $context->getMeta(self::CURRENT_ROW),
-                    $context->getMeta(self::CURRENT_COLUMN) + $valueLength
-                )
+                    $context->getMeta(self::CURRENT_COLUMN) + $valueLength,
+                ),
             );
             $context->setMeta(self::CURRENT_COLUMN, $context->getMeta(self::CURRENT_COLUMN) + $valueLength);
         }
@@ -103,14 +103,14 @@ final class IdentifyRowsAndColumns implements TokenizationEventListener
         if ($firstToken !== null) {
             $region->setMeta(
                 Position::KEY_START,
-                clone $firstToken->getMeta(Position::KEY_START)
+                clone $firstToken->getMeta(Position::KEY_START),
             );
         }
 
         if ($lastToken !== null) {
             $region->setMeta(
                 Position::KEY_END,
-                clone $lastToken->getMeta(Position::KEY_END)
+                clone $lastToken->getMeta(Position::KEY_END),
             );
         }
     }

@@ -30,14 +30,13 @@ class JsonRfc8259 extends Whitespace
 
         $grammar->global->add(
             $jsonText,
-
             Rule::token("begin-array", "[", type: NodeType::Structure)
                 ->startRegion('array')
                 ->enableInheritanceFromGlobal()
                 ->add(
                     // $this->addTriviaMiddleware(),
                     Rule::token("value-separator", ",", type: NodeType::Structure),
-                    Rule::seq("items", "value (ws* value-separator ws* value)*")
+                    Rule::seq("items", "value (ws* value-separator ws* value)*"),
                 )
                 ->withRootSequence("begin-array ws* ?items ws* end-array")
                 ->closeWith(
@@ -45,7 +44,6 @@ class JsonRfc8259 extends Whitespace
                 )
                 ->addTag("value")
                 ->asAstNode('Array'),
-
             Rule::token("begin-object", "{", type: NodeType::Structure)
                 ->startRegion('object')
                 ->enableInheritanceFromGlobal()
@@ -55,7 +53,7 @@ class JsonRfc8259 extends Whitespace
                     Rule::token("value-separator", ",", type: NodeType::Structure),
                     Rule::seq("member", "string[identifier] ws* name-separator ws* value")
                         ->asAstNode('Member'),
-                    Rule::seq("members", "member (ws* value-separator ws* member)*")
+                    Rule::seq("members", "member (ws* value-separator ws* member)*"),
                 )
                 ->withRootSequence("begin-object ws* ?members ws* end-object")
                 ->closeWith(
@@ -67,10 +65,8 @@ class JsonRfc8259 extends Whitespace
                     // (new Definition())
                     //     ->withChildren('members')
                 ),
-
             Rule::choice("primitive", ["false", "null", "true", "number", "string"], tags: ["value"])
                 ->asAstNode('Primitive'),
-
             Rule::keyword("null"),
             Rule::keyword("false"),
             Rule::keyword("true"),
@@ -125,7 +121,7 @@ class JsonRfc8259 extends Whitespace
             static function (Rule $rule) use ($nodeType): Rule {
                 $rule->setNodeType($nodeType);
                 return $rule;
-            }
+            },
         );
     }
 
@@ -146,7 +142,7 @@ class JsonRfc8259 extends Whitespace
 
                 return $rule;
             },
-            10
+            10,
         );
     }
 }

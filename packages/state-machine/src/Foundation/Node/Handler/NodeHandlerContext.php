@@ -20,7 +20,7 @@ readonly class NodeHandlerContext
     ) {
         if (!$pointer->nodeId->equals($node->id())) {
             throw new InvalidNodeException(
-                "Pointer node ID '{$pointer->nodeId}' does not match handler context node ID '{$node->id()}'."
+                "Pointer node ID '{$pointer->nodeId}' does not match handler context node ID '{$node->id()}'.",
             );
         }
     }

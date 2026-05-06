@@ -85,7 +85,7 @@ class Node implements NodeInterface, MetaInterface
     {
         return implode('', array_map(
             static fn(NodeAttributeInterface $attr) => $attr->__toString(),
-            $this->attributes
+            $this->attributes,
         ));
     }
 }

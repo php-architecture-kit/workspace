@@ -13,6 +13,7 @@ use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
+use LogicException;
 
 #[Group('unit')]
 final class SequenceExtenderTest extends TestCase
@@ -55,7 +56,7 @@ final class SequenceExtenderTest extends TestCase
             fn() => true,
             'add',
             'next',
-            fn($node) => $node
+            fn($node) => $node,
         );
         
         $this->assertSame($extender, $result);
@@ -217,7 +218,7 @@ final class SequenceExtenderTest extends TestCase
         $ruleContext = $extender->when(fn($node) => true)->addNext('?ws*');
         $ruleContext->always();
         
-        $this->expectException(\LogicException::class);
+        $this->expectException(LogicException::class);
         $this->expectExceptionMessage('Rule already registered');
         
         $ruleContext->which(fn($contextNode) => true);

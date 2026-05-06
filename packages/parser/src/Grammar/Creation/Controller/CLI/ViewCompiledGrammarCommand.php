@@ -14,6 +14,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Closure;
 
 final class ViewCompiledGrammarCommand extends Command
 {
@@ -84,7 +85,7 @@ final class ViewCompiledGrammarCommand extends Command
                 ['Root Region', $grammar->rootRegionName],
                 ['Require BOF/EOF', $grammar->requireBofEof ? 'Yes' : 'No'],
                 ['Total Regions', count($grammar->regions)],
-            ]
+            ],
         );
     }
 
@@ -210,7 +211,7 @@ final class ViewCompiledGrammarCommand extends Command
 
     private function formatListenerDetails(object $listener, ?string $onlyForRuleName): string
     {
-        if ($listener instanceof \Closure) {
+        if ($listener instanceof Closure) {
             return "(rule: " . ($onlyForRuleName ?? 'all') . ")";
         }
 

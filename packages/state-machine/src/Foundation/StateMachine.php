@@ -22,6 +22,7 @@ use PhpArchitecture\StateMachine\Foundation\Transition\Condition\TransitionCondi
 use PhpArchitecture\StateMachine\Foundation\Transition\Strategy\Output\TransitionSelectionOutput;
 use PhpArchitecture\StateMachine\Foundation\Transition\Transition;
 use Psr\Container\ContainerInterface;
+use Throwable;
 
 abstract class StateMachine
 {
@@ -98,12 +99,12 @@ abstract class StateMachine
 
         if (!$handler instanceof NodeHandlerInterface) {
             throw new InvalidNodeHandlerException(
-                "Handler for node '{$pointer->nodeId}' must implement NodeHandlerInterface, got " . get_class($handler) . "."
+                "Handler for node '{$pointer->nodeId}' must implement NodeHandlerInterface, got " . get_class($handler) . ".",
             );
         }
 
         $handlerResult = $handler->handle(
-            new NodeHandlerContext($execution->id, $node, $pointer, $execution->states)
+            new NodeHandlerContext($execution->id, $node, $pointer, $execution->states),
         );
 
         if ($handlerResult === NodeHandlerResult::Suspended) {
@@ -129,7 +130,7 @@ abstract class StateMachine
         }
 
         throw new NoTransitionStrategyException(
-            "No TransitionStrategy supports the current transition output for node '{$pointer->nodeId}'. Check StateMachineConfig::transitionStrategies."
+            "No TransitionStrategy supports the current transition output for node '{$pointer->nodeId}'. Check StateMachineConfig::transitionStrategies.",
         );
     }
 
@@ -137,7 +138,7 @@ abstract class StateMachine
     {
         try {
             return $this->graph->vertexStore->getVertex($id);
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             throw new NodeNotFoundException("Node '{$id}' not found in the graph.", previous: $e);
         }
     }
@@ -147,9 +148,9 @@ abstract class StateMachine
      */
     protected function getOutgoingTransitions(NodeId $id): array
     {
-        return $this->graph->edgeStore->incidentEdges(
+        return $this->graph->edgeStore->getIncidentEdges(
             $id,
-            static fn(EdgeInterface $edge): bool => $edge->u()->equals($id)
+            static fn(EdgeInterface $edge): bool => $edge->u()->equals($id),
         );
     }
 }

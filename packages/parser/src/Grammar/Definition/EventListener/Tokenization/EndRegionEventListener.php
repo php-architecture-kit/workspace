@@ -67,7 +67,7 @@ final class EndRegionEventListener implements TokenizationEventListener, RuleMat
 
         $currentRegion->setMeta(
             self::KEY_CAUSED_BY_EVENT,
-            $event
+            $event,
         );
     }
 

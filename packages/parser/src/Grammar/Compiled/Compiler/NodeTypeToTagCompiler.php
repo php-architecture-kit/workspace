@@ -18,7 +18,7 @@ class NodeTypeToTagCompiler implements RegionPrecompilerInterface
         }
 
         $region->addTag(
-            $region->config->nodeType->value
+            $region->config->nodeType->value,
         );
     }
 }

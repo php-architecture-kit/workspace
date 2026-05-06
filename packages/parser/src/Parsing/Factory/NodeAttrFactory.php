@@ -104,7 +104,7 @@ class NodeAttrFactory implements NodeAttrFactoryInterface
                         $sequenceNode->meta,
                         $sequenceNode->tags,
                     )
-                }
+                },
             );
 
             return;
@@ -137,7 +137,7 @@ class NodeAttrFactory implements NodeAttrFactoryInterface
             MatchedSequence::class => $this->context->nodeFactory()->fromMatchedSequence($sequenceNode->items[0], $parent),
             default => throw new InvalidArgumentException(
                 'Unknown item type: `' . $sequenceNode->items[0]::class
-                    . '`. Expected Token, TokenRegion or MatchedSequence.'
+                    . '`. Expected Token, TokenRegion or MatchedSequence.',
             ),
         };
 
@@ -214,7 +214,7 @@ class NodeAttrFactory implements NodeAttrFactoryInterface
             implode('', array_map(static fn(Token|TokenRegion|MatchedSequence $item) => $item->__toString(), $items)),
             $region->name,
             $region->meta,
-            $region->tags
+            $region->tags,
         );
     }
 }

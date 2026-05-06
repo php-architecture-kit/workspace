@@ -35,6 +35,7 @@ use PhpArchitecture\Parser\Processing\Model\Matching\Sequence;
 use PhpArchitecture\Parser\Processing\Model\Matching\SequenceLibrary;
 use PhpArchitecture\Parser\Processing\Model\Tokenization\Pattern;
 use PhpArchitecture\Parser\Processing\Model\Tokenization\PatternLibrary;
+use Closure;
 
 class GrammarCompiler
 {
@@ -149,7 +150,7 @@ class GrammarCompiler
         foreach ($source->regions as $childRegion) {
             $clonedChild = new Region(
                 $childRegion->name,
-                clone $childRegion->config
+                clone $childRegion->config,
             );
             $this->copyRegionContents($childRegion, $clonedChild);
             $target->add($clonedChild);
@@ -201,7 +202,7 @@ class GrammarCompiler
                 $region->config->rootSequence,
                 0,
                 $region->tags,
-                []
+                [],
             );
         }
 
@@ -216,10 +217,10 @@ class GrammarCompiler
         foreach ($region->eventSubscribers as $subscriber) {
             $listener = $subscriber->listener;
 
-            if ($listener instanceof \Closure) {
+            if ($listener instanceof Closure) {
                 $listener = new class($listener, $subscriber->priority) implements TokenizationEventListener {
                     public function __construct(
-                        private readonly \Closure $closure,
+                        private readonly Closure $closure,
                         private readonly int $priorityValue,
                     ) {}
 

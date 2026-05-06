@@ -26,7 +26,7 @@ final class TaggedRule implements RuleDefinition
     {
         return array_filter(
             $this->sourceRegionRef->rules,
-            fn(Rule $rule) => in_array($this->tag, $rule->tags)
+            fn(Rule $rule) => in_array($this->tag, $rule->tags),
         );
     }
 }

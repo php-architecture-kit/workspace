@@ -33,7 +33,7 @@ trait RegionConfigApi
             new StartRegionEventListener(
                 $this,
                 $openRule,
-            )
+            ),
         );
 
         if ($includeOpenRuleMatch) {
@@ -55,8 +55,8 @@ trait RegionConfigApi
                 $closeRule,
                 $negated,
                 $allowedByOpenRuleMatch,
-                $negated && !$includeCloseRuleMatch
-            )
+                $negated && !$includeCloseRuleMatch,
+            ),
         );
 
         $this->addRule($closeRule);
