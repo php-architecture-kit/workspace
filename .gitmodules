@@ -17,6 +17,6 @@
 [submodule "uuid"]
 	path = packages/uuid
 	url = git@github.com:php-architecture-kit/uuid.git
-[submodule "packages/technical"]
+[submodule "technical"]
 	path = packages/technical
 	url = git@github.com:php-architecture-kit/technical.git
