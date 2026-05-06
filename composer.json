@@ -10,6 +10,7 @@
     "autoload": {
         "psr-4": {
             "PhpArchitecture\\Graph\\": "packages/graph/src/",
+            "PhpArchitecture\\Technical\\": "packages/technical/src/",
             "PhpArchitecture\\Parser\\": "packages/parser/src/"
         }
     },
@@ -52,7 +53,8 @@
         "psr/event-dispatcher": "^1.0",
         "illuminate/events": "^12.53",
         "symfony/event-dispatcher": "^7.4",
-        "symfony/console": "^7.4"
+        "symfony/console": "^7.4",
+        "psr/container": "^2.0"
     },
     "scripts": {
         "benchmark:uuid": "vendor/bin/phpbench run benchmarks/uuid --config=tools/phpbench/phpbench.json --report=by_method",
