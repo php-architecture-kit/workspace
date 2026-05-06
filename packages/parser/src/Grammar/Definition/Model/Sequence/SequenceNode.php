@@ -89,7 +89,7 @@ final class SequenceNode
             ($isLookahead || $isLookbehind)
             && $cardinality->max() !== 1
         ) {
-            throw new InvalidArgumentException("Lookahead, and lookbehind are not allowed to be repeated. They must be presented max 1 time. Sequence node: `{$sequenceNode}`.");
+            throw new InvalidArgumentException("Lookahead and lookbehind are not allowed to be repeated. They must be presented max 1 time. Sequence node: `{$sequenceNode}`.");
         }
 
         $anchorName = !empty($m['anchor']) ? $m['anchor'] : null;
