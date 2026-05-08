@@ -262,6 +262,6 @@ class GrammarCompiler
 
     private function compileDefinition(Definition $definition): NodeDefinition
     {
-        return new NodeDefinition($definition->name, [], [], [], new FormatDefinition(), []);
+        return new NodeDefinition($definition->name, [], [], [], new FormatDefinition(name: 'default'), []);
     }
 }

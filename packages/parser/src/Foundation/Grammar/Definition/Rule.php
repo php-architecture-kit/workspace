@@ -22,6 +22,7 @@ use PhpArchitecture\Parser\Foundation\Tokenization\Event\TokenMatchedEvent;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\NodeType;
 use PhpArchitecture\Parser\Foundation\Tokenization\Model\Token;
 use PhpArchitecture\Parser\Foundation\Shared\Tags\TagsTrait;
+use LogicException;
 
 class Rule
 {
@@ -33,7 +34,6 @@ class Rule
     /** @var Rule[] */
     public private(set) array $inheritedRuleDefs = [];
     public private(set) int $priority = 0;
-
     public private(set) ?Definition $astDefinition = null;
 
     /**
@@ -263,7 +263,7 @@ class Rule
 
     public function asAstNode(string $name, AstDefinitionInterface ...$definitions): self
     {
-        $this->astDefinition = new Definition($name);
+        $this->astDefinition = (new Definition($name))->add(...$definitions);
 
         return $this;
     }
@@ -271,7 +271,7 @@ class Rule
     public function extendAstNode(AstDefinitionInterface ...$definitions): self
     {
         if ($this->astDefinition === null) {
-            throw new \LogicException('Rule must be converted to AST node first using asAstNode() method.');
+            throw new LogicException('Rule must be converted to AST node first using asAstNode() method.');
         }
 
         $this->astDefinition->add(...$definitions);

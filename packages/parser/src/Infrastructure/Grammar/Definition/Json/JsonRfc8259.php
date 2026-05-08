@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace PhpArchitecture\Parser\Infrastructure\Grammar\Definition\Json;
 
+use PhpArchitecture\Parser\Foundation\Grammar\Definition\Definition;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Grammar;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Middleware\AddRuleMiddleware;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Model\Sequence\NestedSequence;
@@ -28,7 +29,7 @@ class JsonRfc8259 extends Whitespace
             ->setInheritanceFromGlobal()
             ->withRootSequence("ws* value ws*");
         $grammar->global->add(
-            $jsonText->asAstNode('Root')
+            $jsonText->asAstNode('Root'),
         );
 
         $grammar->global->add(
@@ -46,7 +47,10 @@ class JsonRfc8259 extends Whitespace
                     Rule::token("end-array", "]", type: NodeType::Structure),
                 )
                 ->addTag("value")
-                ->asAstNode('Array'),
+                ->asAstNode(
+                    'Array',
+                    Definition::child('Item', 'item', optional: true),
+                ),
             Rule::token("begin-object", "{", type: NodeType::Structure)
                 ->startRegion('object')
                 ->enableInheritanceFromGlobal()
@@ -65,8 +69,7 @@ class JsonRfc8259 extends Whitespace
                 ->addTag("value")
                 ->asAstNode(
                     'Object',
-                    // (new Definition())
-                    //     ->withChildren('members')
+                    Definition::child('Member', 'member', optional: true),
                 ),
             Rule::choice("primitive", ["false", "null", "true", "number", "string"], tags: ["value"])
                 ->asAstNode('Primitive'),

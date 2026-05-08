@@ -17,6 +17,7 @@ use PhpArchitecture\Parser\Foundation\Grammar\Definition\Rule;
 use PhpArchitecture\Parser\Foundation\Tokenization\Event\TokenAddedEvent;
 use PhpArchitecture\Parser\Foundation\Tokenization\Event\TokenMatchedEvent;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\NodeType;
+use LogicException;
 
 /**
  * @mixin Region
@@ -163,8 +164,7 @@ trait RegionConfigApi
 
     public function asAstNode(string $name, AstDefinitionInterface ...$definitions): self
     {
-        $def = new Definition($name);
-        $this->config->definition = $def;
+        $this->config->definition = (new Definition($name))->add(...$definitions);
 
         return $this;
     }
@@ -172,7 +172,7 @@ trait RegionConfigApi
     public function extendAstNode(AstDefinitionInterface ...$definitions): self
     {
         if ($this->config->definition === null) {
-            throw new \LogicException('Region must be converted to AST node first using asAstNode() method.');
+            throw new LogicException('Region must be converted to AST node first using asAstNode() method.');
         }
 
         $this->config->definition->add(...$definitions);

@@ -8,6 +8,7 @@ require __DIR__ . '/../vendor/autoload.php';
 use PhpArchitecture\Parser\Infrastructure\Grammar\Registry\InMemoryGrammarRegistry;
 use PhpArchitecture\Parser\Presentation\Controller\CLI\ViewGrammarCommand;
 use PhpArchitecture\Parser\Presentation\Controller\CLI\ViewCompiledGrammarCommand;
+use PhpArchitecture\Parser\Presentation\Controller\CLI\ViewAstDefinitionCommand;
 use PhpArchitecture\Parser\Presentation\Controller\CLI\TokenizeCommand;
 use PhpArchitecture\Parser\Presentation\Controller\CLI\ParseCommand;
 use Symfony\Component\Console\Application;
@@ -19,6 +20,7 @@ $application = new Application('PHP Architecture Kit - Parser CLI', '1.0.0');
 $application->addCommands([
     new ViewGrammarCommand($registry),
     new ViewCompiledGrammarCommand($registry),
+    new ViewAstDefinitionCommand($registry),
     new TokenizeCommand($registry),
     new ParseCommand($registry),
 ]);
