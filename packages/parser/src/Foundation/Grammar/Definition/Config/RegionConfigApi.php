@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace PhpArchitecture\Parser\Foundation\Grammar\Definition\Config;
 
+use PhpArchitecture\Parser\Foundation\AST\Definition\AstDefinitionInterface;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Definition;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\EventListener\Tokenization\EndRegionEventListener;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\EventListener\Tokenization\StartRegionEventListener;
@@ -160,11 +161,21 @@ trait RegionConfigApi
         return $this;
     }
 
-    public function asAstNode(string $name): Definition
+    public function asAstNode(string $name, AstDefinitionInterface ...$definitions): self
     {
-        $def = new Definition($name, [$this]);
+        $def = new Definition($name);
         $this->config->definition = $def;
 
-        return $def;
+        return $this;
+    }
+
+    public function extendAstNode(AstDefinitionInterface ...$definitions): self
+    {
+        if ($this->config->definition === null) {
+            throw new \LogicException('Region must be converted to AST node first using asAstNode() method.');
+        }
+
+        $this->config->definition->add(...$definitions);
+        return $this;
     }
 }

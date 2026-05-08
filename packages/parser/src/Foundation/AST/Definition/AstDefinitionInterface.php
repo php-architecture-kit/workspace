@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace PhpArchitecture\Parser\Foundation\AST\Definition;
 
-class ContextDefinition implements AstDefinitionInterface
+interface AstDefinitionInterface
 {
-    
 }

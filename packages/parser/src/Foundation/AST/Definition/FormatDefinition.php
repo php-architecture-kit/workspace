@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace PhpArchitecture\Parser\Foundation\AST\Definition;
 
-class FormatDefinition
+class FormatDefinition implements AstDefinitionInterface
 {
     
 }

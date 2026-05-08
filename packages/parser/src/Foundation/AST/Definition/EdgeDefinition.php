@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace PhpArchitecture\Parser\Foundation\AST\Definition;
 
-class EdgeDefinition
+class EdgeDefinition implements AstDefinitionInterface
 {
     public function __construct(
         public readonly string $name,

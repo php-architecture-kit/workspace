@@ -6,7 +6,7 @@ namespace PhpArchitecture\Parser\Foundation\AST\Definition;
 
 use Closure;
 
-class ReferenceDefinition
+class ReferenceDefinition implements AstDefinitionInterface
 {
     public function __construct(
         public readonly string $name,

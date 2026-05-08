@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace PhpArchitecture\Parser\Foundation\Grammar\Definition;
 
 use Closure;
+use PhpArchitecture\Parser\Foundation\AST\Definition\AstDefinitionInterface;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\EventListener\Tokenization\EndRegionEventListener;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Model\Cardinality;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Model\Regex\CallbackRule;
@@ -32,6 +33,8 @@ class Rule
     /** @var Rule[] */
     public private(set) array $inheritedRuleDefs = [];
     public private(set) int $priority = 0;
+
+    public private(set) ?Definition $astDefinition = null;
 
     /**
      * @param string[] $tags
@@ -258,8 +261,20 @@ class Rule
         return $this;
     }
 
-    public function asAstNode(string $name): Definition
+    public function asAstNode(string $name, AstDefinitionInterface ...$definitions): self
     {
-        return new Definition($name, [$this]);
+        $this->astDefinition = new Definition($name);
+
+        return $this;
+    }
+
+    public function extendAstNode(AstDefinitionInterface ...$definitions): self
+    {
+        if ($this->astDefinition === null) {
+            throw new \LogicException('Rule must be converted to AST node first using asAstNode() method.');
+        }
+
+        $this->astDefinition->add(...$definitions);
+        return $this;
     }
 }

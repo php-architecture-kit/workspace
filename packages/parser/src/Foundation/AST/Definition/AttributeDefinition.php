@@ -7,7 +7,7 @@ namespace PhpArchitecture\Parser\Foundation\AST\Definition;
 use Closure;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Node;
 
-class AttributeDefinition
+class AttributeDefinition implements AstDefinitionInterface
 {
     /**
      * @param Closure(Node):mixed $toGraphMapper

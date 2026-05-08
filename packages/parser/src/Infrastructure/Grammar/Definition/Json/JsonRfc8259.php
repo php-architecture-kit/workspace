@@ -27,6 +27,9 @@ class JsonRfc8259 extends Whitespace
         $jsonText = (new Region("json"))
             ->setInheritanceFromGlobal()
             ->withRootSequence("ws* value ws*");
+        $grammar->global->add(
+            $jsonText->asAstNode('Root')
+        );
 
         $grammar->global->add(
             $jsonText,
