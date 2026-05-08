@@ -1,0 +1,43 @@
+<?php
+
+declare(strict_types=1);
+
+namespace PhpArchitecture\Parser\Foundation\Grammar\Definition\Middleware;
+
+use Closure;
+use PhpArchitecture\Parser\Foundation\Shared\Hash\HashClosure;
+
+abstract class AbstractMiddleware implements GrammarMiddleware
+{
+    use HashClosure;
+
+    public function __construct(
+        protected Closure $callback,
+        protected int $priority = 0,
+    ) {}
+
+    public static function fromCallable(callable $callback, int $priority = 0): static
+    {
+        return new static(Closure::fromCallable($callback), $priority);
+    }
+
+    public function hash(): string
+    {
+        return hash('xxh128', implode('|', [
+            static::class,
+            $this->method(),
+            $this->hashClosure($this->callback),
+            (string) $this->priority,
+        ]));
+    }
+
+    public function handle(object $rule): object
+    {
+        return ($this->callback)($rule);
+    }
+
+    public function priority(): int
+    {
+        return $this->priority;
+    }
+}

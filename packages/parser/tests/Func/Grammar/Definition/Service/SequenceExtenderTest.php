@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace PhpArchitecture\Parser\Tests\Func\Grammar\Definition\Service;
 
-use PhpArchitecture\Parser\Grammar\Definition\Model\Cardinality;
-use PhpArchitecture\Parser\Grammar\Definition\Model\Sequence\SequenceNode;
-use PhpArchitecture\Parser\Grammar\Definition\Model\Sequence\SequenceRule;
-use PhpArchitecture\Parser\Grammar\Definition\Service\SequenceExtender\SequenceExtender;
+use PhpArchitecture\Parser\Foundation\Grammar\Definition\Model\Cardinality;
+use PhpArchitecture\Parser\Foundation\Grammar\Definition\Model\Sequence\SequenceNode;
+use PhpArchitecture\Parser\Foundation\Grammar\Definition\Model\Sequence\SequenceRule;
+use PhpArchitecture\Parser\Foundation\Grammar\Definition\Service\SequenceExtender\SequenceExtender;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;

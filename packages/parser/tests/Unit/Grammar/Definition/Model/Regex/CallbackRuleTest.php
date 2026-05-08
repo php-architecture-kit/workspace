@@ -8,11 +8,11 @@ use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use PhpArchitecture\Parser\Grammar\Definition\Model\Regex\CallbackRule;
-use PhpArchitecture\Parser\Grammar\Definition\Model\Regex\RegexRule;
-use PhpArchitecture\Parser\Grammar\Definition\Model\RuleType;
-use PhpArchitecture\Parser\Grammar\Definition\Rule;
-use PhpArchitecture\Parser\Processing\Model\Tokenization\Token;
+use PhpArchitecture\Parser\Foundation\Grammar\Definition\Model\Regex\CallbackRule;
+use PhpArchitecture\Parser\Foundation\Grammar\Definition\Model\Regex\RegexRule;
+use PhpArchitecture\Parser\Foundation\Grammar\Definition\Model\RuleType;
+use PhpArchitecture\Parser\Foundation\Grammar\Definition\Rule;
+use PhpArchitecture\Parser\Foundation\Tokenization\Model\Token;
 
 #[Group('unit')]
 final class CallbackRuleTest extends TestCase

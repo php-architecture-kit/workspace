@@ -7,7 +7,7 @@ namespace PhpArchitecture\Parser\Tests\Unit\Grammar\Definition\Model\Technical;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use PhpArchitecture\Parser\Grammar\Definition\Model\Technical\TaggedRule;
+use PhpArchitecture\Parser\Foundation\Grammar\Definition\Model\Technical\TaggedRule;
 
 #[Group('unit')]
 final class TaggedRuleTest extends TestCase

@@ -8,8 +8,8 @@ use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use PhpArchitecture\Parser\Grammar\Definition\Model\Cardinality;
-use PhpArchitecture\Parser\Grammar\Definition\Model\Sequence\SequenceNode;
+use PhpArchitecture\Parser\Foundation\Grammar\Definition\Model\Cardinality;
+use PhpArchitecture\Parser\Foundation\Grammar\Definition\Model\Sequence\SequenceNode;
 
 #[Group('unit')]
 final class SequenceNodeTest extends TestCase

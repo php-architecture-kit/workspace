@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace PhpArchitecture\Parser\Tests\Unit\Tokenization\Model;
 
-use PhpArchitecture\Parser\Tokenization\Model\StringStream;
+use PhpArchitecture\Parser\Foundation\Tokenization\Model\StringStream;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 

@@ -7,7 +7,7 @@ namespace PhpArchitecture\Parser\Tests\Unit\Grammar\Definition\Model;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use PhpArchitecture\Parser\Grammar\Definition\Model\RuleType;
+use PhpArchitecture\Parser\Foundation\Grammar\Definition\Model\RuleType;
 
 #[Group('unit')]
 final class RuleTypeTest extends TestCase

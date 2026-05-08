@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace PhpArchitecture\Parser\Tests\Unit\Grammar\Definition\Service;
 
-use PhpArchitecture\Parser\Grammar\Definition\Model\Sequence\SequenceNode;
-use PhpArchitecture\Parser\Grammar\Definition\Model\Sequence\SequenceRule;
-use PhpArchitecture\Parser\Grammar\Definition\Service\SequenceExtender\SequenceExtender;
-use PhpArchitecture\Parser\Grammar\Definition\Service\SequenceExtender\SequenceExtenderRule;
-use PhpArchitecture\Parser\Grammar\Definition\Service\SequenceExtender\SequenceExtenderRuleContext;
+use PhpArchitecture\Parser\Foundation\Grammar\Definition\Model\Sequence\SequenceNode;
+use PhpArchitecture\Parser\Foundation\Grammar\Definition\Model\Sequence\SequenceRule;
+use PhpArchitecture\Parser\Foundation\Grammar\Definition\Service\SequenceExtender\SequenceExtender;
+use PhpArchitecture\Parser\Foundation\Grammar\Definition\Service\SequenceExtender\SequenceExtenderRule;
+use PhpArchitecture\Parser\Foundation\Grammar\Definition\Service\SequenceExtender\SequenceExtenderRuleContext;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;

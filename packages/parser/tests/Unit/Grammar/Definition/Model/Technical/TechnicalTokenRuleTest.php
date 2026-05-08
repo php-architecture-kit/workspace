@@ -8,7 +8,7 @@ use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use PhpArchitecture\Parser\Grammar\Definition\Model\Technical\TechnicalTokenRule;
+use PhpArchitecture\Parser\Foundation\Grammar\Definition\Model\Technical\TechnicalTokenRule;
 
 #[Group('unit')]
 final class TechnicalTokenRuleTest extends TestCase

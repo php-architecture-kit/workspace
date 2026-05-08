@@ -7,7 +7,7 @@ namespace PhpArchitecture\Parser\Tests\Unit\Grammar\Definition\Model\Regex;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use PhpArchitecture\Parser\Grammar\Definition\Model\Regex\RegexRule;
+use PhpArchitecture\Parser\Foundation\Grammar\Definition\Model\Regex\RegexRule;
 
 #[Group('unit')]
 final class RegexRuleTest extends TestCase
