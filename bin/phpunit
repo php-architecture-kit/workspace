@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+exec php vendor/bin/phpunit \
+    --colors=always \
+    --configuration tools/phpunit/phpunit.xml \
+    --display-warnings \
+    --display-errors \
+    --display-notices \
+    --display-deprecations \
+    --fail-on-warning \
+    --fail-on-risky \
+    "$@"
