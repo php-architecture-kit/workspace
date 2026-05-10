@@ -9,7 +9,10 @@
     "license": "MIT",
     "autoload": {
         "psr-4": {
-            "PhpArchitecture\\Parser\\": "packages/parser/src/"
+            "PhpArchitecture\\Parser\\": "packages/parser/src/",
+            "PhpArchitecture\\Graph\\": "packages/graph/src/",
+            "PhpArchitecture\\StateMachine\\": "packages/state-machine/src/",
+            "PhpArchitecture\\Technical\\": "packages/technical/src/"
         }
     },
     "autoload-dev": {
@@ -64,7 +67,7 @@
         "code:fix:dry": "vendor/bin/php-cs-fixer --config=tools/php-cs-fixer/php-cs-fixer.php check --diff",
         "code:analyse": "vendor/bin/phpstan analyse packages/*/src -c tools/phpstan/phpstan.neon",
         "code:analyse:b": "vendor/bin/phpstan analyse packages -c tools/phpstan/phpstan.neon --generate-baseline tools/phpstan/baseline.neon --allow-empty-baseline",
-        "phpunit": "php vendor/bin/phpunit --colors=always --configuration tools/phpunit/phpunit.xml --display-warnings --display-errors --display-notices --display-deprecations --fail-on-warning --fail-on-risky",
+        "phpunit": "bin/phpunit",
         "phpunit:coverage": [
             "@putenv XDEBUG_MODE=coverage",
             "@phpunit --do-not-cache-result --log-junit var/coverage/phpunit-report.xml --coverage-cobertura var/coverage/phpunit-coverage.xml --coverage-html var/coverage/html"
