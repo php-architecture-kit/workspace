@@ -11,11 +11,32 @@ use PhpArchitecture\Parser\Presentation\Controller\CLI\ViewCompiledGrammarComman
 use PhpArchitecture\Parser\Presentation\Controller\CLI\ViewAstDefinitionCommand;
 use PhpArchitecture\Parser\Presentation\Controller\CLI\TokenizeCommand;
 use PhpArchitecture\Parser\Presentation\Controller\CLI\ParseCommand;
+use PhpArchitecture\StateMachine\Infrastructure\Mapper\View\StateMachineViewMapper;
+use PhpArchitecture\StateMachine\Infrastructure\Mapper\View\Strategy\EdgeMappingStrategy;
+use PhpArchitecture\StateMachine\Infrastructure\Mapper\View\Strategy\NodeMappingStrategy;
+use PhpArchitecture\StateMachine\Infrastructure\Mapper\View\Strategy\StateMachineMappingStrategy;
+use PhpArchitecture\StateMachine\Infrastructure\Mapper\View\Strategy\TransitionMappingStrategy;
+use PhpArchitecture\StateMachine\Infrastructure\Mapper\View\Strategy\VertexMappingStrategy;
+use PhpArchitecture\StateMachine\Presentation\Controller\CLI\PrintStateMachineCommand;
 use Symfony\Component\Console\Application;
 
 $registry = InMemoryGrammarRegistry::withBuiltIn();
 
-$application = new Application('PHP Architecture Kit - Parser CLI', '1.0.0');
+$nodeMappingStrategy       = new NodeMappingStrategy();
+$transitionMappingStrategy = new TransitionMappingStrategy();
+$vertexMappingStrategy     = new VertexMappingStrategy();
+$edgeMappingStrategy       = new EdgeMappingStrategy();
+
+$stateMachineMapper = new StateMachineViewMapper([
+    new StateMachineMappingStrategy(
+        $nodeMappingStrategy,
+        $transitionMappingStrategy,
+        $vertexMappingStrategy,
+        $edgeMappingStrategy,
+    ),
+]);
+
+$application = new Application('PHP Architecture Kit', '1.0.0');
 
 $application->addCommands([
     new ViewGrammarCommand($registry),
@@ -23,6 +44,7 @@ $application->addCommands([
     new ViewAstDefinitionCommand($registry),
     new TokenizeCommand($registry),
     new ParseCommand($registry),
+    new PrintStateMachineCommand($stateMachineMapper),
 ]);
 
 $application->run();

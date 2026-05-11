@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "f24d4866a9f8e693524abdfbeb6f4868",
+    "content-hash": "598a9bcfd05e275be13529bd886f559a",
     "packages": [
         {
             "name": "php-architecture-kit/actor",
@@ -57,13 +57,18 @@
             "dist": {
                 "type": "path",
                 "url": "packages/clock",
-                "reference": "a56784f576080295ecb99c33cf449e0b4be52128"
+                "reference": "828514ab78a47792d13814c75437c949b13647b3"
             },
             "require": {
                 "php": "^7.4 || ^8.0",
                 "psr/clock": "^1.0"
             },
             "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-main": "1.0.x-dev"
+                }
+            },
             "autoload": {
                 "psr-4": {
                     "PhpArchitecture\\Clock\\": "src/"
@@ -200,15 +205,21 @@
             "dist": {
                 "type": "path",
                 "url": "packages/state-machine",
-                "reference": "ef4040157e39ac0ec2d395b51451335689f6775e"
+                "reference": "9e54058d0384c0d17af4dfcf604d6a187d21f621"
             },
             "require": {
                 "php": "^8.4",
+                "php-architecture-kit/clock": "^1.0",
                 "php-architecture-kit/domain-core": "^1.0",
-                "php-architecture-kit/graph": "^1.0",
+                "php-architecture-kit/graph": ">=1.0.1",
                 "php-architecture-kit/technical": "^1.0",
-                "php-architecture-kit/uuid": "^1.0",
+                "php-architecture-kit/uuid": "^1.1",
+                "psr/clock": "^1.0",
                 "psr/container": "^2.0"
+            },
+            "conflict": {
+                "php-architecture-kit/graph": "<1.0.1",
+                "php-architecture-kit/uuid": "<1.1"
             },
             "type": "library",
             "autoload": {
@@ -298,7 +309,7 @@
             "dist": {
                 "type": "path",
                 "url": "packages/uuid",
-                "reference": "eb36e6ea2ddbc4c292e3002cfd35184cfe9a2f6c"
+                "reference": "302dd279db4485aa90ae46d8410368e3c63c9684"
             },
             "require": {
                 "php": "^7.4 || ^8.0",
@@ -311,7 +322,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-main": "1.0.x-dev"
+                    "dev-main": "1.1.x-dev"
                 }
             },
             "autoload": {
@@ -1942,6 +1953,57 @@
                 "source": "https://github.com/laravel/framework"
             },
             "time": "2026-04-18T13:27:49+00:00"
+        },
+        {
+            "name": "jawira/plantuml-encoding",
+            "version": "v1.1.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/jawira/plantuml-encoding.git",
+                "reference": "fe8bce2d7ff5bb5cccf374349999cef7d6246a32"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/jawira/plantuml-encoding/zipball/fe8bce2d7ff5bb5cccf374349999cef7d6246a32",
+                "reference": "fe8bce2d7ff5bb5cccf374349999cef7d6246a32",
+                "shasum": ""
+            },
+            "require": {
+                "ext-zlib": "*",
+                "php": ">=7.4"
+            },
+            "require-dev": {
+                "phpstan/phpstan": "^2"
+            },
+            "type": "library",
+            "autoload": {
+                "files": [
+                    "src/plantuml_functions.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Jawira Portugal",
+                    "homepage": "https://jawira.com"
+                }
+            ],
+            "description": "PlantUML encoding functions",
+            "keywords": [
+                "encodep",
+                "encoding",
+                "functions",
+                "plantuml",
+                "uml"
+            ],
+            "support": {
+                "issues": "https://github.com/jawira/plantuml-encoding/issues",
+                "source": "https://github.com/jawira/plantuml-encoding/tree/v1.1.1"
+            },
+            "time": "2024-12-22T17:49:30+00:00"
         },
         {
             "name": "myclabs/deep-copy",
@@ -7386,6 +7448,81 @@
                 }
             ],
             "time": "2026-04-18T13:51:42+00:00"
+        },
+        {
+            "name": "symfony/yaml",
+            "version": "v8.0.10",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/yaml.git",
+                "reference": "aa9ee60c41d9b20a2468c41ff0a32e2a7405ac05"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/yaml/zipball/aa9ee60c41d9b20a2468c41ff0a32e2a7405ac05",
+                "reference": "aa9ee60c41d9b20a2468c41ff0a32e2a7405ac05",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=8.4",
+                "symfony/polyfill-ctype": "^1.8"
+            },
+            "conflict": {
+                "symfony/console": "<7.4"
+            },
+            "require-dev": {
+                "symfony/console": "^7.4|^8.0"
+            },
+            "bin": [
+                "Resources/bin/yaml-lint"
+            ],
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Symfony\\Component\\Yaml\\": ""
+                },
+                "exclude-from-classmap": [
+                    "/Tests/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Fabien Potencier",
+                    "email": "fabien@symfony.com"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "https://symfony.com/contributors"
+                }
+            ],
+            "description": "Loads and dumps YAML files",
+            "homepage": "https://symfony.com",
+            "support": {
+                "source": "https://github.com/symfony/yaml/tree/v8.0.10"
+            },
+            "funding": [
+                {
+                    "url": "https://symfony.com/sponsor",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/fabpot",
+                    "type": "github"
+                },
+                {
+                    "url": "https://github.com/nicolas-grekas",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+                    "type": "tidelift"
+                }
+            ],
+            "time": "2026-05-05T08:10:04+00:00"
         },
         {
             "name": "theseer/tokenizer",

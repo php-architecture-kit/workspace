@@ -59,7 +59,9 @@
         "illuminate/events": "^12.53",
         "symfony/event-dispatcher": "^7.4",
         "symfony/console": "^7.4",
-        "psr/container": "^2.0"
+        "psr/container": "^2.0",
+        "jawira/plantuml-encoding": "^1.1",
+        "symfony/yaml": "^8.0"
     },
     "scripts": {
         "benchmark:uuid": "vendor/bin/phpbench run benchmarks/uuid --config=tools/phpbench/phpbench.json --report=by_method",
