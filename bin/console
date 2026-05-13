@@ -11,7 +11,9 @@ use PhpArchitecture\Parser\Presentation\Controller\CLI\ViewCompiledGrammarComman
 use PhpArchitecture\Parser\Presentation\Controller\CLI\ViewAstDefinitionCommand;
 use PhpArchitecture\Parser\Presentation\Controller\CLI\TokenizeCommand;
 use PhpArchitecture\Parser\Presentation\Controller\CLI\ParseCommand;
+use PhpArchitecture\StateMachine\Infrastructure\Mapper\View\DefinitionViewMapper;
 use PhpArchitecture\StateMachine\Infrastructure\Mapper\View\StateMachineViewMapper;
+use PhpArchitecture\StateMachine\Infrastructure\Mapper\View\Strategy\DefinitionMappingStrategy;
 use PhpArchitecture\StateMachine\Infrastructure\Mapper\View\Strategy\EdgeMappingStrategy;
 use PhpArchitecture\StateMachine\Infrastructure\Mapper\View\Strategy\NodeMappingStrategy;
 use PhpArchitecture\StateMachine\Infrastructure\Mapper\View\Strategy\StateMachineMappingStrategy;
