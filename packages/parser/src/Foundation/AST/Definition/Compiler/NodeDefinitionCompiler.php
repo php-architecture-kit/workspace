@@ -27,15 +27,15 @@ use LogicException;
  */
 class NodeDefinitionCompiler
 {
-    /** @var array<string, NodeDefinition> */
+    /** @var array<string,NodeDefinition> */
     private array $compiled = [];
 
-    /** @var array<string, true> */
+    /** @var array<string,true> */
     private array $inProgress = [];
 
     /**
      * @param DefinitionSource[] $sources
-     * @return array<string, NodeDefinition>
+     * @return array<string,NodeDefinition>
      */
     public function compile(array $sources): array
     {
@@ -66,7 +66,7 @@ class NodeDefinitionCompiler
             // that will be replaced with proper definition
             throw new LogicException(
                 "Cyclic definition detected for '{$name}' from '{$sourceName}'. " .
-                "Recursive AST nodes require explicit reference handling.",
+                    "Recursive AST nodes require explicit reference handling.",
             );
         }
 
