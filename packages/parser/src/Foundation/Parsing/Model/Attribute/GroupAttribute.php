@@ -10,13 +10,16 @@ use PhpArchitecture\Parser\Foundation\Shared\Meta\MetaInterface;
 use PhpArchitecture\Parser\Foundation\Shared\Meta\MetaTrait;
 use PhpArchitecture\Parser\Foundation\Shared\Tags\TagsTrait;
 
+/**
+ * @template T of NodeInterface
+ */
 class GroupAttribute implements NodeAttributeInterface, MetaInterface
 {
     use MetaTrait;
     use TagsTrait;
 
     /**
-     * @param NodeInterface[] $nodes
+     * @param T[] $nodes
      * @param array<string,mixed> $meta
      * @param string[] $tags
      */

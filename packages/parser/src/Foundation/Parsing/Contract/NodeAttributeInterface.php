@@ -9,4 +9,6 @@ use Stringable;
 interface NodeAttributeInterface extends Stringable
 {
     public const DEFAULT_VALUE_KEY = 'defaultValue';
+
+    public function getName(): string;
 }

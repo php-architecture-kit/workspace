@@ -11,6 +11,7 @@ use PhpArchitecture\Parser\Foundation\Shared\Meta\MetaInterface;
 use PhpArchitecture\Parser\Foundation\Shared\Meta\MetaTrait;
 use PhpArchitecture\Parser\Foundation\Shared\Tags\TagsTrait;
 use WeakReference;
+use LogicException;
 
 class Node implements NodeInterface, MetaInterface
 {
@@ -53,6 +54,27 @@ class Node implements NodeInterface, MetaInterface
         array_splice($this->attributes, $offset, 0, [$attribute]);
 
         return $this;
+    }
+
+    /** @return NodeAttributeInterface[] */
+    public function getAttributes(): array
+    {
+        return $this->attributes;
+    }
+
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
+    public function __get(string $name): NodeAttributeInterface
+    {
+        foreach ($this->attributes as $attribute) {
+            if ($attribute->getName() === $name) {
+                return $attribute;
+            }
+        }
+        throw new LogicException("Attribute '{$name}' not found on node '{$this->name}'");
     }
 
     public function removeAttributeByOffset(int $offset): self

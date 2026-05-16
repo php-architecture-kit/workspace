@@ -10,12 +10,16 @@ use PhpArchitecture\Parser\Foundation\Shared\Meta\MetaInterface;
 use PhpArchitecture\Parser\Foundation\Shared\Meta\MetaTrait;
 use PhpArchitecture\Parser\Foundation\Shared\Tags\TagsTrait;
 
+/**
+ * @template T of NodeInterface
+ */
 class OptionalAttribute implements NodeAttributeInterface, MetaInterface
 {
     use MetaTrait;
     use TagsTrait;
 
     /**
+     * @param T|null $node
      * @param array<string,mixed> $meta
      * @param string[] $tags
      */

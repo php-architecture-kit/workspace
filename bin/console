@@ -10,6 +10,7 @@ use PhpArchitecture\Parser\Presentation\Controller\CLI\ViewGrammarCommand;
 use PhpArchitecture\Parser\Presentation\Controller\CLI\ViewCompiledGrammarCommand;
 use PhpArchitecture\Parser\Presentation\Controller\CLI\ViewAstDefinitionCommand;
 use PhpArchitecture\Parser\Presentation\Controller\CLI\TokenizeCommand;
+use PhpArchitecture\Parser\Presentation\Controller\CLI\GenerateTreeSchemaCommand;
 use PhpArchitecture\Parser\Presentation\Controller\CLI\ParseCommand;
 use PhpArchitecture\StateMachine\Infrastructure\Mapper\View\DefinitionViewMapper;
 use PhpArchitecture\StateMachine\Infrastructure\Mapper\View\StateMachineViewMapper;
@@ -46,6 +47,7 @@ $application->addCommands([
     new ViewAstDefinitionCommand($registry),
     new TokenizeCommand($registry),
     new ParseCommand($registry),
+    new GenerateTreeSchemaCommand($registry),
     new PrintStateMachineCommand($stateMachineMapper),
 ]);
 
