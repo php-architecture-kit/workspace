@@ -196,7 +196,7 @@ class Rule
             RuleType::Choice,
             new SequenceRule(
                 [
-                    new Model\Sequence\SequenceNode($rulesNames, $cardinality)
+                    new Model\Sequence\SequenceNode($rulesNames, $cardinality, anchorName: $name)
                 ],
             ),
             $type,

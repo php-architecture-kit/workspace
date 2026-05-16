@@ -8,6 +8,6 @@ use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\NodeAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Node;
 
 /**
- * @property NodeAttribute<PrimitiveNode|ArrayNode|ObjectNode> $array|object|primitive
+ * @property NodeAttribute<PrimitiveNode|ArrayNode|ObjectNode> $value
  */
 class ValueNode extends Node {}

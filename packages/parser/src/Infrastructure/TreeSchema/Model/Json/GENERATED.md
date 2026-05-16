@@ -13,5 +13,5 @@ bin/console tree:generate 'assets/parser-source-files/json/json-rfc8259.minified
 
 | Field     | Value |
 |-----------|-------|
-| Generated | 2026-05-16 16:20:55 UTC |
+| Generated | 2026-05-16 16:37:55 UTC |
 
