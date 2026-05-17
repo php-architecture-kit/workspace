@@ -31,7 +31,8 @@ class JsonRfc8259 extends Whitespace
                 ->enableInheritanceFromGlobal()
                 ->add(
                     Rule::token("valueSeparator", ",", type: NodeType::Structure),
-                    Rule::seq("items", "value[item] (-* valueSeparator -* value[item])*"),
+                    Rule::seq("itemContinuation", "-* valueSeparator -* value[item]"),
+                    Rule::seq("items", "value[item] itemContinuation*"),
                 )
                 ->withRootSequence("beginArray -* ?items -* endArray")
                 ->closeWith(
@@ -50,7 +51,8 @@ class JsonRfc8259 extends Whitespace
                     Rule::token("valueSeparator", ",", type: NodeType::Structure),
                     Rule::seq("member", "string[identifier] -* nameSeparator -* value")
                         ->asAstNode('Member'),
-                    Rule::seq("members", "member (-* valueSeparator -* member)*"),
+                    Rule::seq("memberContinuation", "-* valueSeparator -* member"),
+                    Rule::seq("members", "member memberContinuation*"),
                 )
                 ->withRootSequence("beginObject -* ?members -* endObject")
                 ->closeWith(
