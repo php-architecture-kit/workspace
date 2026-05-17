@@ -9,6 +9,7 @@ use PhpArchitecture\Parser\Foundation\Grammar\Definition\Config\RegionConfigApi;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Middleware\GrammarMiddleware;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Middleware\Standard\AddInheritedRuleMiddleware;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Middleware\Standard\AddTaggedRuleRegionRefMiddleware;
+use PhpArchitecture\Parser\Foundation\Grammar\Definition\Middleware\Standard\TriviaSequenceNamingMiddleware;
 use PhpArchitecture\Parser\Foundation\Shared\Meta\MetaTrait;
 use PhpArchitecture\Parser\Foundation\Shared\Tags\TagsTrait;
 use RuntimeException;
@@ -50,6 +51,7 @@ class Region
         $this->add(
             new AddInheritedRuleMiddleware($this),
             new AddTaggedRuleRegionRefMiddleware($this),
+            new TriviaSequenceNamingMiddleware(),
         );
     }
 

@@ -36,7 +36,7 @@ class NodeAttrFactory implements NodeAttrFactoryInterface
         $attribute = match ($nodeType) {
             NodeType::Node => new NodeAttribute($token->name, $this->context->nodeFactory()->fromToken($token, $parent), $token->meta, $token->tags),
             NodeType::Structure => new StructureAttribute(true, $token->name, $token->raw === '' ? null : $token->raw, $token->meta, $token->tags),
-            NodeType::Raw => new RawContentAttribute($token->raw, $token->name, $token->meta, $token->tags),
+            NodeType::Raw => new RawContentAttribute($token->raw, $token->name, null, $token->meta, $token->tags),
         };
 
         $parent->addAttribute($attribute);
@@ -47,7 +47,7 @@ class NodeAttrFactory implements NodeAttrFactoryInterface
         $attribute = match ($nodeType) {
             NodeType::Node => new NodeAttribute($region->name, $this->context->nodeFactory()->fromTokenRegion($region, $parent), $region->meta, $region->tags),
             NodeType::Structure => new StructureAttribute(true, $region->name, ($content = $region->__toString()) === '' ? null : $content, $region->meta, $region->tags),
-            NodeType::Raw => $this->createRawRegionAttribute($region),
+            NodeType::Raw => $this->createRawRegionAttribute($region, null),
         };
 
         $parent->addAttribute($attribute);
@@ -58,7 +58,7 @@ class NodeAttrFactory implements NodeAttrFactoryInterface
         $attribute = match ($nodeType) {
             NodeType::Node => new NodeAttribute($region->name, $this->context->nodeFactory()->fromMatchedRegion($region, $parent), $region->meta, $region->tags),
             NodeType::Structure => new StructureAttribute(true, $region->name, ($content = $region->__toString()) === '' ? null : $content, $region->meta, $region->tags),
-            NodeType::Raw => $this->createRawRegionAttribute($region),
+            NodeType::Raw => $this->createRawRegionAttribute($region, null),
         };
 
         $parent->addAttribute($attribute);
@@ -69,7 +69,7 @@ class NodeAttrFactory implements NodeAttrFactoryInterface
         $attribute = match ($nodeType) {
             NodeType::Node => new NodeAttribute($matchedSequence->name, $this->context->nodeFactory()->fromMatchedSequence($matchedSequence, $parent), $matchedSequence->meta, $matchedSequence->tags),
             NodeType::Structure => new StructureAttribute(true, $matchedSequence->name, ($content = $matchedSequence->__toString()) === '' ? null : $content, $matchedSequence->meta, $matchedSequence->tags),
-            NodeType::Raw => new RawContentAttribute($matchedSequence->__toString(), $matchedSequence->name, $matchedSequence->meta, $matchedSequence->tags),
+            NodeType::Raw => new RawContentAttribute($matchedSequence->__toString(), $matchedSequence->name, null, $matchedSequence->meta, $matchedSequence->tags),
         };
 
         $parent->addAttribute($attribute);
@@ -96,10 +96,11 @@ class NodeAttrFactory implements NodeAttrFactoryInterface
             $firstItem = $sequenceNode->items[0] ?? null;
             $parent->addAttribute(
                 match (true) {
-                    $countItems === 1 && $firstItem instanceof Token => new RawContentAttribute($firstItem->raw, $firstItem->name, $firstItem->meta, $firstItem->tags),
-                    $countItems === 1 && $firstItem instanceof TokenRegion => $this->createRawRegionAttribute($firstItem),
+                    $countItems === 1 && $firstItem instanceof Token => new RawContentAttribute($firstItem->raw, $firstItem->name, $sequenceNode->name, $firstItem->meta, $firstItem->tags),
+                    $countItems === 1 && $firstItem instanceof TokenRegion => $this->createRawRegionAttribute($firstItem, $sequenceNode->name),
                     default => new RawContentAttribute(
                         $sequenceNode->__toString(),
+                        implode('', array_map(static fn(Token|TokenRegion|MatchedSequence $item) => $item->__toString(), $sequenceNode->items)),
                         $sequenceNode->name,
                         $sequenceNode->meta,
                         $sequenceNode->tags,
@@ -162,13 +163,13 @@ class NodeAttrFactory implements NodeAttrFactoryInterface
         ));
     }
 
-    private function createRawRegionAttribute(MatchedRegion|TokenRegion $region): RawRegionAttribute
+    private function createRawRegionAttribute(MatchedRegion|TokenRegion $region, ?string $anchorName): RawRegionAttribute
     {
         $items = $region instanceof MatchedRegion ? $region->items : $region->stream->tokens;
         $opener = null;
         $closer = null;
         if (empty($items)) {
-            return new RawRegionAttribute($opener, $closer, '', $region->name, $region->meta, $region->tags);
+            return new RawRegionAttribute($opener, $closer, '', $region->name, $anchorName, $region->meta, $region->tags);
         }
 
         // opener
@@ -188,7 +189,7 @@ class NodeAttrFactory implements NodeAttrFactoryInterface
         }
 
         if (empty($items)) {
-            return new RawRegionAttribute($opener, $closer, '', $region->name, $region->meta, $region->tags);
+            return new RawRegionAttribute($opener, $closer, '', $region->name, $anchorName, $region->meta, $region->tags);
         }
 
         // closer
@@ -213,6 +214,7 @@ class NodeAttrFactory implements NodeAttrFactoryInterface
             $closer,
             implode('', array_map(static fn(Token|TokenRegion|MatchedSequence $item) => $item->__toString(), $items)),
             $region->name,
+            $anchorName,
             $region->meta,
             $region->tags,
         );

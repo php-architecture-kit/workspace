@@ -11,9 +11,10 @@ use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\StructureAttribute
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Node;
 
 /**
- * @property RawRegionAttribute $string
- * @property GroupAttribute<InlineWsNode> $ws
- * @property StructureAttribute $name-separator
+ * @property RawRegionAttribute $identifier
+ * @property GroupAttribute $leadingTrivia
+ * @property StructureAttribute $nameSeparator
+ * @property GroupAttribute<InlineWsNode> $trailingTrivia
  * @property NodeAttribute<ValueNode> $value
  */
 class MemberNode extends Node {}

@@ -15,15 +15,16 @@ class RawRegionAttribute extends RawContentAttribute
         public ?StructureAttribute $closer,
         string $content,
         string $name = self::DEFAULT_NAME,
+        public ?string $anchorName = null,
         array $meta = [],
         array $tags = [],
     ) {
-        parent::__construct($content, $name, $meta, $tags);
+        parent::__construct($content, $name, $anchorName, $meta, $tags);
     }
 
     public function getName(): string
     {
-        return $this->name;
+        return $this->anchorName ?? $this->name;
     }
 
     public function __toString(): string

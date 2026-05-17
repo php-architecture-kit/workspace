@@ -14,7 +14,7 @@ class RawContentAttribute implements NodeAttributeInterface, MetaInterface
     use MetaTrait;
     use TagsTrait;
 
-    public const DEFAULT_NAME = '__raw__';
+    public const DEFAULT_NAME = 'raw';
 
     /**
      * @param array<string,mixed> $meta
@@ -23,6 +23,7 @@ class RawContentAttribute implements NodeAttributeInterface, MetaInterface
     public function __construct(
         public string $content,
         public string $name = self::DEFAULT_NAME,
+        public ?string $anchorName = null,
         array $meta = [],
         array $tags = [],
     ) {
@@ -32,7 +33,7 @@ class RawContentAttribute implements NodeAttributeInterface, MetaInterface
 
     public function getName(): string
     {
-        return $this->name;
+        return $this->anchorName ?? $this->name;
     }
 
     public function __toString(): string

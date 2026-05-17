@@ -69,17 +69,17 @@ class Whitespace implements GrammarDefinitionInterface
 
                             if ($isLastTokenNewLine) {
                                 if ($isStartedByNewLine && !$isTriggerTokenIncluded) {
-                                    $event->region->rename('empty-line');
+                                    $event->region->rename('emptyLine');
                                 } else {
-                                    $event->region->rename('trailing-ws');
+                                    $event->region->rename('trailingWs');
                                 }
                             } else {
                                 if ($isStartedByNewLine && !$isTriggerTokenIncluded) {
-                                    $event->region->rename('leading-ws');
+                                    $event->region->rename('leadingWs');
                                 } elseif ($previousEndedWithNewline) {
-                                    $event->region->rename('leading-ws');
+                                    $event->region->rename('leadingWs');
                                 } else {
-                                    $event->region->rename('inline-ws');
+                                    $event->region->rename('inlineWs');
                                 }
                             }
                         },
@@ -87,7 +87,7 @@ class Whitespace implements GrammarDefinitionInterface
                 )
                 ->closeWith(Rule::taggedWith("_ws"), true, false)
                 ->setNodeType(NodeType::Raw)
-                ->addTag('ws', 'whitespace'),
+                ->addTag('ws', 'whitespace', '-'),
         );
 
         return $grammar;

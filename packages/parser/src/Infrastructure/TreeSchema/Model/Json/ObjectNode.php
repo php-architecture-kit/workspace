@@ -10,9 +10,10 @@ use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\StructureAttribute
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Node;
 
 /**
- * @property StructureAttribute $begin-object
- * @property GroupAttribute<TrailingWsNode|LeadingWsNode> $ws
+ * @property StructureAttribute $beginObject
+ * @property GroupAttribute<TrailingWsNode|LeadingWsNode> $leadingTrivia
  * @property OptionalAttribute<MembersNode> $members
- * @property StructureAttribute $end-object
+ * @property GroupAttribute<TrailingWsNode|LeadingWsNode> $trailingTrivia
+ * @property StructureAttribute $endObject
  */
 class ObjectNode extends Node {}

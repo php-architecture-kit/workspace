@@ -8,6 +8,6 @@ use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\RawContentAttribut
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Node;
 
 /**
- * @property RawContentAttribute $__raw__
+ * @property RawContentAttribute $raw
  */
 class TrailingWsNode extends Node {}

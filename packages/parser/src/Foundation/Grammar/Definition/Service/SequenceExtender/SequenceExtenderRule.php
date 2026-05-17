@@ -23,7 +23,7 @@ class SequenceExtenderRule
     }
 
     /**
-     * @param NestedSequence|SequenceNode|string|callable(NestedSequence|SequenceNode $node, array $context): (NestedSequence|SequenceNode) $node
+     * @param NestedSequence|SequenceNode|string|callable(NestedSequence|SequenceNode $node, array $context):(NestedSequence|SequenceNode) $node
      */
     public function addPrev(NestedSequence|SequenceNode|string|callable $node): SequenceExtenderRuleContext
     {
@@ -32,7 +32,7 @@ class SequenceExtenderRule
     }
 
     /**
-     * @param NestedSequence|SequenceNode|string|callable(NestedSequence|SequenceNode $node, array $context): (NestedSequence|SequenceNode) $node
+     * @param NestedSequence|SequenceNode|string|callable(NestedSequence|SequenceNode $node, array $context):(NestedSequence|SequenceNode) $node
      */
     public function addNext(NestedSequence|SequenceNode|string|callable $node): SequenceExtenderRuleContext
     {
@@ -41,7 +41,7 @@ class SequenceExtenderRule
     }
 
     /**
-     * @param callable(NestedSequence|SequenceNode $node, array $context): (NestedSequence|SequenceNode) $callback
+     * @param callable(NestedSequence|SequenceNode $node, array $context):(NestedSequence|SequenceNode) $callback
      */
     public function modify(callable $callback): SequenceExtenderRuleContext
     {

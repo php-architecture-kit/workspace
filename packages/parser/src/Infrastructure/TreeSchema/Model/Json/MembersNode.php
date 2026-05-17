@@ -11,7 +11,8 @@ use PhpArchitecture\Parser\Foundation\Parsing\Model\Node;
 
 /**
  * @property NodeAttribute<MemberNode> $member
- * @property GroupAttribute<TrailingWsNode|LeadingWsNode> $ws
- * @property StructureAttribute $value-separator
+ * @property GroupAttribute $leadingTrivia
+ * @property StructureAttribute $valueSeparator
+ * @property GroupAttribute<TrailingWsNode|LeadingWsNode> $trailingTrivia
  */
 class MembersNode extends Node {}
