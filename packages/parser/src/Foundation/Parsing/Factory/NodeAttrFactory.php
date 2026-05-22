@@ -33,6 +33,10 @@ class NodeAttrFactory implements NodeAttrFactoryInterface
 
     public function fromToken(Token $token, NodeType $nodeType, NodeInterface $parent): void
     {
+        if ($nodeType === NodeType::Skip) {
+            return;
+        }
+
         $attribute = match ($nodeType) {
             NodeType::Node => new NodeAttribute($token->name, $this->context->nodeFactory()->fromToken($token, $parent), $token->meta, $token->tags),
             NodeType::Structure => new StructureAttribute(true, $token->name, $token->raw === '' ? null : $token->raw, $token->meta, $token->tags),
@@ -44,6 +48,10 @@ class NodeAttrFactory implements NodeAttrFactoryInterface
 
     public function fromTokenRegion(TokenRegion $region, NodeType $nodeType, NodeInterface $parent): void
     {
+        if ($nodeType === NodeType::Skip) {
+            return;
+        }
+
         $attribute = match ($nodeType) {
             NodeType::Node => new NodeAttribute($region->name, $this->context->nodeFactory()->fromTokenRegion($region, $parent), $region->meta, $region->tags),
             NodeType::Structure => new StructureAttribute(true, $region->name, ($content = $region->__toString()) === '' ? null : $content, $region->meta, $region->tags),
@@ -55,6 +63,10 @@ class NodeAttrFactory implements NodeAttrFactoryInterface
 
     public function fromMatchedRegion(MatchedRegion $region, NodeType $nodeType, NodeInterface $parent): void
     {
+        if ($nodeType === NodeType::Skip) {
+            return;
+        }
+
         $attribute = match ($nodeType) {
             NodeType::Node => new NodeAttribute($region->name, $this->context->nodeFactory()->fromMatchedRegion($region, $parent), $region->meta, $region->tags),
             NodeType::Structure => new StructureAttribute(true, $region->name, ($content = $region->__toString()) === '' ? null : $content, $region->meta, $region->tags),
@@ -66,6 +78,10 @@ class NodeAttrFactory implements NodeAttrFactoryInterface
 
     public function fromMatchedSequence(MatchedSequence $matchedSequence, NodeType $nodeType, NodeInterface $parent): void
     {
+        if ($nodeType === NodeType::Skip) {
+            return;
+        }
+
         $attribute = match ($nodeType) {
             NodeType::Node => new NodeAttribute($matchedSequence->name, $this->context->nodeFactory()->fromMatchedSequence($matchedSequence, $parent), $matchedSequence->meta, $matchedSequence->tags),
             NodeType::Structure => new StructureAttribute(true, $matchedSequence->name, ($content = $matchedSequence->__toString()) === '' ? null : $content, $matchedSequence->meta, $matchedSequence->tags),
@@ -77,6 +93,10 @@ class NodeAttrFactory implements NodeAttrFactoryInterface
 
     public function fromMatchedSequenceNode(MatchedSequenceNode $sequenceNode, NodeType $nodeType, NodeInterface $parent): void
     {
+        if ($nodeType === NodeType::Skip) {
+            return;
+        }
+
         if ($nodeType === NodeType::Structure) {
             $content = $sequenceNode->__toString();
 

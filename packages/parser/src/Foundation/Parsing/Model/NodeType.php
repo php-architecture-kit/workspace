@@ -8,5 +8,6 @@ enum NodeType: string
 {
     case Node = 'NodeType.Node';
     case Raw = 'NodeType.Raw';
+    case Skip = 'NodeType.Skip';
     case Structure = 'NodeType.Structure';
 }

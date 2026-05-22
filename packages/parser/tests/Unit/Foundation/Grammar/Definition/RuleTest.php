@@ -265,4 +265,24 @@ final class RuleTest extends TestCase
 
         self::assertCount(1, $rule->eventSubscribers);
     }
+
+    // --- skipInNodeTree ---
+
+    #[Test]
+    public function shouldSetSkipTagViaSkipInNodeTree(): void
+    {
+        $rule = Rule::token('t', 'x');
+
+        $rule->skipInNodeTree();
+
+        self::assertTrue($rule->hasTag(NodeType::Skip->value));
+    }
+
+    #[Test]
+    public function shouldBeFluentOnSkipInNodeTree(): void
+    {
+        $rule = Rule::token('t', 'x');
+
+        self::assertSame($rule, $rule->skipInNodeTree());
+    }
 }

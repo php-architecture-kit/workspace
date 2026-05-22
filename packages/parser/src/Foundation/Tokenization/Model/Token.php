@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace PhpArchitecture\Parser\Foundation\Tokenization\Model;
 
 use InvalidArgumentException;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\NodeType;
 use PhpArchitecture\Parser\Foundation\Shared\Meta\MetaTrait;
 use PhpArchitecture\Parser\Foundation\Shared\Tags\TagsTrait;
 use Stringable;
@@ -33,12 +34,12 @@ final class Token implements Stringable
 
     public static function bof(): self
     {
-        return new self(
+        return (new self(
             name: self::TOKEN_BOF,
             raw: '',
             startPosition: 0,
             endPosition: 0,
-        );
+        ))->addTag(NodeType::Skip->value);
     }
 
     public static function default(
@@ -57,12 +58,12 @@ final class Token implements Stringable
 
     public static function eof(int $position): self
     {
-        return new self(
+        return (new self(
             name: self::TOKEN_EOF,
             raw: '',
             startPosition: $position,
             endPosition: $position,
-        );
+        ))->addTag(NodeType::Skip->value);
     }
 
     public static function unknown(string $character, int $position): self

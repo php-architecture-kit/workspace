@@ -255,6 +255,12 @@ class Rule
         return $this;
     }
 
+    public function skipInNodeTree(): self
+    {
+        $this->addTag(NodeType::Skip->value);
+        return $this;
+    }
+
     public function setNodeType(NodeType $type): self
     {
         $this->nodeType = $type;

@@ -14,6 +14,7 @@ use PhpArchitecture\Parser\Foundation\Tokenization\Model\StringStream;
 use PhpArchitecture\Parser\Foundation\Tokenization\Model\TokenRegion;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
+use Throwable;
 
 #[Group('func')]
 abstract class GrammarTestCase extends TestCase
@@ -33,7 +34,7 @@ abstract class GrammarTestCase extends TestCase
 
         try {
             $compiledGrammar = (new GrammarCompiler())->compile($grammar);
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             $this->fail(sprintf(
                 '[Grammar compilation] Failed to compile grammar "%s": %s',
                 $grammar->name,
@@ -45,7 +46,7 @@ abstract class GrammarTestCase extends TestCase
 
         try {
             $context = new DefaultParsingContext($compiledGrammar);
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             $this->fail(sprintf(
                 '[Parsing context] Failed to create DefaultParsingContext for grammar "%s": %s',
                 $compiledGrammar->name,
@@ -59,7 +60,7 @@ abstract class GrammarTestCase extends TestCase
 
         try {
             $tokenRegion = (new Lexer($context->tokenizationContext()))->process($stream);
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             $this->fail(sprintf(
                 '[Tokenization] Lexer threw an exception for grammar "%s" with input "%s": %s',
                 $grammar->name,
@@ -73,7 +74,7 @@ abstract class GrammarTestCase extends TestCase
 
         try {
             $result = $context->nodeFactory()->fromTokenRegion($tokenRegion, null);
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             $this->fail(sprintf(
                 '[Node factory] Failed to parse token region for grammar "%s" with input "%s": %s',
                 $grammar->name,

@@ -16,6 +16,7 @@ final class NodeTypeResolver
     public static function resolveNodeType(Token|TokenRegion|MatchedRegion|MatchedSequence|MatchedSequenceNode $item): NodeType
     {
         return match (true) {
+            in_array(NodeType::Skip->value, $item->tags) => NodeType::Skip,
             in_array(NodeType::Node->value, $item->tags) => NodeType::Node,
             in_array(NodeType::Structure->value, $item->tags) => NodeType::Structure,
             in_array(NodeType::Raw->value, $item->tags) => NodeType::Raw,
