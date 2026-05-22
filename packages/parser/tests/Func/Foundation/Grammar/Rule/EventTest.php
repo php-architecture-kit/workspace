@@ -6,10 +6,12 @@ namespace PhpArchitecture\Parser\Tests\Func\Foundation\Grammar\Rule;
 
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\EventSubscriber;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Grammar;
+use PhpArchitecture\Parser\Foundation\Grammar\Definition\Region;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Rule;
 use PhpArchitecture\Parser\Foundation\Tokenization\Contract\TokenizationContext;
 use PhpArchitecture\Parser\Foundation\Tokenization\Event\TokenAddedEvent;
 use PhpArchitecture\Parser\Foundation\Tokenization\Event\TokenMatchedEvent;
+use PhpArchitecture\Parser\Foundation\Tokenization\Event\TokenRegionEndedEvent;
 use PhpArchitecture\Parser\Tests\Func\Grammar\GrammarTestCase;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
@@ -123,5 +125,32 @@ final class EventTest extends GrammarTestCase
         $this->assertGrammarParsing(string: 'x', grammar: $grammar, requireBofEof: false);
 
         $this->assertSame(['first', 'second'], $order);
+    }
+
+    #[Test]
+    public function shouldFireEventSubscriberWhenRegionEnds(): void
+    {
+        // TokenRegionEndedEvent is dispatched by the inner region's dispatcher when it closes.
+        // An EventSubscriber added to the inner region can observe this and capture the region name.
+        $regionName = null;
+        $grammar = new Grammar('event-test');
+
+        $inner = (new Region('inner'))
+            ->openWith(Rule::token('open', '['), includeOpenRuleMatch: true)
+            ->closeWith(Rule::token('close', ']'), includeCloseRuleMatch: true);
+        $inner->add(Rule::expr('content', '[a-z]+'));
+        $inner->add(
+            EventSubscriber::on(
+                TokenRegionEndedEvent::class,
+                function (TokenRegionEndedEvent $event, TokenizationContext $ctx) use (&$regionName): void {
+                    $regionName = $event->region->name;
+                },
+            ),
+        );
+        $grammar->global->add($inner);
+
+        $this->assertGrammarParsing(string: '[abc]', grammar: $grammar, requireBofEof: false);
+
+        $this->assertSame('inner', $regionName);
     }
 }

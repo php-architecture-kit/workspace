@@ -101,17 +101,17 @@ final class IdentifyRowsAndColumns implements TokenizationEventListener
         $lastToken = $region->lastToken();
 
         if ($firstToken !== null) {
-            $region->setMeta(
-                Position::KEY_START,
-                clone $firstToken->getMeta(Position::KEY_START),
-            );
+            $start = $firstToken->getMeta(Position::KEY_START);
+            if ($start !== null) {
+                $region->setMeta(Position::KEY_START, clone $start);
+            }
         }
 
         if ($lastToken !== null) {
-            $region->setMeta(
-                Position::KEY_END,
-                clone $lastToken->getMeta(Position::KEY_END),
-            );
+            $end = $lastToken->getMeta(Position::KEY_END);
+            if ($end !== null) {
+                $region->setMeta(Position::KEY_END, clone $end);
+            }
         }
     }
 }
