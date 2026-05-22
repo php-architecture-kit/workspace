@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace PhpArchitecture\Parser\Foundation\Tokenization\Contract;
 
+use PhpArchitecture\Parser\Foundation\Tokenization\Event\Contract\TokenizationEvent;
 use PhpArchitecture\Parser\Foundation\Tokenization\Event\Contract\TokenizationEventListener;
 use PhpArchitecture\Parser\Foundation\Tokenization\Model\Pattern;
 use PhpArchitecture\Parser\Foundation\Tokenization\Model\PatternLibrary;

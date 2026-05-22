@@ -14,6 +14,7 @@ use PhpArchitecture\Parser\Foundation\Tokenization\Contract\TokenizationContext;
 use PhpArchitecture\Parser\Foundation\Tokenization\Event\Contract\TokenizationEvent;
 use PhpArchitecture\Parser\Foundation\Tokenization\Event\Contract\TokenizationEventListener;
 use PhpArchitecture\Parser\Foundation\Tokenization\Event\TokenAddedEvent;
+use PhpArchitecture\Parser\Foundation\Tokenization\Model\Pattern;
 
 final class DynamicTokenInitEventListener implements TokenizationEventListener, RuleMatchedEventListener
 {
@@ -39,7 +40,8 @@ final class DynamicTokenInitEventListener implements TokenizationEventListener, 
         $newRule = $callbackDefinition->toTokenRule($this->dynamicRule, $token);
 
         $newPattern = (new RuleToPatternCompiler())->compileRule($newRule);
-        $context->regionToPatternLibraryMap[$this->targetRegion->name]->addPattern($newPattern);
+        assert($newPattern instanceof Pattern);
+        $context->registerPattern($newPattern, $this->targetRegion->name);
     }
 
     public function priority(): int

@@ -129,6 +129,49 @@ final class RegionTest extends GrammarTestCase
     }
 
     #[Test]
+    public function shouldCloseRegionWhenNegatedCloseRuleDoesNotMatch(): void
+    {
+        // closeWith(rule, negated: true) closes the region when any token that does NOT
+        // match the close rule is encountered. Here the region collects 'member' tokens
+        // and closes as soon as 'close' (']') appears — which is not 'member'.
+        // The closing token is re-tokenized in the parent region after the escape.
+        $grammar = new Grammar('region-test');
+        $grammar->global->add(Rule::token('other', 'x'));
+        $grammar->global->add(Rule::token('close', ']'));
+
+        $inner = (new Region('inner'))
+            ->openWith(Rule::token('open', '['), includeOpenRuleMatch: true);
+        $inner->add(Rule::token('member', 'a'));
+        $inner->add(Rule::token('close', ']'));
+        $inner->closeWith(Rule::token('member', 'a'), negated: true, includeCloseRuleMatch: false);
+
+        $grammar->global->add($inner);
+
+        $this->assertGrammarParsing(
+            string: '[aaa]x',
+            grammar: $grammar,
+            assertTokenizationResultValid: function (TokenRegion $tokenRegion, self $test): void {
+                $tokens = $tokenRegion->stream->tokens;
+
+                // root: inner_region + close(']') re-tokenized in parent + other('x')
+                $test->assertCount(3, $tokens);
+                $test->assertInstanceOf(TokenRegion::class, $tokens[0]);
+                $test->assertSame('close', $tokens[1]->name);
+                $test->assertSame('other', $tokens[2]->name);
+
+                $innerTokens = $tokens[0]->stream->tokens;
+                // open('[') + 3 × member('a') — ']' triggered the close but is not in inner
+                $test->assertCount(4, $innerTokens);
+                $test->assertSame('open', $innerTokens[0]->name);
+                $test->assertSame('member', $innerTokens[1]->name);
+                $test->assertSame('member', $innerTokens[2]->name);
+                $test->assertSame('member', $innerTokens[3]->name);
+            },
+            requireBofEof: false,
+        );
+    }
+
+    #[Test]
     public function shouldCastNodeToStringAsFullInput(): void
     {
         $grammar = new Grammar('region-test');
