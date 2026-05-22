@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace PhpArchitecture\Parser\Tests\Func\Grammar\Definition\Service;
+namespace PhpArchitecture\Parser\Tests\Func\Foundation\Grammar\Definition\Service;
 
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Model\Cardinality;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Model\Sequence\SequenceNode;

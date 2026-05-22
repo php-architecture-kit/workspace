@@ -2,15 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Tests\PhpArchitecture\Parser\Feature;
+namespace Tests\PhpArchitecture\Parser\E2e\Presentation\Controller;
 
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
-#[Group('feature')]
-#[Group('cli')]
-final class CliCommandsFeatureTest extends TestCase
+#[Group('e2e')]
+final class CliCommandsE2eTest extends TestCase
 {
     private string $projectRoot;
     private string $consolePath;
@@ -18,7 +17,7 @@ final class CliCommandsFeatureTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->projectRoot = dirname(__DIR__, 4);
+        $this->projectRoot = dirname(__DIR__, 6);
         $this->consolePath = $this->projectRoot . '/bin/console';
         $this->grammarClass = 'PhpArchitecture\\Parser\\Infrastructure\\Grammar\\Definition\\Json\\JsonRfc8259';
     }
@@ -147,5 +146,4 @@ final class CliCommandsFeatureTest extends TestCase
             }
         }
     }
-
 }
