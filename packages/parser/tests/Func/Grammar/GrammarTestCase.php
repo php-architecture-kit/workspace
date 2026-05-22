@@ -29,7 +29,10 @@ abstract class GrammarTestCase extends TestCase
         ?callable $assertParsingContextAfterTokenizationValid = null,
         ?callable $assertParsingResultValid = null,
         ?callable $assertParsingContextAfterParsingValid = null,
+        bool $requireBofEof = true,
     ): void {
+        $grammar->requireBofEof = $requireBofEof;
+
         $this->assertGrammarDefinitionStage($grammar, $assertDefinedGrammarValid);
 
         try {

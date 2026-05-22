@@ -163,6 +163,8 @@ class GrammarCompiler
         foreach ($source->getAllTags() as $tag) {
             $target->addTag($tag);
         }
+
+        $target->config->rootSequence = $source->config->rootSequence;
     }
 
     private function precompileRegion(Region $region): void

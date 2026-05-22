@@ -99,7 +99,7 @@ class RuleToSequenceCompiler implements RuleCompilerInterface
             $definition->isLookbehind,
             $definition->anchorName,
             [],
-            $definition->nodeType ? ($definition->tags + [$definition->nodeType->value]) : $definition->tags,
+            $definition->nodeType ? array_merge($definition->tags, [$definition->nodeType->value]) : $definition->tags,
         );
     }
 }
