@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace PhpArchitecture\Parser\Tests\Unit\Grammar\Definition\Model\Technical;
+namespace PhpArchitecture\Parser\Tests\Unit\Foundation\Grammar\Definition\Model\Technical;
 
 use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\Group;

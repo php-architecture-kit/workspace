@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace PhpArchitecture\Parser\Tests\Unit\Grammar\Definition\Service;
+namespace PhpArchitecture\Parser\Tests\Unit\Foundation\Grammar\Definition\Service;
 
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Model\Sequence\SequenceNode;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Model\Sequence\SequenceRule;

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\PhpArchitecture\Parser\E2e\Presentation\Controller;
+namespace PhpArchitecture\Parser\Tests\E2e\Presentation\Controller;
 
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;

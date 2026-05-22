@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace PhpArchitecture\Parser\Tests\Unit\Grammar\Definition\Model;
+namespace PhpArchitecture\Parser\Tests\Unit\Foundation\Grammar\Definition\Model;
 
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;

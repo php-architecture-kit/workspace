@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace PhpArchitecture\Parser\Tests\Unit\Grammar\Definition\Model\Regex;
+namespace PhpArchitecture\Parser\Tests\Unit\Foundation\Grammar\Definition\Model\Regex;
 
 use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\Group;

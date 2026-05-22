@@ -22,7 +22,7 @@
             "PhpArchitecture\\DomainCore\\Tests\\": "packages/domain-core/tests/",
             "PhpArchitecture\\Graph\\Tests\\": "packages/graph/tests/",
             "PhpArchitecture\\Uuid\\Tests\\": "packages/uuid/tests/",
-            "Tests\\PhpArchitecture\\Parser\\": "packages/parser/tests/",
+            "PhpArchitecture\\Parser\\Tests\\": "packages/parser/tests/",
             "Benchmarks\\PhpArchitecture\\Uuid\\": "benchmarks/uuid/",
             "PhpArchitecture\\StateMachine\\Tests\\": "packages/state-machine/tests/"
         }

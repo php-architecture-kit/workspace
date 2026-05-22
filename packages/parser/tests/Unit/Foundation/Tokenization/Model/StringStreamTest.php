@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace PhpArchitecture\Parser\Tests\Unit\Tokenization\Model;
+namespace PhpArchitecture\Parser\Tests\Unit\Foundation\Tokenization\Model;
 
 use PhpArchitecture\Parser\Foundation\Tokenization\Model\StringStream;
 use PHPUnit\Framework\Attributes\Test;
