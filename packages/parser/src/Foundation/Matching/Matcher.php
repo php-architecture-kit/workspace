@@ -394,6 +394,7 @@ class Matcher
             $node->max,
             $node->meta,
             $node->tags,
+            $node->inGroup,
         );
     }
 }

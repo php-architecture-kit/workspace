@@ -38,6 +38,11 @@ class GroupAttribute implements NodeAttributeInterface, MetaInterface
         return $this->name;
     }
 
+    public function addNode(NodeInterface $node): void
+    {
+        $this->nodes[] = $node;
+    }
+
     public function __toString(): string
     {
         return implode('', array_map(

@@ -13,7 +13,7 @@ use PhpArchitecture\Parser\Foundation\Parsing\Model\Node;
 /**
  * @property RawRegionAttribute $identifier
  * @property GroupAttribute $leadingTrivia
- * @property StructureAttribute $nameSeparator
+ * @property StructureAttribute $colon
  * @property GroupAttribute<InlineWsNode> $trailingTrivia
  * @property NodeAttribute<ValueNode> $value
  */

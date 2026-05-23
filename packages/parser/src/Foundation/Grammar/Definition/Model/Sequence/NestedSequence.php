@@ -9,6 +9,8 @@ use PhpArchitecture\Parser\Foundation\Grammar\Definition\Model\Cardinality;
 
 final class NestedSequence
 {
+    public readonly bool $isGroup;
+
     /**
      * @param (NestedSequence|SequenceNode)[][] $alternativeSequences Array of alternative sequences (union)
      * @param string[] $tags
@@ -19,7 +21,9 @@ final class NestedSequence
         public bool $isLookahead = false,
         public bool $isLookbehind = false,
         public array $tags = [],
-    ) {}
+    ) {
+        $this->isGroup = in_array('g', $tags);
+    }
 
     /**
      * @param string $nestedSequence ex.: (?ws member)*, >(ws member), (seq1)|(seq2), (ws member)/t
@@ -167,22 +171,18 @@ final class NestedSequence
      */
     public function getAllSequenceNodes(?callable $filter = null): array
     {
-        $nodes = [];
-        foreach ($this->alternativeSequences as $nodes) {
-            foreach ($nodes as $node) {
+        $result = [];
+        foreach ($this->alternativeSequences as $alternative) {
+            foreach ($alternative as $node) {
                 if ($node instanceof NestedSequence) {
-                    $nodes = array_merge($nodes, $node->getAllSequenceNodes($filter));
-
-                    continue;
-                }
-
-                if (!$filter || $filter($node)) {
-                    $nodes[] = $node;
+                    $result = array_merge($result, $node->getAllSequenceNodes($filter));
+                } elseif (!$filter || $filter($node)) {
+                    $result[] = $node;
                 }
             }
         }
 
-        return $nodes;
+        return $result;
     }
 
     /**

@@ -30,11 +30,9 @@ class JsonRfc8259 extends Whitespace
                 ->startRegion('array')
                 ->enableInheritanceFromGlobal()
                 ->add(
-                    Rule::token("valueSeparator", ",", type: NodeType::Structure),
-                    Rule::seq("itemContinuation", "-* valueSeparator -* value[item]"),
-                    Rule::seq("items", "value[item] itemContinuation*"),
+                    Rule::token("comma", ",", type: NodeType::Structure),
                 )
-                ->withRootSequence("beginArray -* ?items -* endArray")
+                ->withRootSequence("beginArray -* ?(value[item] (-* comma -* value[item])*)/g -* endArray")
                 ->closeWith(
                     Rule::token("endArray", "]", type: NodeType::Structure),
                 )
@@ -47,14 +45,12 @@ class JsonRfc8259 extends Whitespace
                 ->startRegion('object')
                 ->enableInheritanceFromGlobal()
                 ->add(
-                    Rule::token("nameSeparator", ":", type: NodeType::Structure),
-                    Rule::token("valueSeparator", ",", type: NodeType::Structure),
-                    Rule::seq("member", "string[identifier] -* nameSeparator -* value")
+                    Rule::token("colon", ":", type: NodeType::Structure),
+                    Rule::token("comma", ",", type: NodeType::Structure),
+                    Rule::seq("member", "string[identifier] -* colon -* value")
                         ->asAstNode('Member'),
-                    Rule::seq("memberContinuation", "-* valueSeparator -* member"),
-                    Rule::seq("members", "member memberContinuation*"),
                 )
-                ->withRootSequence("beginObject -* ?members -* endObject")
+                ->withRootSequence("beginObject -* ?(member (-* comma -* member)*)/g -* endObject")
                 ->closeWith(
                     Rule::token("endObject", "}", type: NodeType::Structure),
                 )

@@ -6,6 +6,7 @@ namespace PhpArchitecture\Parser\Foundation\Parsing\Factory;
 
 use InvalidArgumentException;
 use PhpArchitecture\Parser\Foundation\Matching\Matcher;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\GroupAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\RawContentAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\StructureAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Node;
@@ -136,10 +137,52 @@ class NodeFactory implements NodeFactoryInterface
     /** @param array<MatchedSequenceNode> $items */
     private function fillSequenceBasedNodeWithAttributes(NodeInterface $sequenceBasedNode, array $items): void
     {
-        foreach ($items as $item) {
-            $nodeType = NodeTypeResolver::resolveNodeType($item);
+        $groupAttr = null;
 
-            $this->context->nodeAttrFactory()->fromMatchedSequenceNode($item, $nodeType, $sequenceBasedNode);
+        foreach ($items as $item) {
+            if (!$item->inGroup) {
+                $groupAttr = null;
+                $nodeType = NodeTypeResolver::resolveNodeType($item);
+                $this->context->nodeAttrFactory()->fromMatchedSequenceNode($item, $nodeType, $sequenceBasedNode);
+                continue;
+            }
+
+            if ($groupAttr === null) {
+                $groupAttr = new GroupAttribute($item->name, [], $item->meta, $item->tags);
+                $sequenceBasedNode->addAttribute($groupAttr);
+            }
+
+            $groupAttr->addNode($this->buildNodeFromMatchedSequenceNode($item, $sequenceBasedNode));
         }
+    }
+
+    private function buildNodeFromMatchedSequenceNode(MatchedSequenceNode $sequenceNode, NodeInterface $parent): NodeInterface
+    {
+        if (empty($sequenceNode->items)) {
+            return new Node($sequenceNode->name, [], $parent, $sequenceNode->meta, $sequenceNode->tags);
+        }
+
+        if (count($sequenceNode->items) === 1) {
+            $item = $sequenceNode->items[0];
+            return match ($item::class) {
+                Token::class => $this->context->nodeFactory()->fromToken($item, $parent),
+                TokenRegion::class => $this->context->nodeFactory()->fromTokenRegion($item, $parent),
+                MatchedSequence::class => $this->context->nodeFactory()->fromMatchedSequence($item, $parent),
+                default => throw new InvalidArgumentException('Unknown item type: ' . $item::class),
+            };
+        }
+
+        $node = new Node($sequenceNode->name, [], $parent, $sequenceNode->meta, $sequenceNode->tags);
+        foreach ($sequenceNode->items as $item) {
+            $nodeType = NodeTypeResolver::resolveNodeType($item);
+            match ($item::class) {
+                Token::class => $this->context->nodeAttrFactory()->fromToken($item, $nodeType, $node),
+                TokenRegion::class => $this->context->nodeAttrFactory()->fromTokenRegion($item, $nodeType, $node),
+                MatchedSequence::class => $this->context->nodeAttrFactory()->fromMatchedSequence($item, $nodeType, $node),
+                default => throw new InvalidArgumentException('Unknown item type: ' . $item::class),
+            };
+        }
+
+        return $node;
     }
 }

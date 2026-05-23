@@ -65,18 +65,20 @@ class RuleToSequenceCompiler implements RuleCompilerInterface
         );
     }
 
-    public function compileNestedSequence(NestedSequence $definition): CompiledNestedSequence
+    public function compileNestedSequence(NestedSequence $definition, bool $inGroup = false): CompiledNestedSequence
     {
+        $childInGroup = $definition->isGroup || $inGroup;
+
         return new CompiledNestedSequence(
             array_map(
-                /** 
-                 * @param array<NestedSequence|SequenceNode> $alternatives 
+                /**
+                 * @param array<NestedSequence|SequenceNode> $alternatives
                  * @return array<CompiledNestedSequence|CompiledSequenceNode>
                  */
                 fn(array $alternatives): array => array_map(
                     fn(NestedSequence|SequenceNode $def): CompiledNestedSequence|CompiledSequenceNode => $def instanceof NestedSequence
-                        ? $this->compileNestedSequence($def)
-                        : $this->compileSequenceNode($def),
+                        ? $this->compileNestedSequence($def, $def->isGroup ? false : $childInGroup)
+                        : $this->compileSequenceNode($def, $childInGroup),
                     $alternatives,
                 ),
                 $definition->alternativeSequences,
@@ -85,11 +87,12 @@ class RuleToSequenceCompiler implements RuleCompilerInterface
             $definition->cardinality->max(),
             $definition->isLookahead,
             $definition->isLookbehind,
+            $definition->isGroup,
             $definition->tags,
         );
     }
 
-    public function compileSequenceNode(SequenceNode $definition): CompiledSequenceNode
+    public function compileSequenceNode(SequenceNode $definition, bool $inGroup = false): CompiledSequenceNode
     {
         return new CompiledSequenceNode(
             $definition->alternatives,
@@ -101,6 +104,7 @@ class RuleToSequenceCompiler implements RuleCompilerInterface
             [],
             $definition->nodeType ? array_merge($definition->tags, [$definition->nodeType->value]) : $definition->tags,
             $definition->isNegation,
+            $inGroup,
         );
     }
 }
