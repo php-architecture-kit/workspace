@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace PhpArchitecture\Parser\Tests\Func\Foundation\Grammar\Rule;
+namespace PhpArchitecture\Parser\Tests\Func\Foundation\Grammar\Definition\Sequence;
 
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Grammar;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Rule;
@@ -113,6 +113,55 @@ final class SequenceLookaheadLookbehindTest extends GrammarTestCase
                 $test->assertSame(']', $attributes[1]->content);
             },
             requireBofEof: false,
+        );
+    }
+
+    // --- BOF / EOF (Rule::technical) ---
+
+    #[Test]
+    public function shouldLookaheadMatchEofToken(): void
+    {
+        // Canonical use: verify the matched value is the last token before EOF.
+        // Sequence: bof (value >eof) eof
+        // BOF is consumed at the outer level; the nested group matches 'value'
+        // and peeks ahead to verify EOF follows (without consuming it);
+        // the outer 'eof' then consumes EOF.
+        $grammar = new Grammar('lookahead-eof-test');
+        $grammar->global->add(Rule::technical('bof'));
+        $grammar->global->add(Rule::technical('eof'));
+        $grammar->global->add(Rule::token('value', 'x'));
+        $grammar->global->withRootSequence('bof (value >eof) eof');
+
+        $this->assertGrammarParsing(
+            string: 'x',
+            grammar: $grammar,
+            assertParsingResultValid: function (NodeInterface $node, self $test): void {
+                $test->assertSame('x', (string) $node);
+            },
+            requireBofEof: true,
+        );
+    }
+
+    #[Test]
+    public function shouldLookbehindMatchBofToken(): void
+    {
+        // Canonical use: verify the matched value is the first token after BOF.
+        // Sequence: bof (<bof value) eof
+        // BOF is consumed at the outer level; the nested group checks the previous
+        // token was BOF (lookbehind) and then matches 'value'; EOF is consumed last.
+        $grammar = new Grammar('lookbehind-bof-test');
+        $grammar->global->add(Rule::technical('bof'));
+        $grammar->global->add(Rule::technical('eof'));
+        $grammar->global->add(Rule::token('value', 'x'));
+        $grammar->global->withRootSequence('bof (<bof value) eof');
+
+        $this->assertGrammarParsing(
+            string: 'x',
+            grammar: $grammar,
+            assertParsingResultValid: function (NodeInterface $node, self $test): void {
+                $test->assertSame('x', (string) $node);
+            },
+            requireBofEof: true,
         );
     }
 }

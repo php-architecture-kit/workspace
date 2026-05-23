@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace PhpArchitecture\Parser\Tests\Func\Foundation\Grammar\Rule;
+namespace PhpArchitecture\Parser\Tests\Func\Foundation\Grammar\Definition\Sequence;
 
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Grammar;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Rule;

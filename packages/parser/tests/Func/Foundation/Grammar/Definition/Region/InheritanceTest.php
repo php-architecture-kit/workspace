@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace PhpArchitecture\Parser\Tests\Func\Foundation\Grammar\Rule;
+namespace PhpArchitecture\Parser\Tests\Func\Foundation\Grammar\Definition\Region;
 
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\EventSubscriber;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Grammar;
