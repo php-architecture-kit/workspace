@@ -149,6 +149,7 @@ class SequenceNodeEnricher
             $node->anchorName,
             $node->meta,
             $tags,
+            $node->isNegation,
         );
     }
 

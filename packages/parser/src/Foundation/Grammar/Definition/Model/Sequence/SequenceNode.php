@@ -23,6 +23,7 @@ final class SequenceNode
         public bool $isLookbehind = false,
         public ?string $anchorName = null,
         public array $tags = [],
+        public bool $isNegation = false,
     ) {
         if (in_array('n', $tags)) {
             $this->nodeType = NodeType::Node;
@@ -51,13 +52,14 @@ final class SequenceNode
     public static function fromString(string $sequenceNode): self
     {
         if (!preg_match(
-            '/^(?<lookahead>>)?(?<lookbehind><)?(?<optional>\?)?(?<name>[a-zA-Z\s\-_|][a-zA-Z0-9\s\-_|]*)(?<quantifier>[+*])?(?:\[(?<anchor>[a-zA-Z0-9\s\-_]+)\])?(?:\/(?<tags>[a-zA-Z]+))?$/',
+            '/^(?<negate>!)?(?<lookahead>>)?(?<lookbehind><)?(?<optional>\?)?(?<name>[a-zA-Z\s\-_|][a-zA-Z0-9\s\-_|]*)(?<quantifier>[+*])?(?:\[(?<anchor>[a-zA-Z0-9\s\-_]+)\])?(?:\/(?<tags>[a-zA-Z]+))?$/',
             $sequenceNode,
             $m,
         )) {
             throw new InvalidArgumentException("Invalid sequence node: `{$sequenceNode}`");
         }
 
+        $isNegation = !empty($m['negate']);
         $isLookahead = !empty($m['lookahead']);
         $isLookbehind = !empty($m['lookbehind']);
 
@@ -95,7 +97,7 @@ final class SequenceNode
         $anchorName = !empty($m['anchor']) ? $m['anchor'] : null;
         $tags = !empty($m['tags']) ? str_split($m['tags']) : [];
 
-        return new self($alternatives, $cardinality, $isLookahead, $isLookbehind, $anchorName, $tags);
+        return new self($alternatives, $cardinality, $isLookahead, $isLookbehind, $anchorName, $tags, $isNegation);
     }
 
     /**
@@ -111,7 +113,13 @@ final class SequenceNode
         $name = implode('|', $this->alternatives);
 
         $prefix = '';
-        if ($this->isLookahead) {
+        if ($this->isNegation && $this->isLookahead) {
+            $prefix = '!>';
+        } elseif ($this->isNegation && $this->isLookbehind) {
+            $prefix = '!<';
+        } elseif ($this->isNegation) {
+            $prefix = '!';
+        } elseif ($this->isLookahead) {
             $prefix = '>';
         } elseif ($this->isLookbehind) {
             $prefix = '<';

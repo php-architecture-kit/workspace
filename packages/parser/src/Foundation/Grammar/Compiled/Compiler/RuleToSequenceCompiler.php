@@ -100,6 +100,7 @@ class RuleToSequenceCompiler implements RuleCompilerInterface
             $definition->anchorName,
             [],
             $definition->nodeType ? array_merge($definition->tags, [$definition->nodeType->value]) : $definition->tags,
+            $definition->isNegation,
         );
     }
 }

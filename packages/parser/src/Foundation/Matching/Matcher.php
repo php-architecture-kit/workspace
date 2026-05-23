@@ -66,7 +66,8 @@ class Matcher
         $nodeDescriptions = [];
         foreach ($rootSequence->nodes as $idx => $node) {
             if ($node instanceof SequenceNode) {
-                $alternatives = implode(' | ', $node->alternatives);
+                $prefix = $node->isNegation ? '!' : '';
+                $alternatives = $prefix . implode(' | ' . $prefix, $node->alternatives);
                 $cardinality = $node->min === $node->max
                     ? "exactly {$node->min}"
                     : "min:{$node->min}, max:{$node->max}";
@@ -303,6 +304,38 @@ class Matcher
 
         while ($count < $node->max) {
             $currentOffset = $offset;
+
+            if ($node->isNegation) {
+                $anyMatched = false;
+                foreach ($node->alternatives as $alternative) {
+                    $namedSequence = $this->context->getSequenceLibrary()->sequences[$alternative] ?? null;
+                    if ($namedSequence !== null) {
+                        $checkOffset = $currentOffset;
+                        if ($this->matchSequence($namedSequence, $stream, $checkOffset) !== null) {
+                            $anyMatched = true;
+                            break;
+                        }
+                    }
+                    if ($stream->is($currentOffset, $alternative)) {
+                        $anyMatched = true;
+                        break;
+                    }
+                }
+
+                if ($anyMatched) {
+                    break;
+                }
+
+                $token = $stream->peek($currentOffset);
+                if ($token === null) {
+                    break;
+                }
+                $items[] = $token;
+                $offset++;
+                $count++;
+                continue;
+            }
+
             $matched = false;
 
             foreach ($node->alternatives as $alternative) {
@@ -353,7 +386,9 @@ class Matcher
         }
 
         return new MatchedSequenceNode(
-            $node->anchorName ?? implode('|', $node->alternatives),
+            $node->anchorName ?? ($node->isNegation
+                ? '!' . implode('|', $node->alternatives)
+                : implode('|', $node->alternatives)),
             $items,
             $node->min,
             $node->max,

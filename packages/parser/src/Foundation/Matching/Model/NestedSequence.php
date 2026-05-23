@@ -74,6 +74,13 @@ final class NestedSequence implements MetaInterface
                     continue;
                 }
 
+                if ($node instanceof SequenceNode && $node->isNegation) {
+                    if ($node->min >= 1) {
+                        break;
+                    }
+                    continue;
+                }
+
                 if ($node instanceof SequenceNode) {
                     $output = array_merge($output, $node->alternatives);
                 }

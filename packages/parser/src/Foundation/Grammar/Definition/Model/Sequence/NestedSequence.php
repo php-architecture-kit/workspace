@@ -197,6 +197,13 @@ final class NestedSequence
                     continue;
                 }
 
+                if ($node instanceof SequenceNode && $node->isNegation) {
+                    if ($node->cardinality->min() >= 1) {
+                        break;
+                    }
+                    continue;
+                }
+
                 if ($node instanceof SequenceNode) {
                     $output = array_merge($output, $node->alternatives);
                 }

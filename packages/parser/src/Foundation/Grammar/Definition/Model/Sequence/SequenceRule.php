@@ -74,6 +74,13 @@ final class SequenceRule implements RuleDefinition
                 continue;
             }
 
+            if ($node instanceof SequenceNode && $node->isNegation) {
+                if ($node->cardinality->min() >= 1) {
+                    return [];
+                }
+                continue;
+            }
+
             if ($node instanceof SequenceNode) {
                 $output = array_merge($output, $node->alternatives);
             }

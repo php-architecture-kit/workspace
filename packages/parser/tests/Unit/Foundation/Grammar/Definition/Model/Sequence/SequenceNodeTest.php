@@ -172,4 +172,50 @@ final class SequenceNodeTest extends TestCase
 
         self::assertSame($input, $node->toString());
     }
+
+    #[Test]
+    public function shouldParseNegationWhenFromString(): void
+    {
+        $node = SequenceNode::fromString('!token');
+
+        self::assertSame(['token'], $node->alternatives);
+        self::assertTrue($node->isNegation);
+        self::assertFalse($node->isLookahead);
+        self::assertFalse($node->isLookbehind);
+        self::assertSame(Cardinality::ExactlyOne, $node->cardinality);
+    }
+
+    #[Test]
+    public function shouldParseNegationWithQuantifierWhenFromString(): void
+    {
+        $node = SequenceNode::fromString('!token+');
+
+        self::assertTrue($node->isNegation);
+        self::assertSame(Cardinality::OneOrMore, $node->cardinality);
+    }
+
+    #[Test]
+    public function shouldParseNegationWithUnionAlternativesWhenFromString(): void
+    {
+        $node = SequenceNode::fromString('!token1|token2');
+
+        self::assertTrue($node->isNegation);
+        self::assertSame(['token1', 'token2'], $node->alternatives);
+    }
+
+    #[Test]
+    public function shouldReconstructStringWithNegationWhenToString(): void
+    {
+        $node = SequenceNode::fromString('!token');
+
+        self::assertSame('!token', $node->toString());
+    }
+
+    #[Test]
+    public function shouldReconstructStringWithNegationAndQuantifierWhenToString(): void
+    {
+        $node = SequenceNode::fromString('!token+');
+
+        self::assertSame('!token+', $node->toString());
+    }
 }

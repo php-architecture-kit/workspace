@@ -51,6 +51,13 @@ final class Sequence implements MetaInterface
                 continue;
             }
 
+            if ($node instanceof SequenceNode && $node->isNegation) {
+                if ($node->min >= 1) {
+                    return [];
+                }
+                continue;
+            }
+
             if ($node instanceof SequenceNode) {
                 $output = array_merge($output, $node->alternatives);
             }
