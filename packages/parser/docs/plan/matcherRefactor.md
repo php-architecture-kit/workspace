@@ -1,92 +1,12 @@
 # Refactoring klasy Matcher
 
-Usunięcie duplikacji `processWithRoot`/`processWithoutRoot` przez scalenie w jeden przepływ skanowania oraz ekstrakcja pomocnika `matchNodeList` eliminującego powtórzony dispatch węzłów.
+Ekstrakcja pomocnika `matchNodeList` eliminującego zduplikowany dispatch węzłów między `matchSequence` i `matchNestedSequence`. Jest to jedyna zmiana funkcjonalna: naprawienie buga polegającego na tym, że `matchSequence` pomijało obsługę lookahead/lookbehind.
+
+**Kontrakt `process()` oraz logika `processWithRoot`/`processWithoutRoot` pozostają bez zmian.**
 
 ---
 
-## Duplikacja 1: `processWithRoot` vs `processWithoutRoot`
-
-Obie metody robią to samo konceptualnie: iterują przez sekwencje i próbują dopasować je do strumienia tokenów. Różnią się tylko:
-- `processWithRoot` próbuje **raz** z rootSequence i rzuca wyjątek przy niepowodzeniu
-- `processWithoutRoot` skanuje iteracyjnie przez **wszystkie** sekwencje z fallbackiem na "unmatched"
-
-**Plan**: usunąć obie prywatne metody, logikę scalić bezpośrednio w `process()`:
-
-```php
-public function process(TokenRegion $region): MatchedRegion
-{
-    $this->context->markMatchingStarted();
-
-    $rootSequence = $this->context->getSequenceLibrary()->rootSequence;
-    $stream = $region->stream;
-    $offset = 0;
-
-    while ($stream->has($offset)) {
-        $matched = false;
-        $startOffset = $offset;
-
-        // Root sequence ma priorytet – próbujemy pierwsza
-        if ($rootSequence !== null) {
-            $matchedSequence = $this->matchSequence($rootSequence, $stream, $offset);
-            if ($matchedSequence !== null) {
-                $this->context->addMatchedSequence($matchedSequence);
-                $matched = true;
-            } else {
-                $offset = $startOffset;
-            }
-        }
-
-        // Fallback na pozostałe sekwencje
-        if (!$matched) {
-            foreach ($this->context->getSequenceLibrary()->sequences as $sequence) {
-                $startOffset = $offset;
-                $matchedSequence = $this->matchSequence($sequence, $stream, $offset);
-                if ($matchedSequence !== null) {
-                    $this->context->addMatchedSequence($matchedSequence);
-                    $matched = true;
-                    break;
-                }
-                $offset = $startOffset;
-            }
-        }
-
-        if (!$matched) {
-            $element = $stream->peek($offset++);
-            if ($element instanceof Token) {
-                $this->context->addUnmatchedToken($element);
-            } elseif ($element instanceof TokenRegion) {
-                $this->context->addUnmatchedTokenRegion($element);
-            }
-        }
-    }
-
-    $this->context->markMatchingFinished();
-    return $this->context->getOutput();
-}
-```
-
-### Zmiana return type: `MatchedRegion|MatchedSequence` → `MatchedRegion`
-
-Caller `NodeFactory::fromTokenRegion()` obecnie rozgałęzia się:
-```php
-if ($matchedSeqOrRegion instanceof MatchedRegion) {
-    return $this->createNodeFromMatchedRegion(...);
-}
-return $this->createNodeFromMatchedSequence(...);  // ← ten branch odpada
-```
-
-Po refactoringu `process()` zawsze zwraca `MatchedRegion`. Dopasowane sekwencje trafiają do `MatchedRegion.items` poprzez `context->addMatchedSequence()`.
-`NodeFactory` traci branch dla `MatchedSequence` i zawsze woła `createNodeFromMatchedRegion()`.
-
-**Uwaga**: `createNodeFromMatchedRegion` używa `fillRegionBasedNodeWithAttributes`, które obsługuje `MatchedSequence` w itemach – więc semantyka pozostaje poprawna.
-
-### Usunięcie error message z `processWithRoot`
-
-Szczegółowy komunikat błędu z `processWithRoot` (lista węzłów, tokeny) odpada. Jeśli root sequence nie pasuje, po prostu skanujemy dalej. Błąd nie jest już rzucany.
-
----
-
-## Duplikacja 2: dispatch węzłów w `matchSequence` vs `matchNestedSequence`
+## Jedyny bug: brak lookahead/lookbehind w `matchSequence`
 
 `matchSequence` wewnętrzna pętla:
 ```php
@@ -105,17 +25,30 @@ foreach ($alternativeNodes as $node) {
 }
 ```
 
-Ten sam dispatch `NestedSequence|SequenceNode` jest zduplikowany. `matchSequence` nie obsługuje lookahead/lookbehind (pre-existing bug).
+Ten sam dispatch `NestedSequence|SequenceNode` jest zduplikowany. `matchSequence` nie obsługuje lookahead/lookbehind — to pre-existing bug, który refactoring ma naprawić.
 
-**Plan**: wyekstrahować `matchNodeList(array $nodes, TokenStream $stream, int &$offset): ?array`
+---
+
+## Plan: ekstrakcja `matchNodeList`
+
+Wyekstrahować `matchNodeList(array $nodes, TokenStream $stream, int &$offset): ?array`
 
 - Iteruje listę węzłów w kolejności
 - Obsługuje lookahead/lookbehind (naprawia bug w `matchSequence`)
 - Zwraca `array<MatchedSequenceNode|MatchedSequence>` lub `null` przy niepowodzeniu
 
-Wtedy:
+Następnie:
 - `matchSequence` → zamiast własnej pętli woła `matchNodeList($sequence->nodes, ...)`
 - `matchNestedSequence` → wewnętrzna pętla alternatywy zastąpiona przez `matchNodeList($alternativeNodes, ...)`
+
+---
+
+## Co NIE ulega zmianie
+
+- `process()` zachowuje obecny return type (`MatchedRegion|MatchedSequence` — union)
+- `processWithRoot` zachowuje wyjątek przy niezmatchowanym root sequence (root sequence w regionie musi zostać zmatchowany)
+- `processWithoutRoot` zachowuje obecną logikę iteracyjnego skanowania z fallbackiem na "unmatched"
+- `NodeFactory::fromTokenRegion()` — brak zmian (branch `instanceof MatchedSequence` pozostaje)
 
 ---
 
@@ -123,10 +56,6 @@ Wtedy:
 
 | Zmiana | Plik |
 |---|---|
-| Usunąć `processWithRoot()` i `processWithoutRoot()`, scalić w `process()` | `Matcher.php` |
-| `process()` zwraca `MatchedRegion` (nie union) | `Matcher.php` |
-| Wyekstrahować `matchNodeList()` | `Matcher.php` |
+| Wyekstrahować `matchNodeList()` z obsługą lookahead/lookbehind | `Matcher.php` |
 | `matchSequence()` używa `matchNodeList()` (naprawa lookahead/lookbehind) | `Matcher.php` |
 | `matchNestedSequence()` używa `matchNodeList()` | `Matcher.php` |
-| Usunąć branch `instanceof MatchedSequence` w `fromTokenRegion()` | `NodeFactory.php` |
-| Zmiana type-hinta return type `process()` | `Matcher.php` |

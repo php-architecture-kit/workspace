@@ -183,25 +183,11 @@ class Matcher
         $this->currentStack[] = $sequence->name;
         $start = $offset;
 
-        $items = [];
-        foreach ($sequence->nodes as $node) {
-            if ($node instanceof NestedSequence) {
-                $nestedItems = $this->matchNestedSequence($node, $stream, $offset);
-                if ($nestedItems === null) {
-                    $offset = $start;
-                    array_pop($this->currentStack);
-                    return null;
-                }
-                $items = array_merge($items, $nestedItems);
-            } elseif ($node instanceof SequenceNode) {
-                $matchedNode = $this->matchSequenceNode($node, $stream, $offset);
-                if ($matchedNode === null) {
-                    $offset = $start;
-                    array_pop($this->currentStack);
-                    return null;
-                }
-                $items[] = $matchedNode;
-            }
+        $items = $this->matchNodeList($sequence->nodes, $stream, $offset);
+        if ($items === null) {
+            $offset = $start;
+            array_pop($this->currentStack);
+            return null;
         }
 
         array_pop($this->currentStack);
@@ -230,52 +216,9 @@ class Matcher
 
             foreach ($nestedSequence->alternativeSequences as $alternativeNodes) {
                 $alternativeStart = $offset;
-                $alternativeItems = [];
-                $allMatched = true;
 
-                foreach ($alternativeNodes as $node) {
-                    $nodeStart = $offset;
-
-                    if ($node->isLookbehind) {
-                        $offset--;
-                    }
-
-                    if ($node instanceof NestedSequence) {
-                        $items = $this->matchNestedSequence($node, $stream, $offset);
-                        if ($items !== null) {
-                            if ($node->isLookbehind) {
-                                $offset = $nodeStart;
-                                continue;
-                            }
-                            if ($node->isLookahead) {
-                                $offset = $nodeStart;
-                                break;
-                            }
-                            $alternativeItems = array_merge($alternativeItems, $items);
-                        } else {
-                            $allMatched = false;
-                            break;
-                        }
-                    } elseif ($node instanceof SequenceNode) {
-                        $matchedNode = $this->matchSequenceNode($node, $stream, $offset);
-                        if ($matchedNode !== null) {
-                            if ($node->isLookbehind) {
-                                $offset = $nodeStart;
-                                continue;
-                            }
-                            if ($node->isLookahead) {
-                                $offset = $nodeStart;
-                                break;
-                            }
-                            $alternativeItems[] = $matchedNode;
-                        } else {
-                            $allMatched = false;
-                            break;
-                        }
-                    }
-                }
-
-                if ($allMatched) {
+                $alternativeItems = $this->matchNodeList($alternativeNodes, $stream, $offset);
+                if ($alternativeItems !== null) {
                     $allItems = array_merge($allItems, $alternativeItems);
                     $matchedAlternative = true;
                     $count++;
@@ -296,6 +239,57 @@ class Matcher
         }
 
         return $allItems;
+    }
+
+    /**
+     * @param (NestedSequence|SequenceNode)[] $nodes
+     * @return null|array<MatchedSequenceNode|MatchedSequence>
+     */
+    private function matchNodeList(array $nodes, TokenStream $stream, int &$offset): ?array
+    {
+        $items = [];
+
+        foreach ($nodes as $node) {
+            $nodeStart = $offset;
+
+            if ($node->isLookbehind) {
+                $offset--;
+            }
+
+            if ($node instanceof NestedSequence) {
+                $matched = $this->matchNestedSequence($node, $stream, $offset);
+                if ($matched !== null) {
+                    if ($node->isLookbehind) {
+                        $offset = $nodeStart;
+                        continue;
+                    }
+                    if ($node->isLookahead) {
+                        $offset = $nodeStart;
+                        break;
+                    }
+                    $items = array_merge($items, $matched);
+                } else {
+                    return null;
+                }
+            } elseif ($node instanceof SequenceNode) {
+                $matchedNode = $this->matchSequenceNode($node, $stream, $offset);
+                if ($matchedNode !== null) {
+                    if ($node->isLookbehind) {
+                        $offset = $nodeStart;
+                        continue;
+                    }
+                    if ($node->isLookahead) {
+                        $offset = $nodeStart;
+                        break;
+                    }
+                    $items[] = $matchedNode;
+                } else {
+                    return null;
+                }
+            }
+        }
+
+        return $items;
     }
 
     /**
