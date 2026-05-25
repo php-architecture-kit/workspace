@@ -7,6 +7,7 @@ namespace PhpArchitecture\Parser\Presentation\View\ParseTree;
 use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeAttributeInterface;
 use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeInterface;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\GroupAttribute;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\GroupedAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\NodeAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\OptionalAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\RawContentAttribute;
@@ -57,6 +58,17 @@ final class ParseTreeViewFactory
                 meta: $this->safeMeta($node->meta),
                 children: array_map($this->convert(...), $node->nodes),
                 childCount: count($node->nodes),
+            );
+        }
+
+        if ($node instanceof GroupedAttribute) {
+            return new ParseNodeViewData(
+                type: ParseNodeViewData::TYPE_GROUPED_ATTR,
+                name: $node->name,
+                tags: $this->domainTags($node->getAllTags()),
+                meta: $this->safeMeta($node->meta),
+                children: array_map($this->convert(...), $node->attributes),
+                childCount: count($node->attributes),
             );
         }
 

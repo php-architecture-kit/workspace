@@ -38,6 +38,11 @@ class NodeAttribute implements NodeAttributeInterface, MetaInterface
         return $this->name;
     }
 
+    public function withParent(NodeInterface $parent): static
+    {
+        return new static($this->name, $this->node->withParent($parent), $this->meta, $this->tags);
+    }
+
     public function __toString(): string
     {
         return $this->node->__toString();

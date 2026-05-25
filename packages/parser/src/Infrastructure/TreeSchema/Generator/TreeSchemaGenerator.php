@@ -8,6 +8,7 @@ use LogicException;
 use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeAttributeInterface;
 use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeInterface;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\GroupAttribute;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\GroupedAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\NodeAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\OptionalAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\RawContentAttribute;
@@ -93,6 +94,14 @@ final class TreeSchemaGenerator
                 $attribute->getName(),
                 OptionalAttribute::class,
                 $attribute->node !== null ? [$this->processNode($attribute->node)] : [],
+            ),
+            $attribute instanceof GroupedAttribute     => new PropertyTemplate(
+                $attribute->getName(),
+                GroupedAttribute::class,
+                array_values(array_unique(array_map(
+                    fn(NodeAttributeInterface $a) => $a::class,
+                    $attribute->attributes,
+                ))),
             ),
             $attribute instanceof GroupAttribute      => new PropertyTemplate(
                 $attribute->getName(),

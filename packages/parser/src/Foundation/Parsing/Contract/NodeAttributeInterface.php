@@ -11,4 +11,6 @@ interface NodeAttributeInterface extends Stringable
     public const DEFAULT_VALUE_KEY = 'defaultValue';
 
     public function getName(): string;
+
+    public function withParent(NodeInterface $parent): static;
 }

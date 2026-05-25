@@ -10,27 +10,34 @@ use PhpArchitecture\Parser\Foundation\Shared\Meta\MetaInterface;
 use PhpArchitecture\Parser\Foundation\Shared\Meta\MetaTrait;
 use PhpArchitecture\Parser\Foundation\Shared\Tags\TagsTrait;
 
-/**
- * @template T of NodeInterface
- */
-class GroupAttribute implements NodeAttributeInterface, MetaInterface
+class GroupedAttribute implements NodeAttributeInterface, MetaInterface
 {
     use MetaTrait;
     use TagsTrait;
 
+    /** @var NodeAttributeInterface[] */
+    public array $attributes;
+
     /**
-     * @param T[] $nodes
+     * @param NodeAttributeInterface[] $attributes
      * @param array<string,mixed> $meta
      * @param string[] $tags
      */
     public function __construct(
-        public string $name,
-        public array $nodes,
+        public readonly string $name,
+        public readonly NodeInterface $parent,
+        array $attributes = [],
         array $meta = [],
         array $tags = [],
     ) {
+        $this->attributes = $attributes;
         $this->meta = $meta;
         $this->tags = $tags;
+    }
+
+    public function addAttribute(NodeAttributeInterface $attr): void
+    {
+        $this->attributes[] = $attr->withParent($this->parent);
     }
 
     public function getName(): string
@@ -38,26 +45,16 @@ class GroupAttribute implements NodeAttributeInterface, MetaInterface
         return $this->name;
     }
 
-    public function addNode(NodeInterface $node): void
-    {
-        $this->nodes[] = $node;
-    }
-
     public function withParent(NodeInterface $parent): static
     {
-        return new static(
-            $this->name,
-            array_map(static fn(NodeInterface $n) => $n->withParent($parent), $this->nodes),
-            $this->meta,
-            $this->tags,
-        );
+        return new static($this->name, $parent, $this->attributes, $this->meta, $this->tags);
     }
 
     public function __toString(): string
     {
         return implode('', array_map(
-            static fn(NodeInterface $node) => $node->__toString(),
-            $this->nodes,
+            static fn(NodeAttributeInterface $attr) => $attr->__toString(),
+            $this->attributes,
         ));
     }
 }

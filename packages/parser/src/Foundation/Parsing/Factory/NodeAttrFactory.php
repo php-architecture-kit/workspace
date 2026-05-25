@@ -8,6 +8,7 @@ use InvalidArgumentException;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\EventListener\Tokenization\EndRegionEventListener;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\EventListener\Tokenization\StartRegionEventListener;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\GroupAttribute;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\GroupedAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\NodeAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\OptionalAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\RawContentAttribute;
@@ -31,14 +32,16 @@ class NodeAttrFactory implements NodeAttrFactoryInterface
         private ParsingContext $context,
     ) {}
 
-    public function fromToken(Token $token, NodeType $nodeType, NodeInterface $parent): void
+    public function fromToken(Token $token, NodeType $nodeType, NodeInterface|GroupedAttribute $parent): void
     {
         if ($nodeType === NodeType::Skip) {
             return;
         }
 
+        $nodeParent = $parent instanceof GroupedAttribute ? $parent->parent : $parent;
+
         $attribute = match ($nodeType) {
-            NodeType::Node => new NodeAttribute($token->name, $this->context->nodeFactory()->fromToken($token, $parent), $token->meta, $token->tags),
+            NodeType::Node => new NodeAttribute($token->name, $this->context->nodeFactory()->fromToken($token, $nodeParent), $token->meta, $token->tags),
             NodeType::Structure => new StructureAttribute(true, $token->name, $token->raw === '' ? null : $token->raw, $token->meta, $token->tags),
             NodeType::Raw => new RawContentAttribute($token->raw, $token->name, null, $token->meta, $token->tags),
         };
@@ -46,14 +49,16 @@ class NodeAttrFactory implements NodeAttrFactoryInterface
         $parent->addAttribute($attribute);
     }
 
-    public function fromTokenRegion(TokenRegion $region, NodeType $nodeType, NodeInterface $parent): void
+    public function fromTokenRegion(TokenRegion $region, NodeType $nodeType, NodeInterface|GroupedAttribute $parent): void
     {
         if ($nodeType === NodeType::Skip) {
             return;
         }
 
+        $nodeParent = $parent instanceof GroupedAttribute ? $parent->parent : $parent;
+
         $attribute = match ($nodeType) {
-            NodeType::Node => new NodeAttribute($region->name, $this->context->nodeFactory()->fromTokenRegion($region, $parent), $region->meta, $region->tags),
+            NodeType::Node => new NodeAttribute($region->name, $this->context->nodeFactory()->fromTokenRegion($region, $nodeParent), $region->meta, $region->tags),
             NodeType::Structure => new StructureAttribute(true, $region->name, ($content = $region->__toString()) === '' ? null : $content, $region->meta, $region->tags),
             NodeType::Raw => $this->createRawRegionAttribute($region, null),
         };
@@ -61,14 +66,16 @@ class NodeAttrFactory implements NodeAttrFactoryInterface
         $parent->addAttribute($attribute);
     }
 
-    public function fromMatchedRegion(MatchedRegion $region, NodeType $nodeType, NodeInterface $parent): void
+    public function fromMatchedRegion(MatchedRegion $region, NodeType $nodeType, NodeInterface|GroupedAttribute $parent): void
     {
         if ($nodeType === NodeType::Skip) {
             return;
         }
 
+        $nodeParent = $parent instanceof GroupedAttribute ? $parent->parent : $parent;
+
         $attribute = match ($nodeType) {
-            NodeType::Node => new NodeAttribute($region->name, $this->context->nodeFactory()->fromMatchedRegion($region, $parent), $region->meta, $region->tags),
+            NodeType::Node => new NodeAttribute($region->name, $this->context->nodeFactory()->fromMatchedRegion($region, $nodeParent), $region->meta, $region->tags),
             NodeType::Structure => new StructureAttribute(true, $region->name, ($content = $region->__toString()) === '' ? null : $content, $region->meta, $region->tags),
             NodeType::Raw => $this->createRawRegionAttribute($region, null),
         };
@@ -76,14 +83,16 @@ class NodeAttrFactory implements NodeAttrFactoryInterface
         $parent->addAttribute($attribute);
     }
 
-    public function fromMatchedSequence(MatchedSequence $matchedSequence, NodeType $nodeType, NodeInterface $parent): void
+    public function fromMatchedSequence(MatchedSequence $matchedSequence, NodeType $nodeType, NodeInterface|GroupedAttribute $parent): void
     {
         if ($nodeType === NodeType::Skip) {
             return;
         }
 
+        $nodeParent = $parent instanceof GroupedAttribute ? $parent->parent : $parent;
+
         $attribute = match ($nodeType) {
-            NodeType::Node => new NodeAttribute($matchedSequence->name, $this->context->nodeFactory()->fromMatchedSequence($matchedSequence, $parent), $matchedSequence->meta, $matchedSequence->tags),
+            NodeType::Node => new NodeAttribute($matchedSequence->name, $this->context->nodeFactory()->fromMatchedSequence($matchedSequence, $nodeParent), $matchedSequence->meta, $matchedSequence->tags),
             NodeType::Structure => new StructureAttribute(true, $matchedSequence->name, ($content = $matchedSequence->__toString()) === '' ? null : $content, $matchedSequence->meta, $matchedSequence->tags),
             NodeType::Raw => new RawContentAttribute($matchedSequence->__toString(), $matchedSequence->name, null, $matchedSequence->meta, $matchedSequence->tags),
         };
@@ -91,7 +100,7 @@ class NodeAttrFactory implements NodeAttrFactoryInterface
         $parent->addAttribute($attribute);
     }
 
-    public function fromMatchedSequenceNode(MatchedSequenceNode $sequenceNode, NodeType $nodeType, NodeInterface $parent): void
+    public function fromMatchedSequenceNode(MatchedSequenceNode $sequenceNode, NodeType $nodeType, NodeInterface|GroupedAttribute $parent): void
     {
         if ($nodeType === NodeType::Skip) {
             return;
@@ -131,13 +140,15 @@ class NodeAttrFactory implements NodeAttrFactoryInterface
             return;
         }
 
+        $nodeParent = $parent instanceof GroupedAttribute ? $parent->parent : $parent;
+
         if ($sequenceNode->max > 1) {
             $nodes = [];
             foreach ($sequenceNode->items as $item) {
                 $nodes[] = match ($item::class) {
-                    Token::class => $this->context->nodeFactory()->fromToken($item, $parent),
-                    TokenRegion::class => $this->context->nodeFactory()->fromTokenRegion($item, $parent),
-                    MatchedSequence::class => $this->context->nodeFactory()->fromMatchedSequence($item, $parent),
+                    Token::class => $this->context->nodeFactory()->fromToken($item, $nodeParent),
+                    TokenRegion::class => $this->context->nodeFactory()->fromTokenRegion($item, $nodeParent),
+                    MatchedSequence::class => $this->context->nodeFactory()->fromMatchedSequence($item, $nodeParent),
                     default => throw new InvalidArgumentException('Unknown item type'),
                 };
             }
@@ -153,9 +164,9 @@ class NodeAttrFactory implements NodeAttrFactoryInterface
         }
 
         $node = empty($sequenceNode->items) ? null : match ($sequenceNode->items[0]::class) {
-            Token::class => $this->context->nodeFactory()->fromToken($sequenceNode->items[0], $parent),
-            TokenRegion::class => $this->context->nodeFactory()->fromTokenRegion($sequenceNode->items[0], $parent),
-            MatchedSequence::class => $this->context->nodeFactory()->fromMatchedSequence($sequenceNode->items[0], $parent),
+            Token::class => $this->context->nodeFactory()->fromToken($sequenceNode->items[0], $nodeParent),
+            TokenRegion::class => $this->context->nodeFactory()->fromTokenRegion($sequenceNode->items[0], $nodeParent),
+            MatchedSequence::class => $this->context->nodeFactory()->fromMatchedSequence($sequenceNode->items[0], $nodeParent),
             default => throw new InvalidArgumentException(
                 'Unknown item type: `' . $sequenceNode->items[0]::class
                     . '`. Expected Token, TokenRegion or MatchedSequence.',

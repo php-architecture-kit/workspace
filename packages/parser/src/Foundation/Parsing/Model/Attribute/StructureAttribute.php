@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute;
 
 use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeAttributeInterface;
+use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeInterface;
 use PhpArchitecture\Parser\Foundation\Shared\Meta\MetaInterface;
 use PhpArchitecture\Parser\Foundation\Shared\Meta\MetaTrait;
 use PhpArchitecture\Parser\Foundation\Shared\Tags\TagsTrait;
@@ -36,6 +37,11 @@ class StructureAttribute implements NodeAttributeInterface, MetaInterface
     public function getName(): string
     {
         return $this->name;
+    }
+
+    public function withParent(NodeInterface $parent): static
+    {
+        return $this;
     }
 
     public function __toString(): string

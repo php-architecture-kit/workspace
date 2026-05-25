@@ -97,6 +97,15 @@ final class ParseTreeRenderer
                 $meta,
                 $tags,
             ),
+            ParseNodeViewData::TYPE_GROUPED_ATTR => sprintf(
+                "%s%sGroupedAttribute: %s (count: %d)%s%s\n",
+                $indent,
+                $prefix,
+                $node->name,
+                $node->childCount ?? 0,
+                $meta,
+                $tags,
+            ),
             ParseNodeViewData::TYPE_OPTIONAL_ATTR => sprintf(
                 "%s%sOptionalAttribute: %s (%s)%s%s\n",
                 $indent,
@@ -158,7 +167,8 @@ final class ParseTreeRenderer
         if (!empty($node->children)) {
             $key = match ($node->type) {
                 ParseNodeViewData::TYPE_NODE        => 'attributes',
-                ParseNodeViewData::TYPE_GROUP_ATTR  => 'nodes',
+                ParseNodeViewData::TYPE_GROUP_ATTR    => 'nodes',
+                ParseNodeViewData::TYPE_GROUPED_ATTR  => 'attributes',
                 default                             => 'children',
             };
             $data[$key] = array_map($this->nodeToArray(...), $node->children);
