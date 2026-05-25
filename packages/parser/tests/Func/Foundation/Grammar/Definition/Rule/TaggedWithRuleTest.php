@@ -7,7 +7,7 @@ namespace PhpArchitecture\Parser\Tests\Func\Foundation\Grammar\Definition\Rule;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Grammar;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Rule;
 use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeInterface;
-use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\NodeAttribute;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\ChoiceAttribute;
 use PhpArchitecture\Parser\Foundation\Tokenization\Model\Token;
 use PhpArchitecture\Parser\Foundation\Tokenization\Model\TokenRegion;
 use PhpArchitecture\Parser\Tests\Func\Grammar\GrammarTestCase;
@@ -58,10 +58,10 @@ final class TaggedWithRuleTest extends GrammarTestCase
     // --- Parsing result (NodeInterface) ---
 
     #[Test]
-    public function shouldProduceNodeAttributeNamedAfterTag(): void
+    public function shouldProduceChoiceAttributeNamedAfterTag(): void
     {
         // TagToChoiceCompiler replaces Rule::taggedWith('keyword') with Rule::choice('keyword', [...], NodeType::Node).
-        // The resulting MatchedSequenceNode is named 'keyword' and produces a NodeAttribute.
+        // Rule::choice always produces a ChoiceAttribute.
         $grammar = $this->buildGrammar();
 
         $this->assertGrammarParsing(
@@ -72,7 +72,7 @@ final class TaggedWithRuleTest extends GrammarTestCase
                 $attributes = $node->getAttributes();
 
                 $test->assertCount(1, $attributes);
-                $test->assertInstanceOf(NodeAttribute::class, $attributes[0]);
+                $test->assertInstanceOf(ChoiceAttribute::class, $attributes[0]);
                 $test->assertSame('keyword', $attributes[0]->name);
             },
         );

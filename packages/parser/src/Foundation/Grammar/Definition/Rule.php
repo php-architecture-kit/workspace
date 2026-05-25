@@ -19,6 +19,7 @@ use PhpArchitecture\Parser\Foundation\Matching\Event\Contract\MatchingEventListe
 use PhpArchitecture\Parser\Foundation\Tokenization\Event\Contract\TokenizationEventListener;
 use PhpArchitecture\Parser\Foundation\Tokenization\Event\TokenAddedEvent;
 use PhpArchitecture\Parser\Foundation\Tokenization\Event\TokenMatchedEvent;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\ChoiceAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\NodeType;
 use PhpArchitecture\Parser\Foundation\Tokenization\Model\Token;
 use PhpArchitecture\Parser\Foundation\Shared\Tags\TagsTrait;
@@ -196,7 +197,7 @@ class Rule
             RuleType::Choice,
             new SequenceRule(
                 [
-                    new Model\Sequence\SequenceNode($rulesNames, $cardinality, anchorName: $name)
+                    new Model\Sequence\SequenceNode($rulesNames, $cardinality)
                 ],
             ),
             $type,
@@ -204,6 +205,7 @@ class Rule
         ));
 
         $instance->inheritedRuleDefs = $addedRules;
+        $instance->addTag(ChoiceAttribute::TAG);
 
         return $instance;
     }

@@ -88,6 +88,15 @@ final class ParseTreeRenderer
                 $meta,
                 $tags,
             ),
+            ParseNodeViewData::TYPE_CHOICE_ATTR => sprintf(
+                "%s%sChoiceAttribute: %s (choices: %s)%s%s\n",
+                $indent,
+                $prefix,
+                $node->name,
+                $node->content ?? '',
+                $meta,
+                $tags,
+            ),
             ParseNodeViewData::TYPE_GROUP_ATTR => sprintf(
                 "%s%sGroupAttribute: %s (count: %d)%s%s\n",
                 $indent,

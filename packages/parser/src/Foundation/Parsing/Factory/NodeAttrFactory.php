@@ -7,6 +7,7 @@ namespace PhpArchitecture\Parser\Foundation\Parsing\Factory;
 use InvalidArgumentException;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\EventListener\Tokenization\EndRegionEventListener;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\EventListener\Tokenization\StartRegionEventListener;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\ChoiceAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\GroupAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\GroupedAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\NodeAttribute;
@@ -15,12 +16,14 @@ use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\RawContentAttribut
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\RawRegionAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\StructureAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\NodeAttrFactoryInterface;
+use PhpArchitecture\Parser\Foundation\Parsing\Resolver\NodeTypeResolver;
 use PhpArchitecture\Parser\Foundation\Parsing\Contract\ParsingContext;
 use PhpArchitecture\Parser\Foundation\Tokenization\Event\TokenAddedEvent;
 use PhpArchitecture\Parser\Foundation\Tokenization\Event\TokenMatchedEvent;
 use PhpArchitecture\Parser\Foundation\Matching\Model\MatchedRegion;
 use PhpArchitecture\Parser\Foundation\Matching\Model\MatchedSequence;
 use PhpArchitecture\Parser\Foundation\Matching\Model\MatchedSequenceNode;
+use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeAttributeInterface;
 use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeInterface;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\NodeType;
 use PhpArchitecture\Parser\Foundation\Tokenization\Model\Token;
@@ -102,6 +105,37 @@ class NodeAttrFactory implements NodeAttrFactoryInterface
 
     public function fromMatchedSequenceNode(MatchedSequenceNode $sequenceNode, NodeType $nodeType, NodeInterface|GroupedAttribute $parent): void
     {
+        if (
+            count($sequenceNode->items) === 1
+            && $sequenceNode->items[0] instanceof MatchedSequence
+            && $sequenceNode->items[0]->hasTag(ChoiceAttribute::TAG)
+        ) {
+            $nodeParent = $parent instanceof GroupedAttribute ? $parent->parent : $parent;
+            $choiceSeq  = $sequenceNode->items[0];
+
+            $choices = [];
+            $selected = null;
+
+            if (!empty($choiceSeq->items)) {
+                $innerNode = $choiceSeq->items[0];
+                $choices   = explode('|', $innerNode->name);
+
+                $matchedItem = $innerNode->items[0] ?? null;
+                if ($matchedItem !== null) {
+                    $selected = $this->createAttributeForChoiceItem($matchedItem, $nodeParent);
+                }
+            }
+
+            $parent->addAttribute(new ChoiceAttribute(
+                $sequenceNode->name,
+                $choices,
+                $selected,
+                $sequenceNode->meta,
+                $sequenceNode->tags,
+            ));
+            return;
+        }
+
         if ($nodeType === NodeType::Skip) {
             return;
         }
@@ -192,6 +226,31 @@ class NodeAttrFactory implements NodeAttrFactoryInterface
             $sequenceNode->meta,
             $sequenceNode->tags,
         ));
+    }
+
+    private function createAttributeForChoiceItem(
+        Token|TokenRegion|MatchedSequence $item,
+        NodeInterface $parent,
+    ): NodeAttributeInterface {
+        $nodeType = NodeTypeResolver::resolveNodeType($item);
+
+        return match ($item::class) {
+            Token::class => match ($nodeType) {
+                NodeType::Structure => new StructureAttribute(true, $item->name, $item->raw === '' ? null : $item->raw, $item->meta, $item->tags),
+                NodeType::Node      => new NodeAttribute($item->name, $this->context->nodeFactory()->fromToken($item, $parent), $item->meta, $item->tags),
+                default             => new RawContentAttribute($item->raw, $item->name, null, $item->meta, $item->tags),
+            },
+            TokenRegion::class => match ($nodeType) {
+                NodeType::Structure => new StructureAttribute(true, $item->name, ($c = $item->__toString()) === '' ? null : $c, $item->meta, $item->tags),
+                NodeType::Raw       => $this->createRawRegionAttribute($item, null),
+                default             => new NodeAttribute($item->name, $this->context->nodeFactory()->fromTokenRegion($item, $parent), $item->meta, $item->tags),
+            },
+            MatchedSequence::class => match ($nodeType) {
+                NodeType::Structure => new StructureAttribute(true, $item->name, ($c = $item->__toString()) === '' ? null : $c, $item->meta, $item->tags),
+                NodeType::Raw       => new RawContentAttribute($item->__toString(), $item->name, null, $item->meta, $item->tags),
+                default             => new NodeAttribute($item->name, $this->context->nodeFactory()->fromMatchedSequence($item, $parent), $item->meta, $item->tags),
+            },
+        };
     }
 
     private function createRawRegionAttribute(MatchedRegion|TokenRegion $region, ?string $anchorName): RawRegionAttribute

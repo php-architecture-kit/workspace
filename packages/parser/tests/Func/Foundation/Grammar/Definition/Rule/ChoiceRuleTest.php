@@ -7,7 +7,7 @@ namespace PhpArchitecture\Parser\Tests\Func\Foundation\Grammar\Definition\Rule;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Grammar;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Rule;
 use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeInterface;
-use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\NodeAttribute;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\ChoiceAttribute;
 use PhpArchitecture\Parser\Tests\Func\Grammar\GrammarTestCase;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
@@ -65,9 +65,8 @@ final class ChoiceRuleTest extends GrammarTestCase
     // --- Parsing result (NodeInterface) ---
 
     #[Test]
-    public function shouldProduceNodeAttributeForMatchedChoice(): void
+    public function shouldProduceChoiceAttributeForMatchedChoice(): void
     {
-        // Rule::choice defaults to NodeType::Node → NodeAttribute named 'value'
         $grammar = $this->buildGrammar();
 
         $this->assertGrammarParsing(
@@ -78,7 +77,7 @@ final class ChoiceRuleTest extends GrammarTestCase
                 $attributes = $node->getAttributes();
 
                 $test->assertCount(1, $attributes);
-                $test->assertInstanceOf(NodeAttribute::class, $attributes[0]);
+                $test->assertInstanceOf(ChoiceAttribute::class, $attributes[0]);
                 $test->assertSame('value', $attributes[0]->name);
             },
         );

@@ -6,6 +6,7 @@ namespace PhpArchitecture\Parser\Presentation\View\ParseTree;
 
 use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeAttributeInterface;
 use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeInterface;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\ChoiceAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\GroupAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\GroupedAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\NodeAttribute;
@@ -47,6 +48,18 @@ final class ParseTreeViewFactory
                 tags: $this->domainTags($node->getAllTags()),
                 meta: $this->safeMeta($node->meta),
                 children: [$this->convert($node->node)],
+            );
+        }
+
+        if ($node instanceof ChoiceAttribute) {
+            $children = $node->selected !== null ? [$this->convert($node->selected)] : [];
+            return new ParseNodeViewData(
+                type: ParseNodeViewData::TYPE_CHOICE_ATTR,
+                name: $node->name,
+                tags: $this->domainTags($node->getAllTags()),
+                meta: $this->safeMeta($node->meta),
+                children: $children,
+                content: implode('|', $node->choices),
             );
         }
 
@@ -135,7 +148,7 @@ final class ParseTreeViewFactory
     {
         return array_values(array_filter(
             $tags,
-            static fn(string $t) => !str_starts_with($t, 'NodeType.'),
+            static fn(string $t) => !str_starts_with($t, 'NodeType.') && $t !== ChoiceAttribute::TAG,
         ));
     }
 

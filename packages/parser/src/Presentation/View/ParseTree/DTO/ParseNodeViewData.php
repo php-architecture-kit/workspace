@@ -8,6 +8,7 @@ final class ParseNodeViewData
 {
     public const TYPE_NODE              = 'Node';
     public const TYPE_NODE_ATTR         = 'NodeAttribute';
+    public const TYPE_CHOICE_ATTR       = 'ChoiceAttribute';
     public const TYPE_GROUP_ATTR        = 'GroupAttribute';
     public const TYPE_GROUPED_ATTR      = 'GroupedAttribute';
     public const TYPE_OPTIONAL_ATTR     = 'OptionalAttribute';
