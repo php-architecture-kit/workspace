@@ -8,6 +8,6 @@ use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\RawRegionAttribute
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Node;
 
 /**
- * @property RawRegionAttribute $primitive
+ * @property RawRegionAttribute $false|null|true|number|string
  */
 class PrimitiveNode extends Node {}

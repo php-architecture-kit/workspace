@@ -23,9 +23,11 @@ final class PhpClassFileTemplate implements Stringable
 
         foreach ($this->classStmt->docblock->propertyTemplates as $property) {
             $imports[] = $property->attributeClass;
-            foreach ($property->nodeClasses as $nodeClass) {
-                if (!$this->namespaceStmt->isFqcnDirectChild($nodeClass)) {
-                    $imports[] = $nodeClass;
+            foreach ($property->typeRefs as $typeRef) {
+                foreach ($typeRef->allFqcns() as $fqcn) {
+                    if (!$this->namespaceStmt->isFqcnDirectChild($fqcn)) {
+                        $imports[] = $fqcn;
+                    }
                 }
             }
         }

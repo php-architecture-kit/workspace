@@ -77,6 +77,13 @@ final class GenerateTreeSchemaCommand extends Command
         }
 
         $renderer = new TreeSchemaRenderer();
+
+        if ($outputDir !== null && is_dir($outputDir)) {
+            foreach (glob(rtrim($outputDir, '/') . '/*.php') ?: [] as $file) {
+                unlink($file);
+            }
+        }
+
         foreach ($templates as $template) {
             $className = $template->classStmt->className;
             $code      = $renderer->render($template);

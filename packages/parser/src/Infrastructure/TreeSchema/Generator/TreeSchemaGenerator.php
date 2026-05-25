@@ -7,19 +7,18 @@ namespace PhpArchitecture\Parser\Infrastructure\TreeSchema\Generator;
 use LogicException;
 use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeAttributeInterface;
 use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeInterface;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\ChoiceAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\GroupAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\GroupedAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\NodeAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\OptionalAttribute;
-use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\RawContentAttribute;
-use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\RawRegionAttribute;
-use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\StructureAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Node;
 use PhpArchitecture\Parser\Infrastructure\TreeSchema\Renderer\Template\ClassStmtTemplate;
 use PhpArchitecture\Parser\Infrastructure\TreeSchema\Renderer\Template\DocblockTemplate;
 use PhpArchitecture\Parser\Infrastructure\TreeSchema\Renderer\Template\NamespaceStmtTemplate;
 use PhpArchitecture\Parser\Infrastructure\TreeSchema\Renderer\Template\PhpClassFileTemplate;
 use PhpArchitecture\Parser\Infrastructure\TreeSchema\Renderer\Template\PropertyTemplate;
+use PhpArchitecture\Parser\Infrastructure\TreeSchema\Renderer\Template\TypeRef;
 
 final class TreeSchemaGenerator
 {
@@ -81,37 +80,55 @@ final class TreeSchemaGenerator
             );
         }
 
+        return new PropertyTemplate(
+            $attribute->getName(),
+            $attribute::class,
+            $this->buildContainerTypeRefs($attribute),
+        );
+    }
+
+    /** @return TypeRef[] — type params for <...> of this attribute */
+    private function buildContainerTypeRefs(NodeAttributeInterface $attribute): array
+    {
         return match (true) {
-            $attribute instanceof RawRegionAttribute  => new PropertyTemplate($attribute->getName(), RawRegionAttribute::class),
-            $attribute instanceof RawContentAttribute => new PropertyTemplate($attribute->getName(), RawContentAttribute::class),
-            $attribute instanceof StructureAttribute  => new PropertyTemplate($attribute->getName(), StructureAttribute::class),
-            $attribute instanceof NodeAttribute       => new PropertyTemplate(
-                $attribute->getName(),
-                NodeAttribute::class,
-                [$this->processNode($attribute->node)],
-            ),
-            $attribute instanceof OptionalAttribute   => new PropertyTemplate(
-                $attribute->getName(),
-                OptionalAttribute::class,
-                $attribute->node !== null ? [$this->processNode($attribute->node)] : [],
-            ),
-            $attribute instanceof GroupedAttribute     => new PropertyTemplate(
-                $attribute->getName(),
-                GroupedAttribute::class,
-                array_values(array_unique(array_map(
-                    fn(NodeAttributeInterface $a) => $a::class,
+            $attribute instanceof NodeAttribute     => [new TypeRef($this->processNode($attribute->node))],
+            $attribute instanceof OptionalAttribute => $attribute->node !== null
+                ? [new TypeRef($this->processNode($attribute->node))]
+                : [],
+            $attribute instanceof GroupAttribute    => array_values(array_unique(array_map(
+                fn(NodeInterface $n) => new TypeRef($this->processNode($n)),
+                $attribute->nodes,
+            ))),
+            $attribute instanceof ChoiceAttribute   => $attribute->selected !== null
+                ? $this->buildItemTypeRefs($attribute->selected)
+                : [],
+            $attribute instanceof GroupedAttribute  => array_values(array_merge(
+                ...array_map(
+                    fn(NodeAttributeInterface $a) => $this->buildItemTypeRefs($a),
                     $attribute->attributes,
-                ))),
-            ),
-            $attribute instanceof GroupAttribute      => new PropertyTemplate(
-                $attribute->getName(),
-                GroupAttribute::class,
-                array_values(array_unique(array_map(
-                    fn(NodeInterface $n) => $this->processNode($n),
-                    $attribute->nodes,
-                ))),
-            ),
-            default => throw new LogicException('Unknown attribute type: ' . $attribute::class),
+                ) ?: [[]]
+            )),
+            default => [],
+        };
+    }
+
+    /** @return TypeRef[] — TypeRef(s) representing this attribute as an item inside a container */
+    private function buildItemTypeRefs(NodeAttributeInterface $attribute): array
+    {
+        return match (true) {
+            $attribute instanceof NodeAttribute     => [new TypeRef($this->processNode($attribute->node))],
+            $attribute instanceof OptionalAttribute => $attribute->node !== null
+                ? [new TypeRef($this->processNode($attribute->node))]
+                : [],
+            $attribute instanceof GroupAttribute    => array_values(array_unique(array_map(
+                fn(NodeInterface $n) => new TypeRef($this->processNode($n)),
+                $attribute->nodes,
+            ))),
+            $attribute instanceof ChoiceAttribute,
+            $attribute instanceof GroupedAttribute  => [
+                new TypeRef($attribute::class, $this->buildContainerTypeRefs($attribute)),
+            ],
+            default => [new TypeRef($attribute::class)],
         };
     }
 

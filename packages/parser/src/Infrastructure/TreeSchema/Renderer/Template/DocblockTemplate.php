@@ -19,8 +19,8 @@ final class DocblockTemplate implements Stringable
     {
         foreach ($this->propertyTemplates as $existing) {
             if ($existing->name === $incoming->name) {
-                foreach ($incoming->nodeClasses as $class) {
-                    $existing->addNodeClass($class);
+                foreach ($incoming->typeRefs as $typeRef) {
+                    $existing->addTypeRef($typeRef);
                 }
                 return;
             }
