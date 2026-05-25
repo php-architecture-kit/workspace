@@ -122,6 +122,7 @@ class Matcher
                 $matchedSequence = $this->matchSequence($sequence, $stream, $offset);
 
                 if ($matchedSequence !== null) {
+                    $this->context->addMatchedSequence($matchedSequence);
                     $matched = true;
                     break;
                 }

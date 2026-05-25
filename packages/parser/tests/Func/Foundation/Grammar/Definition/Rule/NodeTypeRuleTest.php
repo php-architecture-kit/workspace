@@ -148,6 +148,7 @@ final class NodeTypeRuleTest extends GrammarTestCase
             assertParsingResultValid: function (NodeInterface $node, self $test): void {
                 $test->assertCount(0, $node->getAttributes());
             },
+            affectedByNodeTypeSkip: true,
         );
     }
 
@@ -163,6 +164,7 @@ final class NodeTypeRuleTest extends GrammarTestCase
             assertParsingResultValid: function (NodeInterface $node, self $test): void {
                 $test->assertSame('', (string) $node);
             },
+            affectedByNodeTypeSkip: true,
         );
     }
 }

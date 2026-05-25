@@ -122,11 +122,9 @@ final class SequenceLookaheadLookbehindTopLevelTest extends GrammarTestCase
             string: 'abc',
             grammar: $grammar,
             assertParsingResultValid: function (NodeInterface $node, self $test): void {
-                // 'full' consumed all tokens — MatchedRegion has no unmatched tokens,
-                // so the RawContentAttribute content is empty.
-                // Bug: 'full' fails (sub erroneously consumes 'b'), sub consumes 'ab',
-                // leaving 'c' unmatched → (string) $node === 'c'.
-                $test->assertSame('', (string) $node);
+                // 'full' matched 'abc' and was added to the MatchedRegion output.
+                // Its content propagates via NodeAttribute → (string) $node === 'abc'.
+                $test->assertSame('abc', (string) $node);
             },
             requireBofEof: false,
         );

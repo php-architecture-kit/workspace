@@ -30,6 +30,7 @@ abstract class GrammarTestCase extends TestCase
         ?callable $assertParsingResultValid = null,
         ?callable $assertParsingContextAfterParsingValid = null,
         bool $requireBofEof = true,
+        bool $affectedByNodeTypeSkip = false,
     ): void {
         $grammar->requireBofEof = $requireBofEof;
 
@@ -72,6 +73,7 @@ abstract class GrammarTestCase extends TestCase
             ));
         }
 
+        $this->assertEquals($string, (string) $tokenRegion, "[Tokenization] CRITICAL VIOLATION: The token region content does not match the original input for grammar \"{$grammar->name}\".");
         $this->assertTokenizationResultStage($tokenRegion, $assertTokenizationResultValid);
         $this->assertParsingContextAfterTokenizationStage($context, $assertParsingContextAfterTokenizationValid);
 
@@ -86,6 +88,9 @@ abstract class GrammarTestCase extends TestCase
             ));
         }
 
+        if (!$affectedByNodeTypeSkip) {
+            $this->assertEquals($string, (string) $result, "[Parsing] CRITICAL VIOLATION: The parsed node content does not match the original input for grammar \"{$grammar->name}\".");
+        }
         $this->assertParsingResultStage($result, $assertParsingResultValid);
         $this->assertParsingContextAfterParsingStage($context, $assertParsingContextAfterParsingValid);
     }
