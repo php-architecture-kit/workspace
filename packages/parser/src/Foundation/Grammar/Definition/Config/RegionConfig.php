@@ -37,5 +37,9 @@ class RegionConfig
         // parsing
         public NodeType $nodeType = NodeType::Node,
         public ?Definition $definition = null,
+
+        // meta
+        /** @var string[] */
+        public array $possibleNames = [],
     ) {}
 }

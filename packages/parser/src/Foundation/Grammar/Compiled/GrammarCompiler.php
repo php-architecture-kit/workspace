@@ -252,6 +252,11 @@ class GrammarCompiler
             ? $this->compileDefinition($region->config->definition)
             : null;
 
+        $meta = [];
+        if (!empty($region->config->possibleNames)) {
+            $meta[CompiledRegion::META_POSSIBLE_NAMES] = $region->config->possibleNames;
+        }
+
         return new CompiledRegion(
             $region->name,
             $compiledEventSubscribers,
@@ -259,6 +264,7 @@ class GrammarCompiler
             new SequenceLibrary($sequences, $rootSequence),
             $definition,
             $region->getAllTags(),
+            $meta,
         );
     }
 

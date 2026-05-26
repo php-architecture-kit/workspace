@@ -87,7 +87,8 @@ class Whitespace implements GrammarDefinitionInterface
                 )
                 ->closeWith(Rule::taggedWith("_ws"), true, false)
                 ->setNodeType(NodeType::Raw)
-                ->addTag('ws', 'whitespace', '-'),
+                ->addTag('ws', 'whitespace', '-')
+                ->withPossibleNames('emptyLine', 'trailingWs', 'leadingWs', 'inlineWs'),
         );
 
         return $grammar;

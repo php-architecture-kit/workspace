@@ -178,4 +178,10 @@ trait RegionConfigApi
         $this->config->definition->add(...$definitions);
         return $this;
     }
+
+    public function withPossibleNames(string ...$names): self
+    {
+        $this->config->possibleNames = $names;
+        return $this;
+    }
 }
