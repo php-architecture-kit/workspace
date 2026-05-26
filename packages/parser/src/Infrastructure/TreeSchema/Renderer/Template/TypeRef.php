@@ -3,8 +3,9 @@
 declare(strict_types=1);
 
 namespace PhpArchitecture\Parser\Infrastructure\TreeSchema\Renderer\Template;
+use Stringable;
 
-final class TypeRef implements \Stringable
+final class TypeRef implements Stringable
 {
     /** @param TypeRef[] $params */
     public function __construct(

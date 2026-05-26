@@ -106,7 +106,7 @@ final class TreeSchemaGenerator
                 ...array_map(
                     fn(NodeAttributeInterface $a) => $this->buildItemTypeRefs($a),
                     $attribute->attributes,
-                ) ?: [[]]
+                ) ?: [[]],
             )),
             default => [],
         };

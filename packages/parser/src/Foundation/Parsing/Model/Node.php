@@ -67,6 +67,11 @@ class Node implements NodeInterface, MetaInterface
         return $this->name;
     }
 
+    public function getParent(): null|NodeInterface
+    {
+        return $this->parent?->get();
+    }
+
     public function __get(string $name): NodeAttributeInterface
     {
         foreach ($this->attributes as $attribute) {

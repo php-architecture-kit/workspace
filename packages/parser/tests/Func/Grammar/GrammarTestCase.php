@@ -8,7 +8,13 @@ use PhpArchitecture\Parser\Foundation\Grammar\Compiled\GrammarCompiler;
 use PhpArchitecture\Parser\Foundation\Grammar\Compiled\Model\CompiledGrammar;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Grammar;
 use PhpArchitecture\Parser\Foundation\Parsing\Context\DefaultParsingContext;
+use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeAttributeInterface;
 use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeInterface;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\ChoiceAttribute;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\GroupAttribute;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\GroupedAttribute;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\NodeAttribute;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\OptionalAttribute;
 use PhpArchitecture\Parser\Foundation\Tokenization\Lexer;
 use PhpArchitecture\Parser\Foundation\Tokenization\Model\StringStream;
 use PhpArchitecture\Parser\Foundation\Tokenization\Model\TokenRegion;
@@ -91,6 +97,7 @@ abstract class GrammarTestCase extends TestCase
         if (!$affectedByNodeTypeSkip) {
             $this->assertEquals($string, (string) $result, "[Parsing] CRITICAL VIOLATION: The parsed node content does not match the original input for grammar \"{$grammar->name}\".");
         }
+        $this->assertNodeTreeIsValidRecursive($result, null);
         $this->assertParsingResultStage($result, $assertParsingResultValid);
         $this->assertParsingContextAfterParsingStage($context, $assertParsingContextAfterParsingValid);
     }
@@ -173,6 +180,67 @@ abstract class GrammarTestCase extends TestCase
     {
         if ($assert !== null) {
             $assert($context, $this);
+        }
+    }
+
+    private function assertNodeTreeIsValidRecursive(NodeInterface $result, ?NodeInterface $parent): void
+    {
+        $this->assertSame($parent, $result->getParent(), '[PARSING] Parent mismatch.');
+        $attributes = $result->getAttributes();
+        $this->assertAttributesAreValidRecursive($attributes, $result);
+    }
+
+    /**
+     * @param NodeAttributeInterface[] $attributes
+     */
+    private function assertAttributesAreValidRecursive(array $attributes, NodeInterface $parent): void
+    {
+        foreach ($attributes as $attr) {
+            match ($attr::class) {
+                NodeAttribute::class => $this->assertNodeAttrIsValidRecursive($attr, $parent),
+                OptionalAttribute::class => $this->assertOptionalAttrIsValidRecursive($attr, $parent),
+                GroupAttribute::class => $this->assertGroupAttrIsValidRecursive($attr, $parent),
+                GroupedAttribute::class => $this->assertGroupedAttrIsValidRecursive($attr, $parent),
+                ChoiceAttribute::class => $this->assertChoiceAttrIsValidRecursive($attr, $parent),
+                default => null,
+            };
+        }
+    }
+
+    private function assertNodeAttrIsValidRecursive(NodeAttribute $attr, NodeInterface $parent): void
+    {
+        $node = $attr->node;
+        $this->assertNodeTreeIsValidRecursive($node, $parent);
+    }
+
+    private function assertOptionalAttrIsValidRecursive(OptionalAttribute $attr, NodeInterface $parent): void
+    {
+        $node = $attr->node;
+        if ($node !== null) {
+            $this->assertNodeTreeIsValidRecursive($node, $parent);
+        }
+    }
+
+    private function assertGroupAttrIsValidRecursive(GroupAttribute $attr, NodeInterface $parent): void
+    {
+        $nodes = $attr->nodes;
+        foreach ($nodes as $node) {
+            $this->assertNodeTreeIsValidRecursive($node, $parent);
+        }
+    }
+
+    private function assertGroupedAttrIsValidRecursive(GroupedAttribute $attr, NodeInterface $parent): void
+    {
+        $this->assertSame($parent, $attr->parent, '[PARSING] Parent mismatch between GroupedAttribute and its actual parent.');
+        $attributes = $attr->attributes;
+        $this->assertAttributesAreValidRecursive($attributes, $parent);
+    }
+
+    private function assertChoiceAttrIsValidRecursive(ChoiceAttribute $attr, NodeInterface $parent): void
+    {
+        if ($attr->selected !== null) {
+            $attributes = [$attr->selected];
+            $this->assertAttributesAreValidRecursive($attributes, $parent);
         }
     }
 }
