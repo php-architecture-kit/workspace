@@ -113,31 +113,15 @@ class SequenceNodeEnricher
             return $node;
         }
 
-        // Verify all NodeTypes are the same
-        if (!empty($nodeTypesMap)) {
-            $uniqueNodeTypes = array_unique(array_map(fn(NodeType $nt) => $nt->value, $nodeTypesMap));
-            if (count($uniqueNodeTypes) > 1) {
-                // Build detailed error message
-                $details = [];
-                foreach ($nodeTypesMap as $alt => $nodeType) {
-                    $details[] = "  - '{$alt}' has NodeType: {$nodeType->name}";
-                }
-
-                throw new LogicException(
-                    "Conflicting NodeTypes in sequence '{$sequenceName}' in region '{$region->name}'.\n" .
-                        "SequenceNode with alternatives [" . implode(', ', $node->alternatives) . "] has conflicting NodeTypes:\n" .
-                        implode("\n", $details) . "\n" .
-                        "All alternatives must have the same NodeType, or the SequenceNode must define its own NodeType using /n, /s, or /r suffix.",
-                );
-            }
-        }
-
-        // Add NodeType to tags if found
+        // Add NodeType to tags only when all alternatives agree — mixed types are resolved per-item at runtime
         $tags = $node->tags;
         if (!empty($nodeTypesMap)) {
-            $nodeType = array_values($nodeTypesMap)[0];
-            if (!in_array($nodeType->value, $tags)) {
-                $tags[] = $nodeType->value;
+            $uniqueNodeTypes = array_unique(array_map(fn(NodeType $nt) => $nt->value, $nodeTypesMap));
+            if (count($uniqueNodeTypes) === 1) {
+                $nodeType = array_values($nodeTypesMap)[0];
+                if (!in_array($nodeType->value, $tags)) {
+                    $tags[] = $nodeType->value;
+                }
             }
         }
 

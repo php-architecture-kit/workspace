@@ -1,0 +1,15 @@
+/* inline block comment */
+{
+    /* single-line block */ "key": "value",
+    "multiline": /* inline mid-value */ 42,
+    /**
+     * JavaDoc style block comment
+     * with asterisks on each line
+     */
+    "described": true,
+    /*
+        no asterisks, just indented text
+        second line here
+    */
+    "plain": null
+}

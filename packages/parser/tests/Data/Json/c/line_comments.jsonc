@@ -1,0 +1,7 @@
+// plik z komentarzami liniowymi
+{
+    // klucz string
+    "name": "Alice",
+    "age": 30, // wiek
+    "active": true //
+}

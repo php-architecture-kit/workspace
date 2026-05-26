@@ -1,0 +1,27 @@
+{
+    // string values
+    "firstName": "John",
+    "lastName": "Doe", /* surname */
+
+    // numbers
+    "age": 25,
+    "score": -3.14,
+
+    /* arrays */
+    "tags": [
+        "php", // language
+        "json", // format
+        "parser" // role
+    ],
+
+    /**
+     * nested object example
+     */
+    "address": {
+        "city": "Warsaw", // capital
+        "zip": "00-001"
+    },
+
+    "enabled": true,
+    "data": null // no data
+}
