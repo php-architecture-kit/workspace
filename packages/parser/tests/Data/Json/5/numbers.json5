@@ -1,0 +1,11 @@
+{
+    "hex": 0xFF,
+    "hexLower": 0x1a2b,
+    "leadingDot": .5,
+    "trailingDot": 5.,
+    "positive": +42,
+    "infinity": Infinity,
+    "negativeInfinity": -Infinity,
+    "positiveInfinity": +Infinity,
+    "nan": NaN,
+}

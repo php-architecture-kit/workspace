@@ -1,0 +1,8 @@
+{
+    foo: "bar",
+    _private: true,
+    $dollar: 42,
+    camelCase: "yes",
+    null: "reserved word as key",
+    true: false,
+}

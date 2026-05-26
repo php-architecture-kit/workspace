@@ -8,6 +8,8 @@ use InvalidArgumentException;
 use PhpArchitecture\Parser\Foundation\Grammar\Contract\GrammarDefinitionInterface;
 use PhpArchitecture\Parser\Foundation\Grammar\Contract\GrammarRegistry;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Grammar;
+use PhpArchitecture\Parser\Infrastructure\Grammar\Definition\Json\JsonC;
+use PhpArchitecture\Parser\Infrastructure\Grammar\Definition\Json\Json5;
 use PhpArchitecture\Parser\Infrastructure\Grammar\Definition\Json\JsonRfc8259;
 use PhpArchitecture\Parser\Infrastructure\Grammar\Definition\Technical\Whitespace;
 
@@ -16,12 +18,16 @@ final class InMemoryGrammarRegistry implements GrammarRegistry
     /**
      * Creates a registry pre-loaded with all built-in grammar definitions:
      *  - json       (rfc8259)   — JsonRfc8259
+     *  - json       (c)         — JsonC
+     *  - json       (5)         — Json5
      *  - technical  (whitespace) — Whitespace
      */
     public static function withBuiltIn(): self
     {
         return (new self())->register(
             new JsonRfc8259(),
+            new JsonC(),
+            new Json5(),
             new Whitespace(),
         );
     }

@@ -1,0 +1,35 @@
+// JSON5 mixed test
+{
+    // string types
+    name: 'John',
+    "surname": "Doe",
+
+    /* numbers */
+    age: 25,
+    score: -3.14,
+    hex: 0xFF,
+    leading: .5,
+    trailing: 5.,
+    positive: +1,
+    inf: Infinity,
+    negInf: -Infinity,
+    nan: NaN,
+
+    // arrays with trailing comma
+    tags: [
+        'php',
+        "json",
+        'parser',
+    ],
+
+    /**
+     * nested object
+     */
+    address: {
+        city: 'Warsaw',
+        zip: "00-001",
+    },
+
+    enabled: true,
+    data: null, // trailing comma on last member
+}

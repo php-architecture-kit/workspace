@@ -1,0 +1,8 @@
+{
+    "double": 'single-quoted value',
+    'key': "value",
+    'escaped': 'it\'s fine',
+    'newlines': 'line1\
+line2',
+    'hex': '\x41\x42\x43',
+}

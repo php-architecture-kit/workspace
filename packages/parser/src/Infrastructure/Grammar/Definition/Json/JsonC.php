@@ -43,7 +43,6 @@ class JsonC extends JsonRfc8259
                 ->withRootSequence("lineCommentStart (space|tab)* ?commentContent ?cr newline|eof")
                 ->setNodeType(NodeType::Node)
                 ->addTag("comment", "-"),
-
             Rule::token("blockCommentStart", "/*", type: NodeType::Structure)
                 ->startRegion('blockComment', true)
                 ->add(
