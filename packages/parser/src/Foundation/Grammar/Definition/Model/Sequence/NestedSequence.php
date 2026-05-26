@@ -9,8 +9,6 @@ use PhpArchitecture\Parser\Foundation\Grammar\Definition\Model\Cardinality;
 
 final class NestedSequence
 {
-    public readonly bool $isGroup;
-
     /**
      * @param (NestedSequence|SequenceNode)[][] $alternativeSequences Array of alternative sequences (union)
      * @param string[] $tags
@@ -22,7 +20,6 @@ final class NestedSequence
         public bool $isLookbehind = false,
         public array $tags = [],
     ) {
-        $this->isGroup = in_array('g', $tags);
     }
 
     /**

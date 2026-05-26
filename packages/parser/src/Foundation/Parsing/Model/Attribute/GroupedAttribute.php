@@ -15,6 +15,8 @@ class GroupedAttribute implements NodeAttributeInterface, MetaInterface
     use MetaTrait;
     use TagsTrait;
 
+    public const TAG = 'GroupedAttribute';
+
     /** @var NodeAttributeInterface[] */
     public array $attributes;
 

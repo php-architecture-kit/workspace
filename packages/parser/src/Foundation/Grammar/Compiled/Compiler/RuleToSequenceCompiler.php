@@ -12,6 +12,7 @@ use PhpArchitecture\Parser\Foundation\Grammar\Definition\Rule;
 use PhpArchitecture\Parser\Foundation\Matching\Model\NestedSequence as CompiledNestedSequence;
 use PhpArchitecture\Parser\Foundation\Matching\Model\SequenceNode as CompiledSequenceNode;
 use PhpArchitecture\Parser\Foundation\Matching\Model\Sequence as CompiledSequence;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\GroupedAttribute;
 
 class RuleToSequenceCompiler implements RuleCompilerInterface
 {
@@ -67,7 +68,7 @@ class RuleToSequenceCompiler implements RuleCompilerInterface
 
     public function compileNestedSequence(NestedSequence $definition, bool $inGroup = false): CompiledNestedSequence
     {
-        $childInGroup = $definition->isGroup || $inGroup;
+        $childInGroup = in_array('g', $definition->tags) || $inGroup;
 
         return new CompiledNestedSequence(
             array_map(
@@ -77,7 +78,7 @@ class RuleToSequenceCompiler implements RuleCompilerInterface
                  */
                 fn(array $alternatives): array => array_map(
                     fn(NestedSequence|SequenceNode $def): CompiledNestedSequence|CompiledSequenceNode => $def instanceof NestedSequence
-                        ? $this->compileNestedSequence($def, $def->isGroup ? false : $childInGroup)
+                        ? $this->compileNestedSequence($def, in_array('g', $def->tags) ? false : $childInGroup)
                         : $this->compileSequenceNode($def, $childInGroup),
                     $alternatives,
                 ),
@@ -87,13 +88,19 @@ class RuleToSequenceCompiler implements RuleCompilerInterface
             $definition->cardinality->max(),
             $definition->isLookahead,
             $definition->isLookbehind,
-            $definition->isGroup,
             $definition->tags,
         );
     }
 
     public function compileSequenceNode(SequenceNode $definition, bool $inGroup = false): CompiledSequenceNode
     {
+        $tags = $definition->nodeType
+            ? array_merge($definition->tags, [$definition->nodeType->value])
+            : $definition->tags;
+        if ($inGroup) {
+            $tags[] = GroupedAttribute::TAG;
+        }
+
         return new CompiledSequenceNode(
             $definition->alternatives,
             $definition->cardinality->min(),
@@ -102,9 +109,8 @@ class RuleToSequenceCompiler implements RuleCompilerInterface
             $definition->isLookbehind,
             $definition->anchorName,
             [],
-            $definition->nodeType ? array_merge($definition->tags, [$definition->nodeType->value]) : $definition->tags,
+            $tags,
             $definition->isNegation,
-            $inGroup,
         );
     }
 }

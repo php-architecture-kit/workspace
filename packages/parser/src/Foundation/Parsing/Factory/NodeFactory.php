@@ -140,7 +140,7 @@ class NodeFactory implements NodeFactoryInterface
         $groupedAttr = null;
 
         foreach ($items as $item) {
-            if (!$item->inGroup) {
+            if (!$item->hasTag(GroupedAttribute::TAG)) {
                 $groupedAttr = null;
                 $nodeType = NodeTypeResolver::resolveNodeType($item);
                 $this->context->nodeAttrFactory()->fromMatchedSequenceNode($item, $nodeType, $sequenceBasedNode);

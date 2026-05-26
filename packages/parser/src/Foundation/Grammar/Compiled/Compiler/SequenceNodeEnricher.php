@@ -85,7 +85,6 @@ class SequenceNodeEnricher
             $nested->max,
             $nested->isLookahead,
             $nested->isLookbehind,
-            $nested->isGroup,
             [],
             $nested->tags,
         );
@@ -152,7 +151,6 @@ class SequenceNodeEnricher
             $node->meta,
             $tags,
             $node->isNegation,
-            $node->inGroup,
         );
     }
 

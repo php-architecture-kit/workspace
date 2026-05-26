@@ -24,7 +24,6 @@ final class NestedSequence implements MetaInterface
         public int $max,
         public bool $isLookahead = false,
         public bool $isLookbehind = false,
-        public bool $isGroup = false,
         array $meta = [],
         array $tags = [],
     ) {

@@ -28,7 +28,6 @@ class MatchedSequenceNode implements MetaInterface, Stringable
         public private(set) int $max,
         array $meta,
         array $tags,
-        public bool $inGroup = false,
     ) {
         $this->meta = $meta;
         $this->tags = $tags;
