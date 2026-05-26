@@ -36,7 +36,7 @@ class JsonC extends JsonRfc8259
                     Rule::token("space", " "),
                     Rule::token("tab", "\t"),
                     Rule::token("cr", "\r"),
-                    Rule::expr("commentContent", "[^\r\n]+"),
+                    Rule::expr("commentContent", "[^\r\n\x{2028}\x{2029}]+"),
                     Rule::token("newline", "\n")->closeRegion(true, true, false),
                     Rule::technical("eof")->closeRegion(true, true, false),
                 )

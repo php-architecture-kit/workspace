@@ -23,13 +23,14 @@ class Json5 extends JsonC
                 ->startRegion("singleQuotedString", true)
                 ->add(
                     Rule::expr("escapeHex", "\\\\x[0-9a-fA-F]{2}")->priority(2),
+                    Rule::expr("escapeUnicode", "\\\\u[0-9a-fA-F]{4}")->priority(2),
                     Rule::expr("escapeChar", "\\\\[bfnrtv0\\\\\"/']")->priority(1),
-                    Rule::expr("lineContinuation", "\\\\\n")->priority(1),
+                    Rule::expr("lineContinuation", "\\\\(\n|\r\n?|\x{2028}|\x{2029})")->priority(1),
                     Rule::expr("unescaped", "[^\\x00-\\x1F\\x27\\x5C]+"),
                 )
                 ->setNodeType(NodeType::Raw)
                 ->closeWith(Rule::token("singleQuote", "'", type: NodeType::Structure)),
-            Rule::expr("identifierKey", "[a-zA-Z_\$][a-zA-Z0-9_\$]*", type: NodeType::Raw),
+            Rule::expr("identifierKey", "[\p{L}_\$][\p{L}\p{N}_\$]*", type: NodeType::Raw),
             Rule::expr("signedInfinity", "[+\\-]?Infinity", caseSensitive: true)
                 ->priority(1)
                 ->addTag("value"),
