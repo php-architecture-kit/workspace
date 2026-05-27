@@ -7,6 +7,7 @@ namespace PhpArchitecture\Parser\Infrastructure\Grammar\Definition\Technical;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\EventListener\Tokenization\StartRegionEventListener;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\EventSubscriber;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Grammar;
+use PhpArchitecture\Parser\Foundation\Grammar\Definition\GrammarOrigin;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Rule;
 use PhpArchitecture\Parser\Foundation\Grammar\Contract\GrammarDefinitionInterface;
 use PhpArchitecture\Parser\Foundation\Tokenization\Contract\TokenizationContext;
@@ -90,6 +91,8 @@ class Whitespace implements GrammarDefinitionInterface
                 ->addTag('ws', 'whitespace', '-')
                 ->withPossibleNames('emptyLine', 'trailingWs', 'leadingWs', 'inlineWs'),
         );
+
+        $grammar->stampOrigin(new GrammarOrigin(self::FORMAT, self::VARIANT));
 
         return $grammar;
     }

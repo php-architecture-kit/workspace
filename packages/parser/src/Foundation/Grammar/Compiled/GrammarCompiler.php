@@ -254,7 +254,7 @@ class GrammarCompiler
             ? $this->compileDefinition($region->config->definition)
             : null;
 
-        $meta = [];
+        $meta = $region->getMetaAll();
         if (!empty($region->config->possibleNames)) {
             $meta[CompiledRegion::META_POSSIBLE_NAMES] = $region->config->possibleNames;
         }

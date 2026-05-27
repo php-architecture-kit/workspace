@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace PhpArchitecture\Parser\Infrastructure\Grammar\Definition\Math;
 
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Grammar;
+use PhpArchitecture\Parser\Foundation\Grammar\Definition\GrammarOrigin;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Region;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Rule;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\NodeType;
@@ -47,6 +48,8 @@ class MathExpression extends Whitespace
 
         $grammar->global->add($expression);
         $grammar->setRootRegion($expression);
+
+        $grammar->stampOrigin(new GrammarOrigin(self::FORMAT, self::VARIANT));
 
         return $grammar;
     }

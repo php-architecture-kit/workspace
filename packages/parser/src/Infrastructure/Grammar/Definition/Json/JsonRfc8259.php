@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace PhpArchitecture\Parser\Infrastructure\Grammar\Definition\Json;
 
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Grammar;
+use PhpArchitecture\Parser\Foundation\Grammar\Definition\GrammarOrigin;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Region;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Rule;
 use PhpArchitecture\Parser\Infrastructure\Grammar\Definition\Technical\Whitespace;
@@ -92,6 +93,8 @@ class JsonRfc8259 extends Whitespace
         );
 
         $grammar->setRootRegion($jsonText);
+
+        $grammar->stampOrigin(new GrammarOrigin(self::FORMAT, self::VARIANT));
 
         return $grammar;
     }

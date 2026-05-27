@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace PhpArchitecture\Parser\Infrastructure\Grammar\Definition\Json;
 
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Grammar;
+use PhpArchitecture\Parser\Foundation\Grammar\Definition\GrammarOrigin;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Rule;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\NodeType;
 
@@ -57,6 +58,8 @@ class JsonC extends JsonRfc8259
                 ->setNodeType(NodeType::Node)
                 ->addTag("comment", "-"),
         );
+
+        $grammar->stampOrigin(new GrammarOrigin(self::FORMAT, self::VARIANT));
 
         return $grammar;
     }

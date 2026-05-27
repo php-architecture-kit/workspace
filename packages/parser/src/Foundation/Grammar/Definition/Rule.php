@@ -23,12 +23,16 @@ use PhpArchitecture\Parser\Foundation\Tokenization\Event\TokenMatchedEvent;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\ChoiceAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\NodeType;
 use PhpArchitecture\Parser\Foundation\Tokenization\Model\Token;
+use PhpArchitecture\Parser\Foundation\Shared\Meta\MetaTrait;
 use PhpArchitecture\Parser\Foundation\Shared\Tags\TagsTrait;
 use LogicException;
 
 class Rule
 {
+    use MetaTrait;
     use TagsTrait;
+
+    public const META_ORIGIN = 'grammar.origin';
 
     /** @var EventSubscriber[] */
     public private(set) array $eventSubscribers = [];

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace PhpArchitecture\Parser\Infrastructure\Grammar\Definition\Json;
 
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Grammar;
+use PhpArchitecture\Parser\Foundation\Grammar\Definition\GrammarOrigin;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Rule;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\NodeType;
 
@@ -75,6 +76,11 @@ class Json5 extends JsonC
 
         $regions['array']->withRootSequence(
             "beginArray -* ?(value[item] (-* comma -* value[item])* -* ?comma)/g -* endArray",
+        );
+
+        $grammar->stampOrigin(
+            new GrammarOrigin(self::FORMAT, self::VARIANT),
+            forceRegions: ['number', 'object', 'array'],
         );
 
         return $grammar;

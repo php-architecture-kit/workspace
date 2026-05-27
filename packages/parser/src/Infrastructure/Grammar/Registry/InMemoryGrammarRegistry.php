@@ -8,6 +8,8 @@ use InvalidArgumentException;
 use PhpArchitecture\Parser\Foundation\Grammar\Contract\GrammarDefinitionInterface;
 use PhpArchitecture\Parser\Foundation\Grammar\Contract\GrammarRegistry;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Grammar;
+use PhpArchitecture\Parser\Infrastructure\Grammar\Definition\Env\EnvDotenv;
+use PhpArchitecture\Parser\Infrastructure\Grammar\Definition\Env\EnvEnvironment;
 use PhpArchitecture\Parser\Infrastructure\Grammar\Definition\Json\JsonC;
 use PhpArchitecture\Parser\Infrastructure\Grammar\Definition\Json\Json5;
 use PhpArchitecture\Parser\Infrastructure\Grammar\Definition\Json\JsonRfc8259;
@@ -17,10 +19,12 @@ final class InMemoryGrammarRegistry implements GrammarRegistry
 {
     /**
      * Creates a registry pre-loaded with all built-in grammar definitions:
-     *  - json       (rfc8259)   — JsonRfc8259
-     *  - json       (c)         — JsonC
-     *  - json       (5)         — Json5
+     *  - json       (rfc8259)    — JsonRfc8259
+     *  - json       (c)          — JsonC
+     *  - json       (5)          — Json5
      *  - technical  (whitespace) — Whitespace
+     *  - env        (environment) — EnvEnvironment
+     *  - env        (dotenv)      — EnvDotenv
      */
     public static function withBuiltIn(): self
     {
@@ -29,6 +33,8 @@ final class InMemoryGrammarRegistry implements GrammarRegistry
             new JsonC(),
             new Json5(),
             new Whitespace(),
+            new EnvEnvironment(),
+            new EnvDotenv(),
         );
     }
 

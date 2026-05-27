@@ -20,6 +20,10 @@ class Region
     use MetaTrait;
     use TagsTrait;
 
+    public const META_ORIGIN = 'grammar.origin';
+    public const META_REMOVED_RULES = 'grammar.removed_rules';
+    public const META_REMOVED_REGIONS = 'grammar.removed_regions';
+
     public const NONE = 0;
     public const RULES = 1;
     public const REGIONS = 2;
@@ -141,6 +145,30 @@ class Region
         }
 
         $this->rules[$rule->name] = $rule;
+
+        return $this;
+    }
+
+    public function removeRule(string $name, ?GrammarOrigin $removedBy = null): self
+    {
+        unset($this->rules[$name]);
+        if ($removedBy !== null) {
+            $removed = $this->getMeta(self::META_REMOVED_RULES, []);
+            $removed[$name] = $removedBy;
+            $this->setMeta(self::META_REMOVED_RULES, $removed);
+        }
+
+        return $this;
+    }
+
+    public function removeRegion(string $name, ?GrammarOrigin $removedBy = null): self
+    {
+        unset($this->regions[$name]);
+        if ($removedBy !== null) {
+            $removed = $this->getMeta(self::META_REMOVED_REGIONS, []);
+            $removed[$name] = $removedBy;
+            $this->setMeta(self::META_REMOVED_REGIONS, $removed);
+        }
 
         return $this;
     }

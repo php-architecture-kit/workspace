@@ -47,4 +47,29 @@ class Grammar
 
         $this->rootRegion = $region;
     }
+
+    /**
+     * Stamps origin on all unstamped rules and regions. Already-stamped items are skipped unless
+     * $overwriteExisting is true. Pass region names in $forceRegions to force-update the origin
+     * on regions that were modified (but not replaced) by this grammar level — their existing rules
+     * keep their original origin, only the region wrapper itself is re-stamped.
+     *
+     * @param string[] $forceRegions
+     */
+    public function stampOrigin(GrammarOrigin $origin, bool $overwriteExisting = false, array $forceRegions = []): self
+    {
+        foreach ($this->getAllRegions() as $region) {
+            $forceThisRegion = $overwriteExisting || in_array($region->name, $forceRegions, true);
+            if ($forceThisRegion || !$region->hasMeta(Region::META_ORIGIN)) {
+                $region->setMeta(Region::META_ORIGIN, $origin);
+            }
+            foreach ($region->rules as $rule) {
+                if ($overwriteExisting || !$rule->hasMeta(Rule::META_ORIGIN)) {
+                    $rule->setMeta(Rule::META_ORIGIN, $origin);
+                }
+            }
+        }
+
+        return $this;
+    }
 }
