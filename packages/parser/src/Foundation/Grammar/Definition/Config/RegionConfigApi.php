@@ -184,4 +184,16 @@ trait RegionConfigApi
         $this->config->possibleNames = $names;
         return $this;
     }
+
+    public function reParsedByPratt(string $groupedRegionName): self
+    {
+        $this->config->prattGroupedRegionName = $groupedRegionName;
+        return $this;
+    }
+
+    public function prattAtom(): self
+    {
+        $this->config->isPrattAtom = true;
+        return $this;
+    }
 }

@@ -11,6 +11,7 @@ use PhpArchitecture\Parser\Foundation\Grammar\Compiled\Compiler\InnerGrammarEven
 use PhpArchitecture\Parser\Foundation\Grammar\Compiled\Compiler\InnerGrammarInheritanceCompiler;
 use PhpArchitecture\Parser\Foundation\Grammar\Compiled\Compiler\InRuleDeclaredEventSubscribersCompiler;
 use PhpArchitecture\Parser\Foundation\Grammar\Compiled\Compiler\NodeTypeToTagCompiler;
+use PhpArchitecture\Parser\Foundation\Grammar\Compiled\Compiler\PrattEventListenerCompiler;
 use PhpArchitecture\Parser\Foundation\Grammar\Compiled\Compiler\RegionInheritanceCompiler;
 use PhpArchitecture\Parser\Foundation\Grammar\Compiled\Compiler\RegionOpenerCloserCompiler;
 use PhpArchitecture\Parser\Foundation\Grammar\Compiled\Compiler\RegionPrecompilerInterface;
@@ -70,6 +71,7 @@ class GrammarCompiler
         $this->grammarCompilers = [
             new RegionOpenerCloserCompiler(),
             $regionInheritanceCompiler,
+            new PrattEventListenerCompiler(),
             new TaggedRuleBasedEventSubscribersCompiler(),
             new TagToChoiceCompiler(),
         ];

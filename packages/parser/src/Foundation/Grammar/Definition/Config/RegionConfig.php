@@ -41,5 +41,9 @@ class RegionConfig
         // meta
         /** @var string[] */
         public array $possibleNames = [],
+
+        // pratt
+        public ?string $prattGroupedRegionName = null,
+        public bool $isPrattAtom = false,
     ) {}
 }

@@ -15,6 +15,7 @@ use PhpArchitecture\Parser\Foundation\Grammar\Definition\Model\RuleType;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Model\Sequence\SequenceRule;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Model\Technical\TaggedRule;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Model\Technical\TechnicalTokenRule;
+use PhpArchitecture\Parser\Foundation\Grammar\Definition\Pratt\PrattRoleDefinition;
 use PhpArchitecture\Parser\Foundation\Matching\Event\Contract\MatchingEventListener;
 use PhpArchitecture\Parser\Foundation\Tokenization\Event\Contract\TokenizationEventListener;
 use PhpArchitecture\Parser\Foundation\Tokenization\Event\TokenAddedEvent;
@@ -36,6 +37,7 @@ class Rule
     public private(set) array $inheritedRuleDefs = [];
     public private(set) int $priority = 0;
     public private(set) ?Definition $astDefinition = null;
+    public private(set) ?PrattRoleDefinition $prattRole = null;
 
     /**
      * @param string[] $tags
@@ -283,6 +285,18 @@ class Rule
         }
 
         $this->astDefinition->add(...$definitions);
+        return $this;
+    }
+
+    public function prattAtom(): self
+    {
+        $this->prattRole = PrattRoleDefinition::atom();
+        return $this;
+    }
+
+    public function prattInfix(int $bindingPower, bool $rightAssociative = false): self
+    {
+        $this->prattRole = PrattRoleDefinition::infix($bindingPower, $rightAssociative);
         return $this;
     }
 }
