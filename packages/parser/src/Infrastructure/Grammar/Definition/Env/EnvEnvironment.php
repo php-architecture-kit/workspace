@@ -6,6 +6,7 @@ namespace PhpArchitecture\Parser\Infrastructure\Grammar\Definition\Env;
 
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\EventSubscriber;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Grammar;
+use PhpArchitecture\Parser\Foundation\Grammar\Definition\GrammarOrigin;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Rule;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\NodeType;
 use PhpArchitecture\Parser\Foundation\Tokenization\Contract\TokenizationContext;
@@ -79,6 +80,8 @@ class EnvEnvironment extends Whitespace
                 )
                 ->setNodeType(NodeType::Node),
         );
+
+        $grammar->stampOrigin(new GrammarOrigin(self::FORMAT, self::VARIANT), false);
 
         return $grammar;
     }

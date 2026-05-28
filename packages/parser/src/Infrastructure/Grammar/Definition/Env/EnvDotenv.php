@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace PhpArchitecture\Parser\Infrastructure\Grammar\Definition\Env;
 
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Grammar;
+use PhpArchitecture\Parser\Foundation\Grammar\Definition\GrammarOrigin;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Rule;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\NodeType;
 
@@ -32,7 +33,6 @@ class EnvDotenv extends EnvEnvironment
                 ->add(
                     Rule::expr("singleQuotedContent", "[^']+"),
                 )
-                ->setNodeType(NodeType::Raw)
                 ->closeWith(Rule::token("singleQuote", "'", type: NodeType::Structure)),
             Rule::token("doubleQuote", '"', type: NodeType::Structure)
                 ->startRegion('doubleQuotedValue', true)
@@ -43,15 +43,16 @@ class EnvDotenv extends EnvEnvironment
                     Rule::expr("bracedExpansion", '\\$\\{[a-zA-Z_][a-zA-Z0-9_]*(?::?[-+?=][^}]*)?\\}'),
                     Rule::expr("doubleQuotedContent", '[^"\\\\$\n]+'),
                 )
-                ->setNodeType(NodeType::Raw)
                 ->closeWith(Rule::token("doubleQuote", '"', type: NodeType::Structure)),
         );
 
         $regions['assignment']->withRootSequence(
             "identifier (space|tab)* equals (space|tab)* "
-            . "(singleQuotedValue|doubleQuotedValue|simpleExpansion|bracedExpansion|unquotedText|equals|space|tab)* "
-            . "newline|eof",
+                . "(singleQuotedValue|doubleQuotedValue|simpleExpansion|bracedExpansion|unquotedText|equals|space|tab)* "
+                . "newline|eof",
         );
+
+        $grammar->stampOrigin(new GrammarOrigin(self::FORMAT, self::VARIANT), false, ['assignment']);
 
         return $grammar;
     }

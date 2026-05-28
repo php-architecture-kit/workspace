@@ -53,6 +53,7 @@ class Whitespace implements GrammarDefinitionInterface
 
                             $isLastTokenNewLine = $lastToken?->name === 'newline' || $lastToken?->name === 'eof';
                             $isStartedByNewLine = $startedBy?->name === 'newline';
+                            $isStartedByBof = $startedBy?->name === 'bof';
                             $isTriggerTokenIncluded = $startedBy === $firstToken;
 
                             $currentRegionPlacementInParent = $context->getCurrentRegion()->getMeta("parentRegion")?->stream->lastOffset();
@@ -70,6 +71,8 @@ class Whitespace implements GrammarDefinitionInterface
 
                             if ($isLastTokenNewLine) {
                                 if ($isStartedByNewLine && !$isTriggerTokenIncluded) {
+                                    $event->region->rename('emptyLine');
+                                } elseif ($isStartedByBof) {
                                     $event->region->rename('emptyLine');
                                 } else {
                                     $event->region->rename('trailingWs');

@@ -61,7 +61,7 @@ class DefaultParsingContext implements ParsingContext
             return null;
         }
 
-        return new DefaultMatchingContext($region->name, $compiledRegion->sequenceLibrary);
+        return new DefaultMatchingContext($region->name, $compiledRegion->sequenceLibrary, $compiledRegion->tags, $compiledRegion->meta);
     }
 
     public function tokenizationContext(): TokenizationContext

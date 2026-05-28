@@ -25,11 +25,17 @@ class DefaultMatchingContext implements MatchingContext
     private MatchingEventDispatcher $dispatcher;
     private MatchedRegion $output;
 
+    /**
+     * @param string[] $tags
+     * @param array<string,mixed> $meta
+     */
     public function __construct(
         private readonly string $regionName,
         private readonly SequenceLibrary $sequenceLibrary,
+        array $tags = [],
+        array $meta = [],
     ) {
-        $this->output = new MatchedRegion($this->regionName, [], [], []);
+        $this->output = new MatchedRegion($this->regionName, [], $meta, $tags);
         $this->dispatcher = new MatchingEventDispatcher($this);
     }
 
