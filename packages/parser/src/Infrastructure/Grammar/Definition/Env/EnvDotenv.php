@@ -19,38 +19,34 @@ class EnvDotenv extends EnvEnvironment
         $grammar = parent::grammar();
         $regions = $grammar->getAllRegions();
 
-        $regions['assignment']->addRule(
-            Rule::expr("bracedExpansion", "\\$\\{[a-zA-Z_][a-zA-Z0-9_]*(?::?[-+?=][^}]*)?\\}"),
-        );
-
-        $regions['assignment']->addRule(
-            Rule::expr("unquotedText", "[^\n$\t ='\"]+"),
-        );
-
         $regions['assignment']->add(
             Rule::token("singleQuote", "'", type: NodeType::Structure)
+                ->priority(1)
                 ->startRegion('singleQuotedValue', true)
                 ->add(
                     Rule::expr("singleQuotedContent", "[^']+"),
+                    Rule::token("singleQuote", "'", type: NodeType::Structure)->priority(1)->closeRegion(true, false, false),
                 )
-                ->closeWith(Rule::token("singleQuote", "'", type: NodeType::Structure)),
+                ->withRootSequence("singleQuote ?singleQuotedContent singleQuote")
+                ->addTag("value")
+                ->setNodeType(NodeType::Raw),
             Rule::token("doubleQuote", '"', type: NodeType::Structure)
+                ->priority(1)
                 ->startRegion('doubleQuotedValue', true)
                 ->add(
                     Rule::expr("escapeChar", '\\\\[nrbt"\\\\$]')->priority(1),
-                    Rule::expr("lineContinuation", "\\\\\n")->priority(1),
+                    Rule::token("lineContinuation", "\\\n")->priority(1),
                     Rule::expr("simpleExpansion", '\\$[a-zA-Z_][a-zA-Z0-9_]*'),
                     Rule::expr("bracedExpansion", '\\$\\{[a-zA-Z_][a-zA-Z0-9_]*(?::?[-+?=][^}]*)?\\}'),
-                    Rule::expr("doubleQuotedContent", '[^"\\\\$\n]+'),
+                    Rule::expr("doubleQuotedContent", "[^\"\\\\$\n]+")->priority(0),
+                    Rule::token("doubleQuote", '"', type: NodeType::Structure)->priority(1)->closeRegion(true, false, false),
                 )
-                ->closeWith(Rule::token("doubleQuote", '"', type: NodeType::Structure)),
+                ->withRootSequence('doubleQuote (escapeChar|lineContinuation|simpleExpansion|bracedExpansion|doubleQuotedContent)* doubleQuote')
+                ->addTag("value")
+                ->setNodeType(NodeType::Node),
         );
 
-        $regions['assignment']->withRootSequence(
-            "identifier (space|tab)* equals (space|tab)* "
-                . "(singleQuotedValue|doubleQuotedValue|simpleExpansion|bracedExpansion|unquotedText|equals|space|tab)* "
-                . "newline|eof",
-        );
+        $regions['assignment']->withRootSequence("string[identifier] (space|tab)* assign (space|tab)* (singleQuotedValue|doubleQuotedValue|simpleExpansion|bracedExpansion|unquotedText|string|space|tab)* newline|eof");
 
         $grammar->stampOrigin(new GrammarOrigin(self::FORMAT, self::VARIANT), false, ['assignment']);
 

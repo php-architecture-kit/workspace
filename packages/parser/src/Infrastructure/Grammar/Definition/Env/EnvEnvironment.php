@@ -23,13 +23,39 @@ class EnvEnvironment extends Whitespace
     {
         $grammar = parent::grammar();
 
+        $simpleExpansion = Rule::token("dollar", "$")
+            ->startRegion("simpleExpansion", true)
+            ->add(
+                Rule::expr("string", "[a-zA-Z_][a-zA-Z0-9_]*")->closeRegion(true, true, false),
+            )
+            ->withRootSequence("dollar string[varRef]")
+            ->addTag("value")
+            ->setNodeType(NodeType::Node)
+            ->prattAtom();
+
+        $bracedExpansion = Rule::token("dollarBrace", "\${", type: NodeType::Structure)
+            ->priority(1)
+            ->startRegion("bracedExpansion", true)
+            ->reParsedByPratt("envExpression")
+            ->prattAtom()
+            ->add(
+                Rule::expr("string", "[a-zA-Z_][a-zA-Z0-9_]*")->prattAtom(),
+                Rule::expr("unquotedText", "[^\n\$\t }:#=]+")->prattAtom()->addTag("value"),
+                Rule::token("space", " "),
+                Rule::token("tab", "\t"),
+                Rule::token("colonMinus", ":-", type: NodeType::Structure)->prattInfix(10),
+                Rule::token("colonPlus", ":+", type: NodeType::Structure)->prattInfix(10),
+                Rule::token("colonQuestion", ":?", type: NodeType::Structure)->prattInfix(10),
+                Rule::token("colonAssign", ":=", type: NodeType::Structure)->prattInfix(10),
+                Rule::token("closeBrace", "}", type: NodeType::Structure)->closeRegion(true, true, false),
+            )
+            ->addTag("value")
+            ->setNodeType(NodeType::Node);
+
         $grammar->global->add(
             Rule::token("hash", "#", type: NodeType::Structure)
                 ->startRegion('lineComment', true)
                 ->add(
-                    Rule::token("space", " "),
-                    Rule::token("tab", "\t"),
-                    Rule::token("cr", "\r"),
                     Rule::expr("commentContent", "[^\r\n]+"),
                     Rule::token("newline", "\n")->closeRegion(true, true, false),
                     Rule::technical("eof")->closeRegion(true, true, false),
@@ -61,23 +87,19 @@ class EnvEnvironment extends Whitespace
                 ->setNodeType(NodeType::Node)
                 ->addTag("comment", "-")
                 ->withPossibleNames('lineComment', 'blockComment'),
-            Rule::expr("identifier", "[a-zA-Z_][a-zA-Z0-9_]*")
+            Rule::expr("string", "[a-zA-Z_][a-zA-Z0-9_]*")
                 ->startRegion('assignment', true)
                 ->add(
+                    $simpleExpansion,
+                    $bracedExpansion,
                     Rule::token("space", " "),
                     Rule::token("tab", "\t"),
-                    Rule::token("equals", "=", type: NodeType::Structure),
-                    Rule::expr("simpleExpansion", "\\$[a-zA-Z_][a-zA-Z0-9_]*"),
-                    Rule::expr("bracedExpansion", "\\$\\{[a-zA-Z_][a-zA-Z0-9_]*\\}"),
-                    Rule::expr("unquotedText", "[^\n$\t =]+"),
+                    Rule::token("assign", "=", type: NodeType::Structure),
+                    Rule::expr("unquotedText", "[^\n\$\t =#]+")->addTag("value"),
                     Rule::token("newline", "\n")->closeRegion(true, true, false),
                     Rule::technical("eof")->closeRegion(true, true, false),
                 )
-                ->withRootSequence(
-                    "identifier (space|tab)* equals (space|tab)* "
-                    . "(simpleExpansion|bracedExpansion|unquotedText|equals|space|tab)* "
-                    . "newline|eof",
-                )
+                ->withRootSequence("string[identifier] (space|tab)* assign (space|tab)* (simpleExpansion|bracedExpansion|unquotedText|string|space|tab)* newline|eof")
                 ->setNodeType(NodeType::Node),
         );
 

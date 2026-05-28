@@ -185,6 +185,10 @@ class Rule
         array $tags = [],
         NodeType $type = NodeType::Node,
     ): self {
+        if (in_array($name, $tags, true)) {
+            throw new LogicException("Rule name '$name' cannot be used as tag for the same rule. It creates a recursive reference to itself.");
+        }
+
         $addedRules = [];
         $rulesNames = [];
         foreach ($options as $option) {
