@@ -97,10 +97,7 @@ final class TriviaSequenceNamingMiddleware implements GrammarMiddleware
     {
         return match (true) {
             $total === 1 => 'trivia',
-            $position === 0 => 'leadingTrivia',
-            $position === $total - 1 => 'trailingTrivia',
-            $total === 3 && $position === 1 => 'inlineTrivia',
-            default => 'inlineTrivia' . $position,
+            default => 'triviaPos' . $position,
         };
     }
 }
