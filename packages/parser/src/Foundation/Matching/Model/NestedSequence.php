@@ -26,6 +26,7 @@ final class NestedSequence implements MetaInterface
         public bool $isLookbehind = false,
         array $meta = [],
         array $tags = [],
+        public ?string $anchorName = null,
     ) {
         $this->meta = $meta;
         $this->tags = $tags;

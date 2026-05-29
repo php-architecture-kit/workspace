@@ -16,6 +16,8 @@ class GroupedAttribute implements NodeAttributeInterface, MetaInterface
     use TagsTrait;
 
     public const TAG = 'GroupedAttribute';
+    public const DEFAULT_NAME = 'grouped';
+    public const ANCHOR_NAME_META_KEY = 'groupedAnchorName';
 
     /** @var NodeAttributeInterface[] */
     public array $attributes;
@@ -27,7 +29,7 @@ class GroupedAttribute implements NodeAttributeInterface, MetaInterface
      */
     public function __construct(
         public readonly string $name,
-        public readonly NodeInterface $parent,
+        public NodeInterface $parent,
         array $attributes = [],
         array $meta = [],
         array $tags = [],
@@ -49,7 +51,11 @@ class GroupedAttribute implements NodeAttributeInterface, MetaInterface
 
     public function withParent(NodeInterface $parent): static
     {
-        return new static($this->name, $parent, $this->attributes, $this->meta, $this->tags);
+        $this->parent = $parent;
+        foreach ($this->attributes as $attr) {
+            $attr->withParent($parent);
+        }
+        return $this;
     }
 
     public function __toString(): string

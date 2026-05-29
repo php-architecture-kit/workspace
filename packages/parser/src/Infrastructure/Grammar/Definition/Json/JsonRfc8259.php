@@ -31,7 +31,7 @@ class JsonRfc8259 extends Whitespace
                 ->add(
                     Rule::token("comma", ",", type: NodeType::Structure),
                 )
-                ->withRootSequence("beginArray -* ?(value[item] (-* comma -* value[item])*)/g -* endArray")
+                ->withRootSequence("beginArray -* ?(value[item] (-* comma -* value[item])*)[items]/g -* endArray")
                 ->closeWith(
                     Rule::token("endArray", "]", type: NodeType::Structure),
                 )
@@ -44,7 +44,7 @@ class JsonRfc8259 extends Whitespace
                     Rule::token("comma", ",", type: NodeType::Structure),
                     Rule::seq("member", "string[identifier] -* colon -* value"),
                 )
-                ->withRootSequence("beginObject -* ?(member (-* comma -* member)*)/g -* endObject")
+                ->withRootSequence("beginObject -* ?(member (-* comma -* member)*)[members]/g -* endObject")
                 ->closeWith(
                     Rule::token("endObject", "}", type: NodeType::Structure),
                 )

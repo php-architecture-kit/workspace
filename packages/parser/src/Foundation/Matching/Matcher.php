@@ -12,6 +12,7 @@ use PhpArchitecture\Parser\Foundation\Matching\Model\MatchedSequenceNode;
 use PhpArchitecture\Parser\Foundation\Matching\Model\NestedSequence;
 use PhpArchitecture\Parser\Foundation\Matching\Model\Sequence;
 use PhpArchitecture\Parser\Foundation\Matching\Model\SequenceNode;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\GroupedAttribute;
 use PhpArchitecture\Parser\Foundation\Tokenization\Model\Token;
 use PhpArchitecture\Parser\Foundation\Tokenization\Model\TokenRegion;
 use PhpArchitecture\Parser\Foundation\Tokenization\Model\TokenStream;
@@ -268,6 +269,9 @@ class Matcher
                     if ($node->isLookahead) {
                         $offset = $nodeStart;
                         break;
+                    }
+                    if ($node->anchorName !== null && count($matched) > 0) {
+                        $matched[array_key_first($matched)]->setMeta(GroupedAttribute::ANCHOR_NAME_META_KEY, $node->anchorName);
                     }
                     $items = array_merge($items, $matched);
                 } else {

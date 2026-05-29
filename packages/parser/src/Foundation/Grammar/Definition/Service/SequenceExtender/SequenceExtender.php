@@ -188,6 +188,7 @@ class SequenceExtender
                     $node->isLookahead,
                     $node->isLookbehind,
                     $node->tags,
+                    $node->anchorName,
                 );
             } else {
                 $processedNodes[] = $node;

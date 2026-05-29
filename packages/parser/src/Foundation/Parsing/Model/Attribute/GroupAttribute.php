@@ -45,12 +45,10 @@ class GroupAttribute implements NodeAttributeInterface, MetaInterface
 
     public function withParent(NodeInterface $parent): static
     {
-        return new static(
-            $this->name,
-            array_map(static fn(NodeInterface $n) => $n->withParent($parent), $this->nodes),
-            $this->meta,
-            $this->tags,
-        );
+        foreach ($this->nodes as $node) {
+            $node->setParent($parent);
+        }
+        return $this;
     }
 
     public function __toString(): string

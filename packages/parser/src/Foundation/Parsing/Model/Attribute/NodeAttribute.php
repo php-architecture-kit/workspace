@@ -40,7 +40,8 @@ class NodeAttribute implements NodeAttributeInterface, MetaInterface
 
     public function withParent(NodeInterface $parent): static
     {
-        return new static($this->name, $this->node->withParent($parent), $this->meta, $this->tags);
+        $this->node->setParent($parent);
+        return $this;
     }
 
     public function __toString(): string

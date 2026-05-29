@@ -40,8 +40,8 @@ class ChoiceAttribute implements NodeAttributeInterface, MetaInterface
 
     public function withParent(NodeInterface $parent): static
     {
-        $selected = $this->selected?->withParent($parent);
-        return new static($this->name, $this->choices, $selected, $this->meta, $this->tags);
+        $this->selected?->withParent($parent);
+        return $this;
     }
 
     public function __toString(): string

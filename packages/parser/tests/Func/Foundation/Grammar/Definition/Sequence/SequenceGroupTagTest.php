@@ -27,6 +27,18 @@ final class SequenceGroupTagTest extends GrammarTestCase
         return $grammar;
     }
 
+    private function listGrammarWithAnchorName(): Grammar
+    {
+        $grammar = new Grammar('group-anchor-test');
+        $grammar->global->add(Rule::token('open', '['));
+        $grammar->global->add(Rule::token('close', ']'));
+        $grammar->global->add(Rule::token('comma', ','));
+        $grammar->global->add(Rule::token('item', 'x'));
+        $grammar->global->withRootSequence('open ?(item (comma item)*)[items]/g close');
+
+        return $grammar;
+    }
+
     #[Test]
     public function shouldPreserveStringForEmptyList(): void
     {
@@ -93,7 +105,7 @@ final class SequenceGroupTagTest extends GrammarTestCase
             assertParsingResultValid: function (NodeInterface $node, self $test): void {
                 $groupAttrs = array_filter(
                     $node->getAttributes(),
-                    static fn($a) => $a instanceof GroupedAttribute && $a->name === 'item',
+                    static fn($a) => $a instanceof GroupedAttribute && $a->name === GroupedAttribute::DEFAULT_NAME,
                 );
 
                 $test->assertCount(1, $groupAttrs);
@@ -115,7 +127,7 @@ final class SequenceGroupTagTest extends GrammarTestCase
             assertParsingResultValid: function (NodeInterface $node, self $test): void {
                 $groupAttrs = array_filter(
                     $node->getAttributes(),
-                    static fn($a) => $a instanceof GroupedAttribute && $a->name === 'item',
+                    static fn($a) => $a instanceof GroupedAttribute && $a->name === GroupedAttribute::DEFAULT_NAME,
                 );
 
                 $test->assertCount(1, $groupAttrs);
@@ -135,7 +147,7 @@ final class SequenceGroupTagTest extends GrammarTestCase
             assertParsingResultValid: function (NodeInterface $node, self $test): void {
                 $groupAttr = array_values(array_filter(
                     $node->getAttributes(),
-                    static fn($a) => $a instanceof GroupedAttribute && $a->name === 'item',
+                    static fn($a) => $a instanceof GroupedAttribute && $a->name === GroupedAttribute::DEFAULT_NAME,
                 ))[0];
 
                 $test->assertSame('x,x,x', (string) $groupAttr);
@@ -155,10 +167,56 @@ final class SequenceGroupTagTest extends GrammarTestCase
             assertParsingResultValid: function (NodeInterface $node, self $test): void {
                 $itemAttrs = array_filter(
                     $node->getAttributes(),
-                    static fn($a) => $a instanceof GroupedAttribute && $a->name === 'item',
+                    static fn($a) => $a instanceof GroupedAttribute && $a->name === GroupedAttribute::DEFAULT_NAME,
                 );
 
                 $test->assertNotEmpty($itemAttrs, 'Single item must produce GroupedAttribute, not NodeAttribute');
+            },
+        );
+    }
+
+    #[Test]
+    public function anchorNameOnNestedSequenceBecomesGroupedAttributeName(): void
+    {
+        $this->assertGrammarParsing(
+            string: '[x,x,x]',
+            grammar: $this->listGrammarWithAnchorName(),
+            requireBofEof: false,
+            assertParsingResultValid: function (NodeInterface $node, self $test): void {
+                $groupAttrs = array_filter(
+                    $node->getAttributes(),
+                    static fn($a) => $a instanceof GroupedAttribute,
+                );
+
+                $test->assertNotEmpty($groupAttrs, 'Expected GroupedAttribute on node');
+
+                foreach ($groupAttrs as $grouped) {
+                    $test->assertEquals(
+                        'items',
+                        $grouped->getName(),
+                        'GroupedAttribute must use the anchorName from the nested sequence, not DEFAULT_NAME',
+                    );
+                }
+            },
+        );
+    }
+
+    #[Test]
+    public function anchorNamePreservedForSingleItem(): void
+    {
+        $this->assertGrammarParsing(
+            string: '[x]',
+            grammar: $this->listGrammarWithAnchorName(),
+            requireBofEof: false,
+            assertParsingResultValid: function (NodeInterface $node, self $test): void {
+                $groupAttrs = array_filter(
+                    $node->getAttributes(),
+                    static fn($a) => $a instanceof GroupedAttribute,
+                );
+
+                $test->assertNotEmpty($groupAttrs);
+                $groupAttr = array_values($groupAttrs)[0];
+                $test->assertEquals('items', $groupAttr->getName());
             },
         );
     }

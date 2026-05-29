@@ -87,6 +87,7 @@ class SequenceNodeEnricher
             $nested->isLookbehind,
             [],
             $nested->tags,
+            $nested->anchorName,
         );
     }
 

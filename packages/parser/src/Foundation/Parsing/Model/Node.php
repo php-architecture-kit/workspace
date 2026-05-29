@@ -76,15 +76,18 @@ class Node implements NodeInterface, MetaInterface
     {
         foreach ($this->attributes as $attribute) {
             if ($attribute->getName() === $name) {
+
                 return $attribute;
             }
         }
+
         throw new LogicException("Attribute '{$name}' not found on node '{$this->name}'");
     }
 
     public function removeAttributeByOffset(int $offset): self
     {
         array_splice($this->attributes, $offset, 1);
+
         return $this;
     }
 
@@ -94,18 +97,15 @@ class Node implements NodeInterface, MetaInterface
     public function removeAttributeByFilter(callable $filter): self
     {
         $this->attributes = array_filter($this->attributes, $filter);
+
         return $this;
     }
 
-    public function withParent(NodeInterface $parent): self
+    public function setParent(NodeInterface $parent): self
     {
-        return new self(
-            $this->name,
-            $this->attributes,
-            $parent,
-            $this->meta,
-            $this->tags,
-        );
+        $this->parent = WeakReference::create($parent);
+
+        return $this;
     }
 
     public function __toString(): string

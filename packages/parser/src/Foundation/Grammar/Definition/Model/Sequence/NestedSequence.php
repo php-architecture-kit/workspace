@@ -19,16 +19,17 @@ final class NestedSequence
         public bool $isLookahead = false,
         public bool $isLookbehind = false,
         public array $tags = [],
+        public ?string $anchorName = null,
     ) {
     }
 
     /**
-     * @param string $nestedSequence ex.: (?ws member)*, >(ws member), (seq1)|(seq2), (ws member)/t
+     * @param string $nestedSequence ex.: (?ws member)*, >(ws member), (seq1)|(seq2), (ws member)/t, (member (-* comma -* member)*)[members]/g
      */
     public static function fromString(string $nestedSequence): self
     {
         if (!preg_match(
-            '/^(?<lookahead>>)?(?<lookbehind><)?(?<optional>\?)?(?<unions>\([a-zA-Z0-9_\-|\(\) \+\*\?<>\[\]\/\.]+\)(\|\([a-zA-Z0-9_\-|\(\) \+\*\?<>\[\]\/\.]+\))*)(?<quantifier>[+*])?(?:\/(?<tags>[a-zA-Z]+))?$/',
+            '/^(?<lookahead>>)?(?<lookbehind><)?(?<optional>\?)?(?<unions>\([a-zA-Z0-9_\-|\(\) \+\*\?<>\[\]\/\.]+\)(\|\([a-zA-Z0-9_\-|\(\) \+\*\?<>\[\]\/\.]+\))*)(?<quantifier>[+*])?(?:\[(?<anchor>[a-zA-Z0-9\-_]+)\])?(?:\/(?<tags>[a-zA-Z]+))?$/',
             $nestedSequence,
             $m,
         )) {
@@ -92,8 +93,13 @@ final class NestedSequence
         };
 
         $tags = !empty($m['tags']) ? str_split($m['tags']) : [];
+        $anchorName = !empty($m['anchor']) ? $m['anchor'] : null;
 
-        return new self($alternativeSequences, $cardinality, $isLookahead, $isLookbehind, $tags);
+        if ($anchorName !== null && !in_array('g', $tags, true)) {
+            throw new InvalidArgumentException("Invalid nested sequence: `{$nestedSequence}`. anchorName is only meaningful for grouped nested sequences (tag /g required).");
+        }
+
+        return new self($alternativeSequences, $cardinality, $isLookahead, $isLookbehind, $tags, $anchorName);
     }
 
     /**
@@ -236,10 +242,11 @@ final class NestedSequence
             $prefix = '<';
         }
 
+        $anchor = $this->anchorName !== null ? '[' . $this->anchorName . ']' : '';
         $tagsStr = !empty($this->tags) ? '/' . implode('', $this->tags) : '';
 
         return sprintf(
-            '%s%s%s%s%s',
+            '%s%s%s%s%s%s',
             $prefix,
             $this->cardinality === Cardinality::ZeroOrOne ? '?' : '',
             $unions,
@@ -248,6 +255,7 @@ final class NestedSequence
                 Cardinality::ZeroOrMore => '*',
                 default => '',
             },
+            $anchor,
             $tagsStr,
         );
     }

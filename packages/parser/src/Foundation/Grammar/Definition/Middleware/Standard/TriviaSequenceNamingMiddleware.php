@@ -76,6 +76,7 @@ final class TriviaSequenceNamingMiddleware implements GrammarMiddleware
                     $node->isLookahead,
                     $node->isLookbehind,
                     $node->tags,
+                    $node->anchorName,
                 );
             } else {
                 $newNodes[] = $node;

@@ -12,6 +12,7 @@ use PhpArchitecture\Parser\Foundation\Grammar\Definition\Rule;
 use PhpArchitecture\Parser\Foundation\Matching\Model\NestedSequence as CompiledNestedSequence;
 use PhpArchitecture\Parser\Foundation\Matching\Model\SequenceNode as CompiledSequenceNode;
 use PhpArchitecture\Parser\Foundation\Matching\Model\Sequence as CompiledSequence;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\ChoiceAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\GroupedAttribute;
 
 class RuleToSequenceCompiler implements RuleCompilerInterface
@@ -52,12 +53,14 @@ class RuleToSequenceCompiler implements RuleCompilerInterface
      */
     public function compileSequence(string $name, SequenceRule $definition, int $priority, array $tags, array $meta = []): CompiledSequence
     {
+        $isChoice = in_array(ChoiceAttribute::TAG, $tags, true);
+
         return new CompiledSequence(
             $name,
             array_map(
                 fn(NestedSequence|SequenceNode $node): CompiledNestedSequence|CompiledSequenceNode => $node instanceof NestedSequence
                     ? $this->compileNestedSequence($node)
-                    : $this->compileSequenceNode($node),
+                    : $this->compileSequenceNode($node, false, $isChoice),
                 $definition->nodes,
             ),
             $priority,
@@ -89,16 +92,21 @@ class RuleToSequenceCompiler implements RuleCompilerInterface
             $definition->isLookahead,
             $definition->isLookbehind,
             $definition->tags,
+            [],
+            $definition->anchorName,
         );
     }
 
-    public function compileSequenceNode(SequenceNode $definition, bool $inGroup = false): CompiledSequenceNode
+    public function compileSequenceNode(SequenceNode $definition, bool $inGroup = false, bool $isChoice = false): CompiledSequenceNode
     {
         $tags = $definition->nodeType
             ? array_merge($definition->tags, [$definition->nodeType->value])
             : $definition->tags;
         if ($inGroup) {
             $tags[] = GroupedAttribute::TAG;
+        }
+        if ($isChoice) {
+            $tags[] = ChoiceAttribute::TAG;
         }
 
         return new CompiledSequenceNode(

@@ -18,5 +18,5 @@ interface NodeInterface extends MetaInterface, Stringable
 
     public function getParent(): null|NodeInterface;
 
-    public function withParent(NodeInterface $parent): self;
+    public function setParent(NodeInterface $parent): self;
 }

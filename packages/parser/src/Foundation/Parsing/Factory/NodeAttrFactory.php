@@ -35,6 +35,67 @@ class NodeAttrFactory implements NodeAttrFactoryInterface
         private ParsingContext $context,
     ) {}
 
+    /** @param array<Token|TokenRegion|MatchedSequence> $items */
+    public function fillRegionBasedNodeWithAttributes(NodeInterface $regionBasedNode, NodeType $regionNodeType, array $items): void
+    {
+        if ($regionNodeType === NodeType::Structure) {
+            $content = implode('', array_map(static fn($item) => $item->__toString(), $items));
+            $regionBasedNode->addAttribute(new StructureAttribute(
+                !empty($sequenceNode->items),
+                StructureAttribute::DEFAULT_NAME,
+                $content === '' ? null : $content,
+            ));
+
+            return;
+        }
+
+        if ($regionNodeType === NodeType::Raw) {
+            $content = implode('', array_map(static fn($item) => $item->__toString(), $items));
+            $regionBasedNode->addAttribute(new RawContentAttribute(
+                $content,
+            ));
+
+            return;
+        }
+
+        foreach ($items as $item) {
+            $nodeType = NodeTypeResolver::resolveNodeType($item);
+
+            match ($item::class) {
+                Token::class => $this->fromToken($item, $nodeType, $regionBasedNode),
+                TokenRegion::class => $this->fromTokenRegion($item, $nodeType, $regionBasedNode),
+                MatchedSequence::class => $this->fromMatchedSequence($item, $nodeType, $regionBasedNode),
+                default => throw new InvalidArgumentException('Unknown item type'),
+            };
+        }
+    }
+
+    /** @param array<MatchedSequenceNode> $items */
+    public function fillSequenceBasedNodeWithAttributes(NodeInterface $sequenceBasedNode, array $items): void
+    {
+        $groupedAttr = null;
+
+        foreach ($items as $item) {
+            if (!$item->hasTag(GroupedAttribute::TAG)) {
+                $groupedAttr = null;
+                $nodeType = NodeTypeResolver::resolveNodeType($item);
+                $this->fromMatchedSequenceNode($item, $nodeType, $sequenceBasedNode);
+                continue;
+            }
+
+            if ($groupedAttr === null) {
+                $name = $item->hasMeta(GroupedAttribute::ANCHOR_NAME_META_KEY)
+                    ? $item->getMeta(GroupedAttribute::ANCHOR_NAME_META_KEY)
+                    : GroupedAttribute::DEFAULT_NAME;
+                $groupedAttr = new GroupedAttribute($name, $sequenceBasedNode, [], $item->meta, $item->tags);
+                $sequenceBasedNode->addAttribute($groupedAttr);
+            }
+
+            $nodeType = NodeTypeResolver::resolveNodeType($item);
+            $this->fromMatchedSequenceNode($item, $nodeType, $groupedAttr);
+        }
+    }
+
     public function fromToken(Token $token, NodeType $nodeType, NodeInterface|GroupedAttribute $parent): void
     {
         if ($nodeType === NodeType::Skip) {
@@ -105,6 +166,23 @@ class NodeAttrFactory implements NodeAttrFactoryInterface
 
     public function fromMatchedSequenceNode(MatchedSequenceNode $sequenceNode, NodeType $nodeType, NodeInterface|GroupedAttribute $parent): void
     {
+        if ($sequenceNode->hasTag(ChoiceAttribute::TAG)) {
+            $nodeParent = $parent instanceof GroupedAttribute ? $parent->parent : $parent;
+            $choices    = explode('|', $sequenceNode->name);
+            $matchedItem = $sequenceNode->items[0] ?? null;
+            $selected   = $matchedItem !== null
+                ? $this->createAttributeForChoiceItem($matchedItem, $nodeParent)
+                : null;
+            $parent->addAttribute(new ChoiceAttribute(
+                $nodeParent->getName(),
+                $choices,
+                $selected,
+                $sequenceNode->meta,
+                $sequenceNode->tags,
+            ));
+            return;
+        }
+
         if (
             count($sequenceNode->items) === 1
             && $sequenceNode->items[0] instanceof MatchedSequence
