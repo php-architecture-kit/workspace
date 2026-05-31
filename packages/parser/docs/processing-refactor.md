@@ -40,7 +40,7 @@ Obecna ścieżka podana względem `src/`.
 | `Model/Parsing/NodeInterface.php` | `Parsing/Contract/NodeInterface.php` | Kontrakt węzła — używany przez `NodeFactory`, `NodeAttrFactory`, atrybuty i `Parser`. Publiczne API modułu `Parsing/`. | ✅ |
 | `Model/Parsing/NodeAttributeInterface.php` | `Parsing/Contract/NodeAttributeInterface.php` | j.w. — kontrakt atrybutu węzła. | ✅ |
 | `Model/Parsing/NodeType.php` | `Parsing/Model/NodeType.php` | Enum używany wyłącznie wewnątrz `Parsing/` (factory, resolver). Można rozważyć `Parsing/Contract/NodeType.php` jeśli ma być częścią publicznego API (np. dla `NodeAttrFactory` od zewnętrznych klientów). | ✅ |
-| `Model/Parsing/AttributePlacement.php` | `Parsing/Contract/AttributePlacement.php` | Enum używany w `NodeInterface::addAttribute()` — jest częścią publicznego API interfejsu, więc razem z `NodeInterface`. | ✅ |
+| `Model/Parsing/Placement.php` | `Parsing/Contract/Placement.php` | Enum używany w `NodeInterface::addAttribute()` — jest częścią publicznego API interfejsu, więc razem z `NodeInterface`. | ✅ |
 | `Model/AST/AstGraph.php` | `AST/AstGraph.php` | Cały blok AST powinien tworzyć osobny moduł `src/AST/`. Aktualnie jest w środku `Processing/Model/`, co jest bez sensu — to nie jest model przetwarzania, to docelowy produkt parsera. | ✅ |
 | `Model/AST/AstNode.php` | `AST/Model/AstNode.php` | j.w. | ✅ |
 | `Model/AST/AstEdge.php` | `AST/Model/AstEdge.php` | j.w. | ✅ |
@@ -90,7 +90,7 @@ src/
 │   │   ├── ParsingContext.php
 │   │   ├── NodeInterface.php
 │   │   ├── NodeAttributeInterface.php
-│   │   └── AttributePlacement.php
+│   │   └── Placement.php
 │   ├── Context/      (DefaultParsingContext)
 │   ├── Factory/      (NodeFactory, NodeAttrFactory)
 │   ├── Model/

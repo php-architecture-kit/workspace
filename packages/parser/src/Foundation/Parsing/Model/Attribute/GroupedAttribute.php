@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute;
 
+use PhpArchitecture\Parser\Foundation\Matching\Model\NestedSequence;
 use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeAttributeInterface;
 use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeInterface;
 use PhpArchitecture\Parser\Foundation\Shared\Meta\MetaInterface;
@@ -22,6 +23,8 @@ class GroupedAttribute implements NodeAttributeInterface, MetaInterface
     /** @var NodeAttributeInterface[] */
     public array $attributes;
 
+    private ?SequenceValidityCursor $validityCursor = null;
+
     /**
      * @param NodeAttributeInterface[] $attributes
      * @param array<string,mixed> $meta
@@ -29,7 +32,7 @@ class GroupedAttribute implements NodeAttributeInterface, MetaInterface
      */
     public function __construct(
         public readonly string $name,
-        public NodeInterface $parent,
+        public ?NodeInterface $parent,
         array $attributes = [],
         array $meta = [],
         array $tags = [],
@@ -41,7 +44,9 @@ class GroupedAttribute implements NodeAttributeInterface, MetaInterface
 
     public function addAttribute(NodeAttributeInterface $attr): void
     {
-        $this->attributes[] = $attr->withParent($this->parent);
+        $this->validityCursor?->advance($attr->getName());
+
+        $this->attributes[] = $this->parent ? $attr->withParent($this->parent) : $attr;
     }
 
     public function getName(): string
@@ -55,6 +60,19 @@ class GroupedAttribute implements NodeAttributeInterface, MetaInterface
         foreach ($this->attributes as $attr) {
             $attr->withParent($parent);
         }
+        return $this;
+    }
+
+    public function withValidSequence(NestedSequence|SequenceValidityCursor $sequence): static
+    {
+        $this->validityCursor = $sequence instanceof SequenceValidityCursor
+            ? $sequence
+            : new SequenceValidityCursor($sequence);
+
+        foreach ($this->attributes as $attr) {
+            $this->validityCursor->advance($attr->getName());
+        }
+
         return $this;
     }
 

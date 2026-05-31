@@ -9,8 +9,8 @@ use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\GroupAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Node;
 
 /**
- * @property GroupAttribute<LeadingWsNode|TrailingWsNode> $leadingTrivia
+ * @property GroupAttribute<LeadingWsNode|EmptyLineNode|TrailingWsNode> $trivia0
  * @property ChoiceAttribute<ObjectNode> $value
- * @property GroupAttribute<TrailingWsNode> $trailingTrivia
+ * @property GroupAttribute<TrailingWsNode> $trivia1
  */
 class JsonNode extends Node {}

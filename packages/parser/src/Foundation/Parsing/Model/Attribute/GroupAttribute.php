@@ -6,6 +6,7 @@ namespace PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute;
 
 use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeAttributeInterface;
 use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeInterface;
+use PhpArchitecture\Parser\Foundation\Parsing\Contract\Placement;
 use PhpArchitecture\Parser\Foundation\Shared\Meta\MetaInterface;
 use PhpArchitecture\Parser\Foundation\Shared\Meta\MetaTrait;
 use PhpArchitecture\Parser\Foundation\Shared\Tags\TagsTrait;
@@ -38,9 +39,48 @@ class GroupAttribute implements NodeAttributeInterface, MetaInterface
         return $this->name;
     }
 
-    public function addNode(NodeInterface $node): void
+    public function addNode(NodeInterface $node, Placement $placement = Placement::After, int $offset = -1): void
     {
-        $this->nodes[] = $node;
+        if ($offset < 0) {
+            $offset = count($this->nodes) + $offset + 1;
+        }
+
+        $offset = match ($placement) {
+            Placement::Before => $offset,
+            Placement::After => $offset + 1,
+        };
+
+        array_splice($this->nodes, $offset, 0, [$node]);
+    }
+
+    /**
+     * @param callable(NodeInterface):bool $filter
+     * @return T[]
+     */
+    public function getNodes(?callable $filter = null): array
+    {
+        if ($filter === null) {
+            return $this->nodes;
+        }
+
+        return array_filter($this->nodes, $filter);
+    }
+
+    public function removeNodeByOffset(int $offset): self
+    {
+        array_splice($this->nodes, $offset, 1);
+
+        return $this;
+    }
+
+    /**
+     * @param callable(NodeInterface):bool $filter true - stay, false - remove
+     */
+    public function removeNodeByFilter(callable $filter): self
+    {
+        $this->nodes = array_filter($this->nodes, $filter);
+
+        return $this;
     }
 
     public function withParent(NodeInterface $parent): static

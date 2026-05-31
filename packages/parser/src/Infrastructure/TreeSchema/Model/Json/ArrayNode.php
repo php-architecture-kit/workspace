@@ -12,9 +12,9 @@ use PhpArchitecture\Parser\Foundation\Parsing\Model\Node;
 
 /**
  * @property StructureAttribute $beginArray
- * @property GroupAttribute<TrailingWsNode|LeadingWsNode> $leadingTrivia
- * @property GroupAttribute<TrailingWsNode|LeadingWsNode> $trailingTrivia
+ * @property GroupAttribute<TrailingWsNode|LeadingWsNode> $trivia0
+ * @property GroupAttribute<TrailingWsNode|LeadingWsNode> $trivia1
  * @property StructureAttribute $endArray
- * @property GroupedAttribute<ChoiceAttribute<PrimitiveNode|ObjectNode|ArrayNode>|StructureAttribute|TrailingWsNode|LeadingWsNode> $item
+ * @property GroupedAttribute<ChoiceAttribute<PrimitiveNode|ObjectNode|ArrayNode>|StructureAttribute|TrailingWsNode|LeadingWsNode> $items
  */
 class ArrayNode extends Node {}

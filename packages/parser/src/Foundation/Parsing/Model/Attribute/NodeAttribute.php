@@ -33,6 +33,16 @@ class NodeAttribute implements NodeAttributeInterface, MetaInterface
         $this->tags = $tags;
     }
 
+    public static function fromNode(NodeInterface $node, array $meta = [], array $tags = []): self
+    {
+        return new self(
+            name: $node->getName(),
+            node: $node,
+            meta: array_merge($node->getMetaAll(), $meta),
+            tags: array_merge($node->getAllTags(), $tags),
+        );
+    }
+
     public function getName(): string
     {
         return $this->name;

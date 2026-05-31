@@ -25,7 +25,7 @@ class ChoiceAttribute implements NodeAttributeInterface, MetaInterface
     public function __construct(
         public readonly string $name,
         public readonly array $choices,
-        public readonly ?NodeAttributeInterface $selected,
+        public private(set) ?NodeAttributeInterface $selected,
         array $meta = [],
         array $tags = [],
     ) {
@@ -36,6 +36,20 @@ class ChoiceAttribute implements NodeAttributeInterface, MetaInterface
     public function getName(): string
     {
         return $this->name;
+    }
+
+    public function setSelected(NodeAttributeInterface $selected): void
+    {
+        if (!in_array($selected->getName(), $this->choices, true)) {
+            throw new \InvalidArgumentException("Selected attribute must be one of the defined choices.");
+        }
+
+        $this->selected = $selected;
+    }
+
+    public function removeSelected(): void
+    {
+        $this->selected = null;
     }
 
     public function withParent(NodeInterface $parent): static

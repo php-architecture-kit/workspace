@@ -4,16 +4,15 @@ declare(strict_types=1);
 
 namespace PhpArchitecture\Parser\Foundation\Parsing\Model;
 
-use PhpArchitecture\Parser\Foundation\Parsing\Contract\AttributePlacement;
 use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeAttributeInterface;
 use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeInterface;
-use PhpArchitecture\Parser\Foundation\Shared\Meta\MetaInterface;
+use PhpArchitecture\Parser\Foundation\Parsing\Contract\Placement;
 use PhpArchitecture\Parser\Foundation\Shared\Meta\MetaTrait;
 use PhpArchitecture\Parser\Foundation\Shared\Tags\TagsTrait;
 use WeakReference;
 use LogicException;
 
-class Node implements NodeInterface, MetaInterface
+class Node implements NodeInterface
 {
     use MetaTrait;
     use TagsTrait;
@@ -40,15 +39,15 @@ class Node implements NodeInterface, MetaInterface
         $this->tags = $tags;
     }
 
-    public function addAttribute(NodeAttributeInterface $attribute, AttributePlacement $placement = AttributePlacement::After, int $offset = -1): self
+    public function addAttribute(NodeAttributeInterface $attribute, Placement $placement = Placement::After, int $offset = -1): self
     {
         if ($offset < 0) {
             $offset = count($this->attributes) + $offset + 1;
         }
 
         $offset = match ($placement) {
-            AttributePlacement::Before => $offset,
-            AttributePlacement::After => $offset + 1,
+            Placement::Before => $offset,
+            Placement::After => $offset + 1,
         };
 
         array_splice($this->attributes, $offset, 0, [$attribute]);

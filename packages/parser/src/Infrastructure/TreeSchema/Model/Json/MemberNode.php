@@ -12,9 +12,9 @@ use PhpArchitecture\Parser\Foundation\Parsing\Model\Node;
 
 /**
  * @property RawRegionAttribute $identifier
- * @property GroupAttribute $leadingTrivia
+ * @property GroupAttribute $trivia0
  * @property StructureAttribute $colon
- * @property GroupAttribute<InlineWsNode> $trailingTrivia
+ * @property GroupAttribute<InlineWsNode> $trivia1
  * @property ChoiceAttribute<PrimitiveNode|ArrayNode|ObjectNode> $value
  */
 class MemberNode extends Node {}
