@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Json\Rfc8259;
 
+use PhpArchitecture\Parser\Foundation\Matching\Model\NestedSequence;
 use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeInterface;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\GroupAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\GroupedAttribute;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\NodeAttribute;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\SequenceValidityCursor;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\StructureAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Node;
 use PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Technical\Whitespace\EmptyLineNode;
@@ -45,5 +48,64 @@ class ObjectNode extends Node
         $node->members->withParent($node);
 
         return $node;
+    }
+
+    /**
+     * Enables structural validation and auto-insertion of structural attributes
+     * (trivia0, comma, trivia1) when adding members via addMemberToMembers().
+     *
+     * Pass the compiled root sequence of the 'object' region, or a pre-built cursor
+     * positioned at the 'members' anchor.
+     */
+    public function withMembersValidation(NestedSequence|SequenceValidityCursor $sequence): self
+    {
+        $this->members->withValidSequence($sequence, [
+            'trivia0' => static fn() => new GroupAttribute('trivia0', []),
+            'comma'   => static fn() => new StructureAttribute(true, 'comma', ','),
+            'trivia1' => static fn() => new GroupAttribute('trivia1', []),
+        ]);
+
+        return $this;
+    }
+
+    /**
+     * Adds a member to the members group, auto-inserting comma and trivia when needed.
+     * Requires withMembersValidation() to have been called first.
+     */
+    public function addMemberToMembers(MemberNode $member): self
+    {
+        $this->members->addUnit(NodeAttribute::fromNode($member->setParent($this)));
+
+        return $this;
+    }
+
+    /**
+     * Removes the member at the given logical index (0-based), along with its
+     * structural attributes (trivia, comma).
+     */
+    public function removeMemberFromMembersByIndex(int $index): self
+    {
+        $this->members->removeUnit($index);
+
+        return $this;
+    }
+
+    /**
+     * Returns all MemberNode instances from the members group, in order.
+     * Works without withMembersValidation() by filtering by attribute name.
+     *
+     * @return MemberNode[]
+     */
+    public function getMembersFromMembers(): array
+    {
+        $result = [];
+        foreach ($this->members->attributes as $attr) {
+            if ($attr instanceof NodeAttribute && $attr->getName() === 'member') {
+                /** @var MemberNode $memberNode */
+                $memberNode = $attr->node;
+                $result[] = $memberNode;
+            }
+        }
+        return $result;
     }
 }
