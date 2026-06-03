@@ -180,6 +180,49 @@ bin/console parser:parse "..." input.json --format=simple
 
 ---
 
+## `parser:tree:generate`
+
+Generate Tree Schema PHP classes based on input file(s) and a grammar definition.
+
+```
+bin/console parser:tree:generate <input-file>... [options]
+```
+
+### Arguments
+
+| Argument | Required | Description |
+|---|---|---|
+| `input-file` | yes (one or more) | Path(s) to input file(s) to parse as source of truth about the tree schema |
+
+### Options
+
+| Option | Short | Description |
+|---|---|---|
+| `--grammar=FQCN` | `-g` | FQCN of the grammar definition (interactive if omitted) |
+| `--output=DIR` | `-o` | Output directory for generated `.php` files (default: stdout) |
+| `--namespace=NS` | | Namespace for generated classes (default: `PhpArchitecture\Parser\Infrastructure\TreeSchema\Model\{Format}`) |
+
+### Output
+
+When `--output` is provided the command writes one `.php` file per node class into the target directory (clearing any existing `.php` files first) and generates a `GENERATED.md` with reproduction instructions. Without `--output` the generated code is printed to stdout.
+
+### Examples
+
+```bash
+# Print generated classes to stdout
+bin/console parser:tree:generate input.json \
+    --grammar='PhpArchitecture\Parser\Infrastructure\Grammar\Definition\Json\JsonRfc8259'
+
+# Write to directory with custom namespace
+bin/console parser:tree:generate \
+    assets/parser-source-files/json/json-rfc8259.pretty.json \
+    assets/parser-source-files/json/json-rfc8259.minified.json \
+    --grammar='PhpArchitecture\Parser\Infrastructure\Grammar\Definition\Json\JsonRfc8259' \
+    --output='packages/parser/src/Infrastructure/TreeSchema/Model/Json'
+```
+
+---
+
 ## Notes
 
 - All commands require the grammar class to be autoloadable (i.e. present in `vendor/autoload.php`).

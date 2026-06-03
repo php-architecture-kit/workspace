@@ -9,8 +9,7 @@ use PhpArchitecture\Parser\Foundation\Parser;
 use PhpArchitecture\Parser\Foundation\Parsing\Context\DefaultParsingContext;
 use PhpArchitecture\Parser\Foundation\Tokenization\Model\StringStream;
 use PhpArchitecture\Parser\Infrastructure\Grammar\Registry\InMemoryGrammarRegistry;
-use PhpArchitecture\Parser\Infrastructure\TreeSchema\Generator\TreeSchemaGenerator;
-use PhpArchitecture\Parser\Infrastructure\TreeSchema\Renderer\TreeSchemaRenderer;
+use PhpArchitecture\Parser\Infrastructure\TreeSchema\Generator\FacadeSchemaGenerator;
 use PhpArchitecture\Parser\Presentation\Controller\CLI\Support\GrammarSelector;
 use DateTimeImmutable;
 use DateTimeZone;
@@ -32,7 +31,7 @@ final class GenerateTreeSchemaCommand extends Command
     protected function configure(): void
     {
         $this
-            ->setName('tree:generate')
+            ->setName('parser:tree:generate')
             ->setDescription('Generate Tree Schema based on input file and grammar definition')
             ->addArgument('input-file', InputArgument::REQUIRED | InputArgument::IS_ARRAY, 'Path(s) to input file(s) to parse as source of truth about tree schema')
             ->addOption('grammar', 'g', InputOption::VALUE_OPTIONAL, 'FQCN of the grammar definition (interactive if omitted)')
@@ -65,18 +64,17 @@ final class GenerateTreeSchemaCommand extends Command
         $namespace = $input->getOption('namespace')
             ?? 'PhpArchitecture\\Parser\\Infrastructure\\TreeSchema\\Model\\' . $format;
 
-        $generator = new TreeSchemaGenerator();
         $parser    = new Parser();
-        $templates = [];
+        $parsedTrees = [];
         foreach ($inputFiles as $inputFile) {
-            $parseTree = $parser->parse(
+            $parsedTrees[] = $parser->parse(
                 new StringStream(file_get_contents($inputFile)),
                 new DefaultParsingContext($compiledGrammar),
             );
-            $templates = $generator->generate($parseTree, $namespace);
         }
 
-        $renderer = new TreeSchemaRenderer();
+        $generator = new FacadeSchemaGenerator();
+        $files = $generator->generate($parsedTrees, $compiledGrammar, $namespace);
 
         if ($outputDir !== null && is_dir($outputDir)) {
             foreach (glob(rtrim($outputDir, '/') . '/*.php') ?: [] as $file) {
@@ -84,18 +82,15 @@ final class GenerateTreeSchemaCommand extends Command
             }
         }
 
-        foreach ($templates as $template) {
-            $className = $template->classStmt->className;
-            $code      = $renderer->render($template);
-
+        foreach ($files as $filename => $code) {
             if ($outputDir !== null) {
                 if (!is_dir($outputDir)) {
                     mkdir($outputDir, 0755, true);
                 }
-                file_put_contents(rtrim($outputDir, '/') . '/' . $className . '.php', $code);
-                $io->success("Generated: {$className}.php");
+                file_put_contents(rtrim($outputDir, '/') . '/' . $filename, $code);
+                $io->success("Generated: {$filename}");
             } else {
-                $io->writeln("<comment>=== {$className}.php ===</comment>");
+                $io->writeln("<comment>=== {$filename} ===</comment>");
                 $io->writeln($code);
             }
         }
@@ -114,7 +109,7 @@ final class GenerateTreeSchemaCommand extends Command
     /** @param string[] $inputFiles */
     private function buildCommandLine(InputInterface $input, array $inputFiles): string
     {
-        $parts = ['bin/console tree:generate'];
+        $parts = ['bin/console parser:tree:generate'];
         foreach ($inputFiles as $file) {
             $parts[] = escapeshellarg($file);
         }
