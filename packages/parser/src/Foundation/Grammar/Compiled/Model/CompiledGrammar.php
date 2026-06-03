@@ -8,6 +8,7 @@ final readonly class CompiledGrammar
 {
     /**
      * @param array<string,CompiledRegion> $regions
+     * @param array<string, class-string> $nodeClassMap
      */
     public function __construct(
         public string $name,
@@ -15,5 +16,6 @@ final readonly class CompiledGrammar
         public bool $requireBofEof,
         public string $rootRegionName,
         public array $regions,
+        public array $nodeClassMap = [],
     ) {}
 }

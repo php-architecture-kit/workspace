@@ -71,7 +71,8 @@ class NodeFactory implements NodeFactoryInterface
 
     private function createNodeFromTokenRegion(TokenRegion $region, ?NodeInterface $parent = null): NodeInterface
     {
-        $node = new Node($region->name, [], $parent, $region->meta, $region->tags);
+        $nodeClass = $this->context->grammar()->nodeClassMap[$region->name] ?? Node::class;
+        $node = new $nodeClass($region->name, [], $parent, $region->meta, $region->tags);
 
         $this->context->nodeAttrFactory()->fillRegionBasedNodeWithAttributes($node, NodeTypeResolver::resolveNodeType($region), $region->stream->tokens);
 
@@ -80,7 +81,8 @@ class NodeFactory implements NodeFactoryInterface
 
     private function createNodeFromMatchedRegion(MatchedRegion $region, ?NodeInterface $parent = null): NodeInterface
     {
-        $node = new Node($region->name, [], $parent, $region->meta, $region->tags);
+        $nodeClass = $this->context->grammar()->nodeClassMap[$region->name] ?? Node::class;
+        $node = new $nodeClass($region->name, [], $parent, $region->meta, $region->tags);
 
         $this->context->nodeAttrFactory()->fillRegionBasedNodeWithAttributes($node, NodeTypeResolver::resolveNodeType($region), $region->items);
 
@@ -89,7 +91,8 @@ class NodeFactory implements NodeFactoryInterface
 
     private function createNodeFromMatchedSequence(MatchedSequence $sequence, ?NodeInterface $parent = null): NodeInterface
     {
-        $node = new Node($sequence->name, [], $parent, $sequence->meta, $sequence->tags);
+        $nodeClass = $this->context->grammar()->nodeClassMap[$sequence->name] ?? Node::class;
+        $node = new $nodeClass($sequence->name, [], $parent, $sequence->meta, $sequence->tags);
 
         $this->context->nodeAttrFactory()->fillSequenceBasedNodeWithAttributes($node, $sequence->items);
 

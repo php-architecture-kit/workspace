@@ -12,6 +12,9 @@ class Grammar
     public private(set) Region $rootRegion;
     public bool $requireBofEof = true;
 
+    /** @var array<string, class-string> */
+    public array $nodeClassMap = [];
+
     public function __construct(
         public readonly string $name,
         public readonly ?string $variant = null,

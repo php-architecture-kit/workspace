@@ -6,7 +6,6 @@ namespace PhpArchitecture\Parser\Infrastructure\TreeSchema\Generator;
 
 use PhpArchitecture\Parser\Foundation\Grammar\Compiled\Model\CompiledGrammar;
 use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeInterface;
-use PhpArchitecture\Parser\Infrastructure\TreeSchema\Generator\Schema\AttributeSchema;
 use PhpArchitecture\Parser\Infrastructure\TreeSchema\Generator\Schema\NodeSchema;
 
 /**
@@ -21,12 +20,21 @@ final class FacadeSchemaGenerator
     private FacadeClassRenderer $classRenderer;
     private EnumFileRenderer    $enumRenderer;
 
+    /** @var array<string, NodeSchema> */
+    private array $lastSchemas = [];
+
     public function __construct()
     {
         $this->collector     = new NodeSchemaCollector();
         $this->augmentor     = new GrammarAugmentor();
         $this->classRenderer = new FacadeClassRenderer();
         $this->enumRenderer  = new EnumFileRenderer();
+    }
+
+    /** @return array<string, NodeSchema> */
+    public function getLastSchemas(): array
+    {
+        return $this->lastSchemas;
     }
 
     /**
@@ -48,6 +56,8 @@ final class FacadeSchemaGenerator
         $schemas = $this->augmentor->augment($schemas, $compiledGrammar, $targetFormat, $namespace);
 
         $rootNodeName = $compiledGrammar->rootRegionName;
+
+        $this->lastSchemas = $schemas;
 
         $files = [];
         foreach ($schemas as $schema) {

@@ -101,6 +101,7 @@ class GrammarCompiler
             $grammar->requireBofEof,
             $grammar->rootRegion->name,
             $compiledRegions,
+            $grammar->nodeClassMap,
         );
     }
 
@@ -123,6 +124,7 @@ class GrammarCompiler
     {
         $cloned = new Grammar($grammar->name, $grammar->variant);
         $cloned->requireBofEof = $grammar->requireBofEof;
+        $cloned->nodeClassMap  = $grammar->nodeClassMap;
 
         $this->copyRegionContents($grammar->global, $cloned->global);
 

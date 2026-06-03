@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace PhpArchitecture\Parser\Presentation\Controller\CLI;
 
 use PhpArchitecture\Parser\Foundation\Grammar\Compiled\GrammarCompiler;
+use PhpArchitecture\Parser\Foundation\Grammar\Compiled\Model\CompiledGrammar;
 use PhpArchitecture\Parser\Foundation\Parser;
 use PhpArchitecture\Parser\Foundation\Parsing\Context\DefaultParsingContext;
 use PhpArchitecture\Parser\Foundation\Tokenization\Model\StringStream;
@@ -64,12 +65,21 @@ final class GenerateTreeSchemaCommand extends Command
         $namespace = $input->getOption('namespace')
             ?? 'PhpArchitecture\\Parser\\Infrastructure\\TreeSchema\\Model\\' . $format;
 
+        // Parse source files without nodeClassMap — facade classes may not exist yet.
+        $grammarForParsing = new CompiledGrammar(
+            $compiledGrammar->name,
+            $compiledGrammar->variant,
+            $compiledGrammar->requireBofEof,
+            $compiledGrammar->rootRegionName,
+            $compiledGrammar->regions,
+        );
+
         $parser    = new Parser();
         $parsedTrees = [];
         foreach ($inputFiles as $inputFile) {
             $parsedTrees[] = $parser->parse(
                 new StringStream(file_get_contents($inputFile)),
-                new DefaultParsingContext($compiledGrammar),
+                new DefaultParsingContext($grammarForParsing),
             );
         }
 
@@ -103,7 +113,32 @@ final class GenerateTreeSchemaCommand extends Command
             $io->success('Generated: GENERATED.md');
         }
 
+        $snippet = $this->buildNodeClassMapSnippet($generator->getLastSchemas(), $namespace);
+        $io->section('Add to your Grammar definition class grammar() method:');
+        $io->writeln($snippet);
+
         return Command::SUCCESS;
+    }
+
+    /**
+     * @param \PhpArchitecture\Parser\Infrastructure\TreeSchema\Generator\Schema\NodeSchema[] $schemas
+     */
+    private function buildNodeClassMapSnippet(array $schemas, string $namespace): string
+    {
+        $entries = [];
+        foreach ($schemas as $schema) {
+            if (!$schema->shouldGenerate) {
+                continue;
+            }
+            $fqcn = $namespace . '\\' . $schema->className;
+            $entries[] = sprintf("    '%s' => \\%s::class,", $schema->nodeName, $fqcn);
+        }
+
+        return implode("\n", [
+            '$grammar->nodeClassMap = array_merge($grammar->nodeClassMap, [',
+            implode("\n", $entries),
+            ']);',
+        ]);
     }
 
     /** @param string[] $inputFiles */

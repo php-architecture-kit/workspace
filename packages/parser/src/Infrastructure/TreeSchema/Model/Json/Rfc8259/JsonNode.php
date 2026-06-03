@@ -17,7 +17,7 @@ use PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Technical\Whitespac
 
 class JsonNode extends Node
 {
-    /** @var GroupAttribute<LeadingWsNode|EmptyLineNode|TrailingWsNode|InlineWsNode> */
+    /** @var GroupAttribute<EmptyLineNode|TrailingWsNode|LeadingWsNode|InlineWsNode> */
     public GroupAttribute $trivia0 { get => $this->attributes[0]; }
 
     /** @var ChoiceAttribute<ObjectNode|ArrayNode> */
@@ -39,13 +39,13 @@ class JsonNode extends Node
         );
     }
 
-    public function addNodeToTrivia0(LeadingWsNode|EmptyLineNode|TrailingWsNode|InlineWsNode $node, Placement $placement = Placement::After, int $offset = -1): self
+    public function addNodeToTrivia0(EmptyLineNode|TrailingWsNode|LeadingWsNode|InlineWsNode $node, Placement $placement = Placement::After, int $offset = -1): self
     {
         $this->trivia0->addNode($node->setParent($this), $placement, $offset);
         return $this;
     }
 
-    /** @return array<LeadingWsNode|EmptyLineNode|TrailingWsNode|InlineWsNode> */
+    /** @return array<EmptyLineNode|TrailingWsNode|LeadingWsNode|InlineWsNode> */
     public function getNodesFromTrivia0(?callable $filter = null): array
     {
         return $this->trivia0->getNodes($filter);

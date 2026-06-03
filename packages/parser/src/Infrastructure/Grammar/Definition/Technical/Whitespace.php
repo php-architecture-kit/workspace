@@ -15,6 +15,10 @@ use PhpArchitecture\Parser\Foundation\Tokenization\Event\TokenRegionEndedEvent;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\NodeType;
 use PhpArchitecture\Parser\Foundation\Tokenization\Model\Token;
 use PhpArchitecture\Parser\Foundation\Tokenization\Model\TokenRegion;
+use PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Technical\Whitespace\EmptyLineNode;
+use PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Technical\Whitespace\InlineWsNode;
+use PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Technical\Whitespace\LeadingWsNode;
+use PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Technical\Whitespace\TrailingWsNode;
 
 class Whitespace implements GrammarDefinitionInterface
 {
@@ -96,6 +100,13 @@ class Whitespace implements GrammarDefinitionInterface
         );
 
         $grammar->stampOrigin(new GrammarOrigin(self::FORMAT, self::VARIANT));
+
+        $grammar->nodeClassMap = array_merge($grammar->nodeClassMap, [
+            'leadingWs'  => LeadingWsNode::class,
+            'trailingWs' => TrailingWsNode::class,
+            'emptyLine'  => EmptyLineNode::class,
+            'inlineWs'   => InlineWsNode::class,
+        ]);
 
         return $grammar;
     }

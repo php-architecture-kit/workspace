@@ -28,7 +28,7 @@ class ArrayNode extends Node
     /** @var GroupedAttribute<ChoiceAttribute<PrimitiveNode|ObjectNode|ArrayNode>|GroupAttribute|StructureAttribute|PrimitiveNode|ObjectNode|ArrayNode> */
     public GroupedAttribute $items { get => $this->attributes[2]; }
 
-    /** @var GroupAttribute<TrailingWsNode|LeadingWsNode|InlineWsNode|EmptyLineNode> */
+    /** @var GroupAttribute<TrailingWsNode|InlineWsNode|LeadingWsNode|EmptyLineNode> */
     public GroupAttribute $trivia1 { get => $this->attributes[3]; }
     public StructureAttribute $endArray { get => $this->attributes[4]; }
 

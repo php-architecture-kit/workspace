@@ -303,7 +303,7 @@ final class SequenceValidityCursor
             }
 
             if ($node instanceof NestedSequence && !$node->isLookahead && !$node->isLookbehind) {
-                $names = array_merge($names, $node->getFirstValidNodeNodeNames());
+                $names = array_merge($names, $node->getFirstValidAnchoredNodeNames());
                 if ($node->min >= 1) {
                     return $names;
                 }
@@ -314,12 +314,13 @@ final class SequenceValidityCursor
             $i++;
         }
 
-        // End of alternative: use getFirstValidNodeNodeNames() for restart (avoids infinite loop with max=PHP_INT_MAX)
+        // End of alternative: use getFirstValidAnchoredNodeNames() for restart (avoids infinite loop with max=PHP_INT_MAX).
+        // Uses anchor names consistently with how tryAdvanceInAlternative validates node names.
         $seq = $stack[$topIdx]->nestedSequence;
         $newCompletedIterations = $completedIterations + 1;
 
         if ($newCompletedIterations < $seq->max) {
-            $names = array_merge($names, $seq->getFirstValidNodeNodeNames());
+            $names = array_merge($names, $seq->getFirstValidAnchoredNodeNames());
         }
 
         if ($topIdx > 0) {

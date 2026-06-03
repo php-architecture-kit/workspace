@@ -23,7 +23,7 @@ class MemberNode extends Node
     public GroupAttribute $trivia0 { get => $this->attributes[1]; }
     public StructureAttribute $colon { get => $this->attributes[2]; }
 
-    /** @var GroupAttribute<InlineWsNode|TrailingWsNode|LeadingWsNode|EmptyLineNode> */
+    /** @var GroupAttribute<TrailingWsNode|InlineWsNode|LeadingWsNode|EmptyLineNode> */
     public GroupAttribute $trivia1 { get => $this->attributes[3]; }
 
     /** @var ChoiceAttribute<PrimitiveNode|ArrayNode|ObjectNode> */

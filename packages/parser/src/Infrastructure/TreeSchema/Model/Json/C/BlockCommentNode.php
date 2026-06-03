@@ -14,7 +14,7 @@ class BlockCommentNode extends Node
     public RawContentAttribute $space { get => $this->attributes[1]; }
     public StructureAttribute $blockCommentEnd { get => $this->attributes[2]; }
 
-    public static function create(string $space = ' int '): self
+    public static function create(string $space = ' f '): self
     {
         return new self(
             name: 'blockComment',

@@ -21,7 +21,7 @@ class ObjectNode extends Node
 {
     public StructureAttribute $beginObject { get => $this->attributes[0]; }
 
-    /** @var GroupAttribute<TrailingWsNode|LeadingWsNode|InlineWsNode|EmptyLineNode> */
+    /** @var GroupAttribute<TrailingWsNode|InlineWsNode|LeadingWsNode|EmptyLineNode> */
     public GroupAttribute $trivia0 { get => $this->attributes[1]; }
 
     /** @var GroupedAttribute<MemberNode|GroupAttribute|StructureAttribute> */
