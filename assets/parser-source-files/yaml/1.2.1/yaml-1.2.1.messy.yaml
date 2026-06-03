@@ -1,0 +1,107 @@
+
+
+
+
+
+# leading trivia — yaml-1.2.1 messy
+
+%YAML 1.2
+%TAG !ns! tag:yaml.org,2002:
+---
+plain_string:    editorial revision value
+double_q:         "null:\0 bell:\a escape:\e"
+single_q:  'no escapes here'
+multiline:         "first part \
+  second part"
+
+
+integer:   98765
+negative:      -42
+octal:    0o644
+hex:         0xDEAD
+infinity:    .inf
+neg_inf:         -.inf
+nan:    .nan
+float:
+  2.71828
+bool_true: true
+bool_false:    false
+bool_True:      True
+bool_FALSE:              FALSE
+null_val:      null
+tilde:
+  ~
+
+
+literal_indented: |2
+    explicit two space indent line
+    second line here
+
+literal_strip: |-
+    no trailing newline here
+folded_keep: >+
+    folded with kept newlines
+
+
+tag_str:    !!str 42
+tag_int:         !!int "17"
+tag_float:  !!float "2.0"
+tag_null: !!null ""
+tag_binary: !!binary |
+    SGVsbG8gV29ybGQ=
+tag_ns:      !ns!mytype {id:   1,data:      val}
+
+flow_obj:      {name: Alice,age:         30,active: true}
+flow_arr: [1,"two",3.0,true,null,~]
+
+sequence:
+   - first
+   -    second
+   -          third
+   - {key: val,num: 42}
+   - [a,b,c]
+
+mapping:
+    alpha:    1
+    beta:
+      2
+               gamma: three
+    delta: {nested:    {deep:    ok}}
+
+base: &base
+           host:   localhost
+           port:       5432
+           adapter: pg
+dev:
+  <<: *base
+  database:    dev_db
+
+deep_nesting:
+ level1:
+   value:    L1
+   level2:
+      value: L2
+      level3:
+          value: L3
+          level4:
+              value:    L4
+              level5:
+                    value: L5
+                    array_of_objects:
+                     - item:    1
+                       nested: {deep:    true}
+                     - item: 2
+                       matrix:
+                         - [1,2,3]
+                         - [4, 5, [6, 7, [8, [9]]]]
+
+timestamp: 2009-10-01T12:00:00Z
+unicode: {polish: "Zażółć gęślą jaźń",emoji: "🎯"}
+
+last_key: last value
+
+...
+
+# trailing comment after end marker
+
+

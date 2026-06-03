@@ -1,0 +1,26 @@
+---
+plain: plain scalar value
+integer: 12345
+negative: -456
+float: 3.14159
+exponential: 1.23e+10
+bool_true: true
+bool_false: false
+null_val: null
+tilde: ~
+double_q: "tab:\t newline:\n backslash:\\"
+single_q: 'literal ''quote'' here'
+literal: |
+ line 1
+ line 2
+folded: >-
+ compact folded single line
+sequence: [1,"two",true,null,~]
+mapping: {key1: val1,key2: val2,key3: 3}
+flow_nested: {a: {b: {c: d}}}
+anchor_src: &base {adapter: postgres,host: localhost,port: 5432}
+merged: {<<: *base,database: dev_db}
+anchor_val: &ref simple value
+alias_val: *ref
+complex_key: {? compound: key_val}
+deep: {l1: {val: L1,l2: {val: L2,l3: {val: L3,l4: {val: L4,l5: {val: L5,arr: [{i: 1,n: {deep: true}},{i: 2,mat: [[1,2,3],[4,5,[6,7,[8]]]]}]}}}}}}

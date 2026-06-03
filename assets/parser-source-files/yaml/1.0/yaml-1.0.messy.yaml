@@ -1,0 +1,88 @@
+
+
+
+
+
+
+# leading comment before document start
+
+--- #YAML:1.0
+# chaotic indentation and spacing throughout
+plain_string:    This is a plain scalar
+double_quoted:          "tab:\t escaped"
+single_quoted: 'literal ''it'''
+
+
+integer:   12345
+negative:      -456
+float:
+  3.14159
+bool_true: true
+bool_false:    false
+null_val:      null
+tilde:
+  ~
+
+
+# comment between entries
+sequence:
+  - item1
+  -   item2
+  -    item3
+  - [inline, sequence, here]
+
+mapping:
+  key1:    value1
+  key2:
+    value2
+              key3: value3
+  key4: {nested: flow, another: val}
+
+literal: |
+    line 1 of literal
+    line 2 of literal
+
+    blank line preserved
+folded: >-
+    folded line 1
+    folded line 2
+
+# anchor and alias section
+defaults: &defaults
+           adapter: postgres
+           host:       localhost
+           port: 5432
+development:
+  <<: *defaults
+  database:      dev_db
+
+production:    {<<: *defaults,database: prod_db,host: prod.example.com}
+
+deep_nesting:
+ level1:
+   value:     L1
+   level2:
+      value: L2
+      level3:
+          value: L3
+          level4:
+              value: L4
+              level5:
+                  value: L5
+                  array_of_objects:
+                   - item: 1
+                     nested:   {deep: true}
+                   - item:   2
+                     matrix:
+                       - [1,   2,   3]
+                       - [4, 5, [6, 7, [8]]]
+
+unicode: {polish: "Zażółć gęślą jaźń",cyrillic: "Привет мир",emoji: "🚀"}
+
+last_key: last value
+...
+
+# trailing comment after document end
+
+
+

@@ -1,0 +1,159 @@
+--- #YAML:1.0
+# === YAML 1.0 REPRESENTATIVE FILE ===
+# First public release of YAML (January 2004)
+# No %YAML directive — uses --- #YAML:1.0 comment convention
+
+# === SCALARS — PLAIN (UNQUOTED) ===
+plain_string: This is a plain scalar
+plain_integer: 12345
+plain_float: 3.14159
+plain_boolean_true: true
+plain_boolean_false: false
+plain_null: null
+plain_tilde: ~
+
+# === SCALARS — QUOTED ===
+double_quoted: "Double quoted with escapes: \t tab, \n newline, \\ backslash"
+double_unicode: "Unicode escapes: Hello \U0001F680"
+single_quoted: 'Single quoted: no escapes, ''double single quote'' for literal'
+empty_double: ""
+empty_single: ''
+
+# === SCALARS — LITERAL BLOCK (preserves newlines) ===
+literal_block: |
+  This is a literal block scalar.
+  Newlines are preserved exactly.
+
+  Including blank lines.
+  Indentation is stripped based on first line.
+
+literal_strip: |-
+  Trailing newline stripped.
+  No newline at end.
+
+literal_keep: |+
+  Trailing newlines kept.
+
+
+# === SCALARS — FOLDED BLOCK (newlines become spaces) ===
+folded_block: >
+  This is a folded block scalar.
+  Single newlines become spaces.
+
+  Blank lines become newlines.
+  Good for long paragraphs.
+
+folded_strip: >-
+  Trailing newline stripped.
+  Becomes single line.
+
+folded_keep: >+
+  Trailing newlines kept.
+
+
+# === BLOCK COLLECTIONS ===
+block_mapping:
+  key1: value1
+  key2: value2
+  nested:
+    deep:
+      deeper: value
+
+block_sequence:
+  - item1
+  - item2
+  - nested:
+      key: value
+  - - nested
+    - sequence
+
+empty_mapping: {}
+empty_sequence: []
+
+# === FLOW COLLECTIONS (JSON-like) ===
+flow_mapping: {key1: value1, key2: value2, nested: {deep: value}}
+flow_sequence: [1, 2, 3, "mixed", true, null]
+flow_mixed: {array: [1, 2], object: {a: b}}
+
+# === COMPLEX KEYS ===
+? multi-line complex key
+: value for complex key
+
+? [compound, key]
+: compound key value
+
+# === ANCHORS AND ALIASES ===
+defaults: &defaults
+  adapter: postgres
+  host: localhost
+  port: 5432
+
+development:
+  <<: *defaults
+  database: dev_db
+
+production:
+  <<: *defaults
+  database: prod_db
+  host: prod.example.com
+
+single_anchor: &name_anchor plain value
+alias_ref: *name_anchor
+
+# === SPECIAL VALUES ===
+null_values:
+  - null
+  - ~
+  -
+
+boolean_values:
+  - true
+  - false
+
+# === NUMBERS ===
+integers:
+  canonical: 12345
+  positive: +12345
+  negative: -12345
+
+floats:
+  canonical: 3.14159
+  exponential: 1.23e+10
+  negative_exp: 1.23e-10
+
+# === UNICODE AND SPECIAL CHARACTERS ===
+unicode:
+  polish: "Zażółć gęślą jaźń"
+  cyrillic: "Привет мир"
+  chinese: "你好世界"
+  japanese: "日本語"
+  arabic: "العربية"
+  emoji: "🚀 Deploy 💻 Code 🔧"
+
+# === DEEP NESTING (5+ levels) ===
+deep_nesting:
+  level1:
+    value: L1
+    level2:
+      value: L2
+      level3:
+        value: L3
+        level4:
+          value: L4
+          level5:
+            value: L5
+            array_of_objects:
+              - item: 1
+                nested:
+                  deep: true
+              - item: 2
+                matrix:
+                  - [1, 2, 3]
+                  - [4, 5, [6, 7, [8]]]
+
+...
+---
+# Second document in the same stream
+second_document: true
+values: [1, 2, 3]
+...

@@ -1,0 +1,134 @@
+
+
+
+
+
+# leading comment — messy yaml 1.2.2 (current spec)
+
+%YAML 1.2
+%TAG !custom! tag:example.com,2024:
+---
+# comprehensive feature coverage with chaotic formatting
+plain_string:    This is a plain scalar
+double_quoted:          "tab:\t hex:\x41 unicode:\U0001F680"
+named_escapes:  "\0 null \a bell \b bs \e esc"
+single_quoted: 'literal: no escapes here'
+multiline_dq:       "line one \
+  continued without newline"
+
+
+integer:   12345
+negative:      -456
+octal:    0o755
+hex:         0xFF
+infinity:    .inf
+neg_inf:         -.inf
+nan:    .nan
+float:
+  3.14159
+bool_true: true
+bool_false:    false
+bool_True:      True
+bool_FALSE:              FALSE
+null_val:      null
+tilde:
+  ~
+
+
+# json-compatible flow section
+flow_json:      {"key": "value","num":         42,"bool": true,"null": null}
+
+literal_block: |
+    full indented literal
+    second line preserved
+
+    blank line preserved
+literal_strip: |-
+    stripped trailing newline
+literal_keep: |+
+    kept trailing newlines
+
+literal_indent: |2
+    explicit two space indent
+    second explicit line
+folded_block: >
+    folded continues
+    on this line
+
+    new paragraph here
+folded_strip: >-
+    folded strip compact
+folded_indent: >2
+    folded with explicit indent
+
+# tag section
+explicit_str:    !!str 123
+explicit_int:         !!int "456"
+explicit_float:  !!float "3.14"
+explicit_null: !!null ""
+binary: !!binary |
+    R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7
+tag_seq:      !!seq [1,2,3]
+tag_map:     !!map {key:    value}
+custom:      !custom!MyType {data: value,id:      42}
+verbatim:         !<tag:example.com,2024:custom> value
+
+sequence:
+   - first item
+   -    second item
+   -          third item
+   - [inline, seq, here]
+   - true
+   - false
+   - null
+   - 0o755
+
+mapping:
+    a:    1
+    b:
+      2
+               c: value three
+    d: {nested:    {deep:    value}}
+
+defaults: &defaults
+           adapter:   postgres
+           host:           localhost
+           port: 5432
+dev:
+  <<: *defaults
+  database:    dev_db
+extra_cfg: &extra {timeout:    30,retries:       3}
+staging: {<<: [*defaults,*extra],database:    staging}
+anchor_str: &greet "Hello World"
+alias_str:    *greet
+
+timestamps: {canonical: 2024-12-21T15:30:00Z,date: 2024-12-21,spaced: 2024-12-21 15:30:00}
+
+deep_nesting:
+ level1:
+   value:    L1
+   level2:
+      value: L2
+      level3:
+          value: L3
+          level4:
+              value:    L4
+              level5:
+                    value: L5
+                    array_of_objects:
+                     - item:    1
+                       nested: {deep:    true}
+                     - item: 2
+                       matrix:
+                         - [1,2,3]
+                         - [4, 5, [6, 7, [8]]]
+
+unicode: {polish: "Zażółć gęślą jaźń",cyrillic: "Привет мир",emoji: "🚀💻🔧"}
+
+last_key: last value
+
+...
+
+# trailing comment after document end marker
+
+

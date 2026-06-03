@@ -1,0 +1,67 @@
+# leading comment — messy-2 pattern
+# second leading comment line
+
+--- #YAML:1.0
+plain:    value # inline comment
+integer:            -9999
+float:    0.001
+bool_true:    true
+bool_false:              false
+null_val: null
+tilde:  ~
+double_q:       "escapes: \t \n \\"
+single_q:           'single ''quoted'''
+empty_str: ""
+
+literal_block: |
+              indented four
+              second line here
+
+              blank preserved
+folded_block: >
+              folded text here
+              continues on next line
+
+              new paragraph
+
+sequence:
+               - first
+               - second
+               -          third
+               - {inline: obj, val: 1}
+               - [a,b,c]
+
+mapping:
+             a:         1
+             b:
+               2
+             c: {nested: {deep: val}}
+             d:    [1,2,3]
+
+anchor_def: &anc {host: db.local,port: 5432,adapter: pg}
+alias_use: *anc
+merged: {<<: *anc,database: test}
+
+deep_nesting:
+          level1:
+            value:       L1
+            level2:
+              value:     L2
+              level3:
+                value:   L3
+                level4:
+                  value: L4
+                  level5:
+                             value: L5
+                             array_of_objects:
+                               - {item: 1,nested: {deep: true}}
+                               - item:     2
+                                 matrix:   [[1,2,3],[4,5,[6,7,[8]]]]
+
+unicode_vals: ["Zażółć gęślą jaźń","Привет мир","你好世界","العربية","🚀💻🔧"]
+
+last: done
+
+# trailing comment line 1
+# trailing comment line 2
+

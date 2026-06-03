@@ -1,0 +1,27 @@
+
+
+# leading trivia — messy-3 no trailing newline
+
+--- #YAML:1.0
+plain:    value
+integer:     12345
+negative:        -456
+float:    3.14
+bool_true: true
+bool_false:      false
+null_val:    null
+tilde:  ~
+double_q: "tab:\t newline:\n"
+single_q: 'literal ''quoted'''
+literal: |
+ line one
+ line two
+folded: >-
+ folded compact
+sequence:    [1,2,"three",true,null]
+mapping:      {a: 1,b: 2,c: {d: 3}}
+anchor_def: &ref {host: localhost,port: 5432}
+alias_use: *ref
+deep: {l1: {val: L1,l2: {val: L2,l3: {val: L3,l4: {val: L4,l5: {val: L5,arr: [{i: 1,n: {deep: true}},{i: 2}]}}}}}}
+unicode: "Zażółć gęślą jaźń 🚀"
+last: value

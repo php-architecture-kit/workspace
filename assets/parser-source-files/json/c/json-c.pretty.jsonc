@@ -1,0 +1,117 @@
+// JSONC Example - JSON with Comments
+/* This file demonstrates all JSONC features:
+   single-line and block comments in valid positions.
+   No trailing commas — JSONC inherits JSON's strict separator rules. */
+{
+    // === STRINGS ===
+    "doubleQuoted": "standard JSON string",
+    "withEscapes": "tab:\there\nnewline\r\ncarriage return",
+    "unicodeEscape": "Hello",
+    "quotedKey": "JSON requires quoted keys",
+    "_underscoreKey": "keys can start with underscore",
+    "$dollarKey": "keys can start with dollar sign",
+    "camelCaseKey": "standard camelCase",
+    "PascalCaseKey": "PascalCase also works",
+
+    // === NUMBERS ===
+    "integer": 123,
+    "negative": -456,
+    "decimal": 123.456,
+    "exponent": 1.23e10,
+    "exponentNegative": 1.23e-10,
+    "exponentPositive": 1.23E+10,
+
+    // === LITERALS ===
+    "boolTrue": true,
+    "boolFalse": false,
+    "nullValue": null,
+
+    // === ARRAYS ===
+    "emptyArray": [],
+    "singleElementArray": [
+        42
+    ],
+    "simpleArray": [
+        1,
+        2,
+        3
+    ],
+    "mixedArray": [
+        1,
+        "string",
+        true,
+        null,
+        {
+            "nested": "object"
+        },
+        [
+            "nested",
+            "array"
+        ]
+    ],
+
+    // === OBJECTS ===
+    "emptyObject": {},
+    "singlePropertyObject": {
+        "onlyKey": "single"
+    },
+    "nestedObject": {
+        "level1": {
+            "level2": {
+                "level3": "deeply nested"
+            }
+        }
+    },
+
+    /*
+     * Deep nesting demonstration
+     * Objects can nest arbitrarily deep inside arrays inside objects.
+     */
+    "deepNesting": {
+        "level1": {
+            "value": "L1",
+            "level2": {
+                "value": "L2",
+                "level3": {
+                    "value": "L3",
+                    "level4": {
+                        "value": "L4",
+                        "level5": {
+                            "value": "L5",
+                            "arrayOfObjects": [
+                                // first item: object with nested object
+                                {
+                                    "item": 1,
+                                    "nested": {
+                                        "deep": true
+                                    }
+                                },
+                                // second item: object with nested matrix
+                                {
+                                    "item": 2,
+                                    "matrix": [
+                                        [1, 2, 3],
+                                        [4, 5, [6, 7, [8]]]
+                                    ]
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        }
+    },
+
+    // === COMMENTS IN VARIOUS POSITIONS ===
+    "arrayWithComments": [
+        // comment before first element
+        "first",
+        "second", // inline comment after element
+        /* block comment before element */
+        "third"
+    ],
+
+    "lastProperty": "JSONC does not allow trailing comma"
+    // comment after last property, before closing brace
+}
+// comment after closing brace

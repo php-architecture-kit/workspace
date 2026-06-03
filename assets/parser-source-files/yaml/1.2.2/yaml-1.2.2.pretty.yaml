@@ -1,0 +1,219 @@
+# Single-line comment at document start
+%YAML 1.2
+%TAG !custom! tag:example.com,2024:
+---
+# === YAML 1.2.2 REPRESENTATIVE FILE ===
+# YAML 1.2.2 (October 2021) — Current spec, no normative changes from 1.2
+# Comprehensive coverage of all 42 YAML features
+
+# === SCALARS — PLAIN (UNQUOTED) ===
+plain_string: This is a plain scalar
+plain_with_special: Hello World  # plain scalar value
+plain_number_like: 12345
+plain_bool_like: true
+plain_null_like: null
+
+# === SCALARS — QUOTED ===
+double_quoted: "Double quoted with escapes: \t tab, \n newline, \\ backslash"
+double_unicode: "Unicode escapes: Hello \U0001F680"
+double_hex_escape: "Hex escapes: \x41\x42\x43"
+double_named_escapes: "Named: \0 null, \a bell, \b backspace, \e escape, \N next-line"
+double_special: "Non-breaking: \_ space, \L line-sep, \P para-sep"
+single_quoted: 'Single quoted: no escapes, ''double single quote'' for literal'
+single_no_escape: 'Backslash \t is literal here'
+empty_double: ""
+empty_single: ''
+multiline_double: "line one \
+  continuation without newline"
+
+# === SCALARS — LITERAL BLOCK (preserves newlines) ===
+literal_block: |
+  This is a literal block scalar.
+  Newlines are preserved exactly.
+
+  Including blank lines.
+  Indentation is stripped based on first line.
+
+literal_strip: |-
+  Trailing newline stripped.
+  No newline at end.
+
+literal_keep: |+
+  Trailing newlines kept.
+
+
+literal_explicit_indent: |2
+  Explicit 2-space indentation indicator.
+  Second line here.
+
+# === SCALARS — FOLDED BLOCK (newlines become spaces) ===
+folded_block: >
+  This is a folded block scalar.
+  Single newlines become spaces.
+
+  Blank lines become newlines.
+  Good for long paragraphs.
+
+folded_strip: >-
+  Trailing newline stripped.
+  Becomes single line.
+
+folded_keep: >+
+  Trailing newlines kept.
+
+
+folded_explicit_indent: >2
+  Explicit 2-space folded indent.
+  Second line.
+
+# === BLOCK COLLECTIONS ===
+block_mapping:
+  key1: value1
+  key2: value2
+  nested:
+    deep:
+      deeper: value
+
+block_sequence:
+  - item1
+  - item2
+  - nested:
+      key: value
+  - - nested
+    - sequence
+
+empty_mapping: {}
+empty_sequence: []
+single_item_seq:
+  - only_item
+
+# === FLOW COLLECTIONS (JSON-like) ===
+flow_mapping: {key1: value1, key2: value2, nested: {deep: value}}
+flow_sequence: [1, 2, 3, "mixed", true, null]
+flow_mixed: {array: [1, 2], object: {a: b}}
+flow_trailing_comma: {a: 1, b: 2,}
+
+# === COMPLEX KEYS ===
+? |
+  multi-line
+  complex key
+: value for complex key
+
+? [compound, key]
+: compound key value
+
+? {map: as_key}
+: map used as key
+
+# === ANCHORS AND ALIASES ===
+defaults: &defaults
+  adapter: postgres
+  host: localhost
+  port: 5432
+
+development:
+  <<: *defaults
+  database: dev_db
+
+production:
+  <<: *defaults
+  database: prod_db
+  host: prod.example.com
+
+multi_merge_base: &extra
+  timeout: 30
+  retries: 3
+
+staging:
+  <<: [*defaults, *extra]
+  database: staging_db
+
+scalar_anchor: &greeting "Hello World"
+scalar_alias: *greeting
+
+# === TAGS (TYPE ANNOTATIONS) ===
+explicit_string: !!str 123
+explicit_int: !!int "456"
+explicit_float: !!float "3.14"
+explicit_bool: !!bool "true"
+explicit_null: !!null ""
+binary_data: !!binary |
+  R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7
+seq_tag: !!seq [1, 2, 3]
+map_tag: !!map {key: value}
+custom_tag: !custom!MyType {data: value, id: 42}
+verbatim_tag: !<tag:example.com,2024:custom> value
+
+# === SPECIAL VALUES ===
+null_values:
+  keyword: null
+  tilde: ~
+  empty:
+
+boolean_values:
+  - true
+  - false
+  - True
+  - False
+  - TRUE
+  - FALSE
+
+# === NUMBERS ===
+integers:
+  canonical: 12345
+  positive: +12345
+  negative: -12345
+  octal: 0o755
+  hexadecimal: 0xFF
+
+floats:
+  canonical: 3.14159
+  exponential: 1.23e+10
+  negative_exp: 1.23e-10
+  infinity: .inf
+  negative_infinity: -.inf
+  not_a_number: .nan
+
+# === TIMESTAMPS ===
+timestamps:
+  canonical: 2024-12-21T15:30:00Z
+  iso8601: 2024-12-21t15:30:00.123+01:00
+  spaced: 2024-12-21 15:30:00
+  date_only: 2024-12-21
+
+# === UNICODE AND SPECIAL CHARACTERS ===
+unicode:
+  polish: "Zażółć gęślą jaźń"
+  cyrillic: "Привет мир"
+  chinese: "你好世界"
+  japanese: "日本語"
+  arabic: "العربية"
+  emoji: "🚀 Deploy 💻 Code 🔧"
+
+# === DEEP NESTING (5+ levels) ===
+deep_nesting:
+  level1:
+    value: L1
+    level2:
+      value: L2
+      level3:
+        value: L3
+        level4:
+          value: L4
+          level5:
+            value: L5
+            array_of_objects:
+              - item: 1
+                nested:
+                  deep: true
+              - item: 2
+                matrix:
+                  - [1, 2, 3]
+                  - [4, 5, [6, 7, [8]]]
+
+...
+---
+# Second document in the same stream
+second_document: true
+values: [1, 2, 3]
+...

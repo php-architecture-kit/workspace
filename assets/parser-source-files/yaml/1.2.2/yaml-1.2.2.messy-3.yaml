@@ -1,0 +1,52 @@
+
+# leading trivia — yaml-1.2.2 messy-3 no trailing newline
+
+%YAML 1.2
+%TAG !custom! tag:example.com,2024:
+---
+plain:    current spec value
+integer:      12345
+negative:        -456
+octal:    0o755
+hex:         0xFF
+infinity:    .inf
+neg_inf:  -.inf
+nan: .nan
+bool_true: true
+bool_false:      false
+bool_True:    True
+bool_FALSE:              FALSE
+null_val:    null
+tilde:  ~
+double_q: "tab:\t hex:\x41 unicode:\U0001F680 null:\0"
+named_esc: "\a bell \b bs \e esc"
+single_q: 'literal \n is two chars'
+multiline: "line one \
+ continued"
+literal: |
+ line one
+ line two
+literal_strip: |-
+ stripped
+folded: >-
+ folded compact
+tag_str: !!str 123
+tag_int: !!int "456"
+tag_null: !!null ""
+tag_binary: !!binary R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7
+custom: !custom!MyType {data: val,id: 42}
+verbatim: !<tag:example.com,2024:custom> val
+flow_obj: {name: Alice,age: 30,active: true}
+flow_trailing: {a: 1,b: 2,}
+sequence:    [1,2,"three",true,false,null,0o7,0xFF,.inf]
+mapping:      {a: 1,b: 2,c: {d: 3}}
+defaults: &defaults {adapter: pg,host: localhost,port: 5432}
+extra: &extra {timeout: 30,retries: 3}
+merged: {<<: [*defaults,*extra],database: dev}
+anchor_str: &greet "Hello"
+alias_str: *greet
+timestamp: 2024-12-21T15:30:00Z
+date: 2024-12-21
+deep: {l1: {val: L1,l2: {val: L2,l3: {val: L3,l4: {val: L4,l5: {val: L5,arr: [{i: 1,n: {deep: true}},{i: 2,mat: [[1,2,3],[4,5,[6,7,[8]]]]}]}}}}}}
+unicode: "Zażółć gęślą jaźń 🚀"
+last: value

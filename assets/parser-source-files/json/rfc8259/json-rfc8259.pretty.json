@@ -1,9 +1,7 @@
-
-
-    {
+{
     "doubleQuoted": "standard JSON string",
     "withEscapes": "tab:\there\nnewline\r\ncarriage return",
-    "unicodeEscape": "\u0048\u0065\u006C\u006C\u006F",
+    "unicodeEscape": "Hello",
     "quotedKey": "JSON requires quoted keys",
     "_underscoreKey": "keys can start with underscore",
     "$dollarKey": "keys can start with dollar sign",
@@ -48,6 +46,38 @@
         "level1": {
             "level2": {
                 "level3": "deeply nested"
+            }
+        }
+    },
+    "deepNesting": {
+        "level1": {
+            "value": "L1",
+            "level2": {
+                "value": "L2",
+                "level3": {
+                    "value": "L3",
+                    "level4": {
+                        "value": "L4",
+                        "level5": {
+                            "value": "L5",
+                            "arrayOfObjects": [
+                                {
+                                    "item": 1,
+                                    "nested": {
+                                        "deep": true
+                                    }
+                                },
+                                {
+                                    "item": 2,
+                                    "matrix": [
+                                        [1, 2, 3],
+                                        [4, 5, [6, 7, [8]]]
+                                    ]
+                                }
+                            ]
+                        }
+                    }
+                }
             }
         }
     },

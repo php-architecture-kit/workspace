@@ -1,0 +1,44 @@
+
+# leading trivia — yaml-1.2.1 messy-3 no trailing newline
+
+%YAML 1.2
+%TAG !ns! tag:yaml.org,2002:
+---
+plain:    editorial value
+integer:      98765
+negative:        -42
+octal:    0o644
+hex:         0xDEAD
+infinity:    .inf
+neg_inf:  -.inf
+nan: .nan
+bool_true: true
+bool_false:      false
+bool_True:    True
+bool_FALSE:              FALSE
+null_val:    null
+tilde:  ~
+double_q: "null:\0 bell:\a tab:\t escape:\e"
+double_hex: "\x48\x65\x6C\x6C\x6F"
+single_q: 'no escapes: \t literal'
+multiline: "line one \
+ continued"
+literal: |
+ line one
+ line two
+folded: >-
+ folded compact
+tag_str: !!str 42
+tag_int: !!int "17"
+tag_null: !!null ""
+tag_binary: !!binary SGVsbG8gV29ybGQ=
+tag_ns: !ns!mytype {id: 1,data: val}
+flow_obj: {name: Alice,age: 30,active: true}
+sequence:    [1,2,"three",true,false,null,0o7,0xF,.inf]
+mapping:      {a: 1,b: 2,c: {d: 3}}
+base: &base {host: localhost,port: 5432,adapter: pg}
+merged: {<<: *base,database: dev}
+timestamp: 2009-10-01T12:00:00Z
+deep: {l1: {val: L1,l2: {val: L2,l3: {val: L3,l4: {val: L4,l5: {val: L5,arr: [{i: 1,n: {deep: true}},{i: 2}]}}}}}}
+unicode: "Zażółć gęślą jaźń 🎯"
+last: value

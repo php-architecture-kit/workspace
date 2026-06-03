@@ -1,0 +1,103 @@
+
+
+
+
+
+# leading comment — messy yaml 1.1
+
+%YAML 1.1
+%TAG !custom! tag:example.com,2005:
+---
+# === chaotic spacing starts here ===
+plain_string:    value with extra spaces
+integer:      12345
+bool_yes:    yes
+bool_no:         no
+bool_on: on
+bool_off:          off
+bool_y:    y
+bool_n: n
+
+
+# comment between entries
+octal:     0755
+null_val: null
+tilde:
+  ~
+double_q:         "tab:\t here"
+single_q:  'single ''quoted'''
+
+
+literal: |
+    literal line one
+    literal line two
+
+    blank preserved
+folded: >-
+    folded line 1
+    folded line 2
+
+timestamp:    !!timestamp 2005-01-18T12:30:00Z
+binary: !!binary |
+    R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7
+omap: !!omap
+    - first:   1
+    - second:    2
+    - third:           3
+
+set: !!set
+    ? item1
+    ? item2
+    ?       item3
+
+custom:      !custom!MyType {data: value,id:      42}
+
+sequence:
+   - first item
+   -    second item
+   -          third item
+   - [inline, seq, here]
+
+mapping:
+    a:    1
+    b:
+      2
+               c: value three
+    d: {nested:    {deep:    value}}
+
+defaults: &defaults
+           adapter:   postgres
+           host:           localhost
+           port: 5432
+dev:
+  <<: *defaults
+  database:    dev_db
+
+deep_nesting:
+ level1:
+   value:    L1
+   level2:
+      value: L2
+      level3:
+          value: L3
+          level4:
+              value:    L4
+              level5:
+                    value: L5
+                    array_of_objects:
+                     - item:    1
+                       nested: {deep:    yes}
+                     - item: 2
+                       matrix:
+                         - [1,2,3]
+                         - [4, 5, [6, 7, [8]]]
+
+unicode: {polish: "Zażółć gęślą jaźń",cyrillic: "Привет мир",emoji: "🚀"}
+
+last_key: last value
+
+...
+
+# trailing comment after end marker
+
+

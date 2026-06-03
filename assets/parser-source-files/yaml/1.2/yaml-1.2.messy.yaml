@@ -1,0 +1,109 @@
+
+
+
+
+
+# leading comment — messy yaml 1.2
+
+%YAML 1.2
+%TAG !custom! tag:example.com,2009:
+---
+# strict booleans only in yaml 1.2
+plain_string:    This is a plain scalar
+double_quoted:          "tab:\t escaped"
+single_quoted: 'literal ''it'''
+
+
+integer:   12345
+negative:      -456
+octal:    0o755
+hex:         0xFF
+infinity:    .inf
+neg_inf:         -.inf
+nan:    .nan
+float:
+  3.14159
+bool_true: true
+bool_false:    false
+bool_True:      True
+bool_FALSE:              FALSE
+null_val:      null
+tilde:
+  ~
+
+
+# json-compatible section
+json_obj:      {"key": "value","num":         42,"bool": true}
+
+literal: |
+    line one preserved
+    line two preserved
+
+    blank preserved
+folded: >-
+    folded line 1
+    folded line 2
+
+explicit_str:    !!str 123
+explicit_int:         !!int "456"
+explicit_null: !!null ""
+binary: !!binary |
+    R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7
+
+custom:      !custom!MyType {data: value,id:      42}
+
+sequence:
+   - first item
+   -    second item
+   -          third item
+   - [inline, seq, here]
+   - true
+   - false
+   - null
+   - 0o755
+
+mapping:
+    a:    1
+    b:
+      2
+               c: value three
+    d: {nested:    {deep:    value}}
+
+defaults: &defaults
+           adapter:   postgres
+           host:           localhost
+           port: 5432
+dev:
+  <<: *defaults
+  database:    dev_db
+
+deep_nesting:
+ level1:
+   value:    L1
+   level2:
+      value: L2
+      level3:
+          value: L3
+          level4:
+              value:    L4
+              level5:
+                    value: L5
+                    array_of_objects:
+                     - item:    1
+                       nested: {deep:    true}
+                     - item: 2
+                       matrix:
+                         - [1,2,3]
+                         - [4, 5, [6, 7, [8]]]
+
+timestamps: {canonical: 2009-07-01T10:00:00Z,date: 2009-07-01}
+
+unicode: {polish: "Zażółć gęślą jaźń",emoji: "🚀"}
+
+last_key: last value
+
+...
+
+# trailing comment after end marker
+
+

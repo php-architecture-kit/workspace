@@ -1,0 +1,235 @@
+%YAML 1.2
+%TAG !ns! tag:yaml.org,2002:
+---
+# === YAML 1.2.1 REPRESENTATIVE FILE ===
+# YAML 1.2.1 (October 2009) — Editorial revision of 1.2, no normative changes
+# Uses %YAML 1.2 directive (no separate 1.2.1 version directive)
+
+# === SCALARS — PLAIN (UNQUOTED) ===
+plain_string: This is a plain scalar value
+plain_with_colon: value after colon is fine here
+plain_integer: 98765
+plain_float: 2.71828
+plain_boolean_true: true
+plain_boolean_false: false
+plain_null: null
+plain_tilde: ~
+
+# === SCALARS — QUOTED ===
+double_quoted: "Escaped sequences: \0 null, \a bell, \b backspace, \e escape"
+double_escape_full: "tab:\t vt:\v ff:\f cr:\r space:\  quote:\""
+double_unicode_4: "four-digit: éüñ"
+double_unicode_8: "eight-digit: \U0001F600\U0001F4BB"
+double_hex: "hex escape: \x41\x42\x43"
+single_quoted: 'No escape sequences: \t is literal backslash-t'
+single_with_double_quote: 'Has ''embedded'' single quotes'
+empty_double: ""
+empty_single: ''
+multiline_double: "first line \
+  continuation here"
+
+# === SCALARS — LITERAL BLOCK (preserves newlines) ===
+literal_block: |
+  Line one preserved.
+  Line two preserved.
+
+  Blank line kept.
+  Final newline kept.
+
+literal_strip: |-
+  No trailing newline.
+  Ends here.
+
+literal_keep: |+
+  Extra trailing newlines.
+
+
+literal_indented: |2
+  Explicit 2-space indent.
+  Second line.
+
+# === SCALARS — FOLDED BLOCK (newlines become spaces) ===
+folded_block: >
+  Folded text flows together.
+  This continues on next line.
+
+  New paragraph after blank.
+
+folded_strip: >-
+  Folded strip no newline at end.
+
+folded_keep: >+
+  Keep trailing newlines.
+
+
+folded_indented: >2
+  Explicit 2-space indent folded.
+  Second line.
+
+# === YAML 1.2.1 — BOOLEANS (strict: only true/false) ===
+bool_true: true
+bool_false: false
+bool_True: True
+bool_False: False
+bool_TRUE: TRUE
+bool_FALSE: FALSE
+
+# === NUMBERS ===
+integers:
+  decimal: 42
+  positive: +42
+  negative: -42
+  octal: 0o644
+  hex_lower: 0xdeadbeef
+  hex_upper: 0xDEADBEEF
+
+floats:
+  simple: 2.71828
+  negative: -0.5
+  small_exp: 1.5e-3
+  large_exp: 6.022e+23
+  infinity: .inf
+  neg_infinity: -.inf
+  nan: .nan
+
+# === TAGS — CORE SCHEMA ===
+tag_string: !!str 42
+tag_int: !!int "0o17"
+tag_float: !!float "1.5"
+tag_bool: !!bool "false"
+tag_null: !!null "null"
+tag_binary: !!binary |
+  SGVsbG8gV29ybGQ=
+tag_seq: !!seq [1, 2, 3]
+tag_map: !!map {key: value}
+tag_ns: !ns!mytype {id: 1, data: test}
+
+# === FLOW COLLECTIONS ===
+flow_object: {name: Alice, age: 30, active: true}
+flow_array: [1, "two", 3.0, true, null, ~]
+flow_nested: {outer: {inner: {deep: value}}}
+flow_mixed: {items: [1, 2, 3], meta: {count: 3}}
+
+# === BLOCK COLLECTIONS ===
+block_mapping:
+  name: Alice
+  age: 30
+  active: true
+  tags:
+    - admin
+    - user
+
+block_sequence:
+  - 1
+  - "two"
+  - true
+  - null
+  - {nested: object}
+  - [nested, array]
+
+mixed_collection:
+  - key: value
+    list:
+      - a
+      - b
+  - another: entry
+    nested:
+      deep: value
+
+# === COMPLEX KEYS ===
+? [list, as, key]
+: value for list key
+
+? {map: as_key}
+: value for map key
+
+# === ANCHORS, ALIASES, MERGE KEYS ===
+base: &base
+  host: localhost
+  port: 5432
+  adapter: postgres
+
+dev: &dev
+  <<: *base
+  database: dev_db
+  debug: true
+
+test:
+  <<: *dev
+  database: test_db
+  debug: false
+
+scalar_anchor: &greeting Hello World
+greeting_alias: *greeting
+
+# === MULTI-LINE KEYS AND VALUES ===
+? |
+  This is a block scalar
+  used as a mapping key
+: corresponding value
+
+# === TIMESTAMPS (strings in core schema) ===
+timestamps:
+  iso8601_utc: 2009-10-01T12:00:00Z
+  iso8601_offset: 2009-10-01T12:00:00+02:00
+  space_separated: 2009-10-01 12:00:00
+  date_only: 2009-10-01
+
+# === SPECIAL VALUES ===
+null_forms:
+  keyword: null
+  tilde: ~
+  empty:
+
+bool_forms:
+  - true
+  - false
+  - True
+  - False
+  - TRUE
+  - FALSE
+
+# === UNICODE ===
+unicode:
+  polish: "Zażółć gęślą jaźń"
+  cyrillic: "Привет мир"
+  chinese: "你好世界"
+  japanese: "日本語テスト"
+  arabic: "مرحبا بالعالم"
+  emoji: "🎯 Target 🔍 Search 📊 Data"
+
+# === DEEP NESTING (5+ levels) ===
+deep_nesting:
+  level1:
+    value: L1
+    info: first level
+    level2:
+      value: L2
+      info: second level
+      level3:
+        value: L3
+        info: third level
+        level4:
+          value: L4
+          info: fourth level
+          level5:
+            value: L5
+            info: fifth level
+            array_of_objects:
+              - item: 1
+                label: first
+                nested:
+                  deep: true
+                  flag: yes_it_is_deep
+              - item: 2
+                label: second
+                matrix:
+                  - [1, 2, 3]
+                  - [4, 5, [6, 7, [8, [9]]]]
+
+...
+---
+# Second document
+second: true
+list: [a, b, c]
+...

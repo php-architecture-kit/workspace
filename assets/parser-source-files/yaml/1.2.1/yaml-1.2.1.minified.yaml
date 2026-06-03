@@ -1,0 +1,50 @@
+%YAML 1.2
+%TAG !ns! tag:yaml.org,2002:
+---
+plain: scalar value
+integer: 98765
+negative: -42
+float: 2.71828
+exponential: 6.022e+23
+small_exp: 1.5e-3
+octal: 0o644
+hex: 0xDEAD
+infinity: .inf
+neg_inf: -.inf
+nan: .nan
+bool_true: true
+bool_false: false
+bool_True: True
+bool_FALSE: FALSE
+null_val: null
+tilde: ~
+double_q: "null:\0 bell:\a escape:\e tab:\t"
+double_hex: "\x41\x42\x43"
+single_q: 'no escapes: \t is literal'
+multiline: "line one \
+ continued"
+literal: |
+ line one
+ line two
+literal_indent: |2
+  explicit indent
+folded: >-
+ compact folded
+folded_indent: >2
+  folded explicit indent
+tag_str: !!str 42
+tag_int: !!int "17"
+tag_float: !!float "2.0"
+tag_null: !!null ""
+tag_binary: !!binary SGVsbG8gV29ybGQ=
+tag_ns: !ns!mytype {id: 1,data: val}
+flow_obj: {name: Alice,age: 30,active: true}
+flow_arr: [1,"two",3.0,true,null,~]
+flow_nested: {a: {b: {c: {d: {e: done}}}}}
+base: &base {host: localhost,port: 5432,adapter: pg}
+dev: {<<: *base,database: dev_db}
+anchor_str: &greet Hello
+alias_str: *greet
+timestamp: 2009-10-01T12:00:00Z
+date: 2009-10-01
+deep: {l1: {val: L1,l2: {val: L2,l3: {val: L3,l4: {val: L4,l5: {val: L5,arr: [{i: 1,n: {deep: true}},{i: 2,mat: [[1,2,3],[4,5,[6,7,[8,[9]]]]]}]}}}}}}

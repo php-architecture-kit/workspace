@@ -1,0 +1,97 @@
+# leading comment messy-2 yaml 1.2.1
+# editorial revision of 1.2
+
+%YAML 1.2
+%TAG !ns! tag:yaml.org,2002:
+---
+plain:          editorial value
+integer:                  -98765
+octal_perms:           0o644
+hex_val:    0xDEADBEEF
+infinity_val:      .inf
+neg_infinity:           -.inf
+nan_val:    .nan
+bool_true:   true
+bool_false:        false
+bool_True:     True
+bool_False:          False
+null_val:   null
+tilde:     ~
+double_q:       "null:\0 bell:\a tab:\t escape:\e"
+double_hex:          "\x48\x65\x6C\x6C\x6F"
+single_q:           'literal \t is literal'
+multiline_dq:          "line one \
+ continued here"
+
+literal_block: |
+              leading four spaces
+              second line here
+
+              blank preserved
+literal_strip: |-
+              no trailing newline
+folded_block: >
+              folded continues
+              on next line
+
+              paragraph here
+
+tag_str:          !!str true
+tag_int:      !!int "0o644"
+tag_float:       !!float "2.71828"
+tag_bool:     !!bool "false"
+tag_null:     !!null "~"
+tag_binary: !!binary |
+             SGVsbG8gV29ybGQ=
+tag_ns:       !ns!item {id:   42,label:      "item label"}
+
+flow_obj: {name: Bob,age:     25,roles: [admin,user]}
+flow_nested: {outer: {inner: {deep:      val}}}
+
+sequence:
+               - one
+               - two
+               -    three
+               -          {inline: obj,val: 42}
+               - [a,     b,  c]
+               - true
+               - false
+               - null
+
+mapping:
+             alpha:         1
+             beta:
+               2
+             gamma: {nested: {deep:      val}}
+             delta:    [x,y,z]
+
+base: &base {host: db.local,port: 5432,adapter: pg}
+dev: {<<: *base,database: dev_db}
+test: {<<: *base,database: test_db}
+
+deep_nesting:
+          level1:
+            value:       L1
+            level2:
+              value:     L2
+              level3:
+                value:   L3
+                level4:
+                  value: L4
+                  level5:
+                             value: L5
+                             array_of_objects:
+                               - {item: 1,label: first,nested: {deep: true}}
+                               - item:     2
+                                 label: second
+                                 matrix: [[1,2,3],[4,5,[6,7,[8,[9]]]]]
+
+timestamps: {utc: 2009-10-01T12:00:00Z,offset: 2009-10-01T12:00:00+02:00,date: 2009-10-01}
+
+unicode_vals: ["Zażółć gęślą jaźń","Привет мир","日本語テスト","مرحبا","🎯🔍📊"]
+
+last_entry: done
+
+# trailing comment messy-2 yaml 1.2.1
+# second trailing line
+

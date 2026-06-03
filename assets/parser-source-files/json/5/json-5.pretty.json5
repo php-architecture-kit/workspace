@@ -1,0 +1,129 @@
+// JSON5 Example - Extended JSON (superset of JSON)
+/*
+ * JSON5 adds: unquoted keys, single-quoted strings, trailing commas,
+ * comments, hex numbers, Infinity, NaN, explicit +, leading/trailing decimal,
+ * multi-line strings, and extended whitespace characters.
+ */
+{
+    // === STRINGS ===
+    "doubleQuoted": "standard JSON string",
+    'singleQuoted': 'JSON5 allows single-quoted strings',
+    "withEscapes": "tab:\there\nnewline\r\ncarriage return\vvertical\fformfeed",
+    "unicodeEscape": "Hello",
+    "hexEscape": "Hello",
+    "multiLine": "This is a long string \
+that continues on the next line \
+using JSON5 line continuation",
+
+    // === UNQUOTED KEYS (IdentifierName) ===
+    unquotedKey: "JSON5 allows unquoted keys",
+    _underscoreKey: "keys can start with underscore",
+    $dollarKey: "keys can start with dollar sign",
+    camelCaseKey: "standard camelCase",
+    PascalCaseKey: "PascalCase also works",
+
+    // === NUMBERS ===
+    integer: 123,
+    negative: -456,
+    explicitPositive: +789,
+    decimal: 123.456,
+    leadingDecimal: .789,
+    trailingDecimal: 123.,
+    exponent: 1.23e10,
+    exponentNegative: 1.23e-10,
+    exponentPositive: 1.23E+10,
+    hexLower: 0xdecaf,
+    hexUpper: 0XDECAF,
+    hexNegative: -0xC0FFEE,
+    hexPositive: +0xFF,
+
+    // === SPECIAL VALUES ===
+    positiveInfinity: Infinity,
+    negativeInfinity: -Infinity,
+    explicitPosInfinity: +Infinity,
+    notANumber: NaN,
+    boolTrue: true,
+    boolFalse: false,
+    nullValue: null,
+
+    // === ARRAYS ===
+    emptyArray: [],
+    singleElementArray: [42],
+    simpleArray: [1, 2, 3,],
+    mixedArray: [
+        1,
+        'string',
+        true,
+        null,
+        {nested: "object"},
+        ["nested", "array",],
+    ],
+
+    // === OBJECTS ===
+    emptyObject: {},
+    singlePropertyObject: {onlyKey: 'single'},
+    nestedObject: {
+        level1: {
+            level2: {
+                level3: "deeply nested",
+            },
+        },
+    },
+
+    /*
+     * Deep nesting demonstration
+     * Objects can nest arbitrarily deep inside arrays inside objects.
+     */
+    deepNesting: {
+        level1: {
+            value: 'L1',
+            level2: {
+                value: 'L2',
+                level3: {
+                    value: 'L3',
+                    level4: {
+                        value: 'L4',
+                        level5: {
+                            value: 'L5',
+                            arrayOfObjects: [
+                                // first item: object with nested object
+                                {
+                                    item: 1,
+                                    nested: {
+                                        deep: true,
+                                    },
+                                },
+                                // second item: object with nested matrix
+                                {
+                                    item: 2,
+                                    matrix: [
+                                        [1, 2, 3,],
+                                        [4, 5, [6, 7, [8,],],],
+                                    ],
+                                },
+                            ],
+                        },
+                    },
+                },
+            },
+        },
+    },
+
+    // === COMMENTS IN VARIOUS POSITIONS ===
+    /* inline block comment */ commentedKey: "value",
+    beforeColonComment /* comment before colon */ : "after comment",
+
+    arrayWithComments: [
+        // comment before first element
+        "first",
+        "second", // inline comment after element
+        /*
+         * Block comment before element
+         */
+        "third",
+        // comment after last element (trailing comma follows)
+    ],
+
+    // last property with trailing comma allowed in JSON5
+    lastProperty: "JSON5 allows trailing comma here",
+}

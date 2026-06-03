@@ -1,0 +1,37 @@
+
+# leading trivia — yaml-1.1 messy-3 no trailing newline
+
+%YAML 1.1
+%TAG !custom! tag:example.com,2005:
+---
+plain:    value
+integer:      12345
+bool_yes:    yes
+bool_no:         no
+bool_on: on
+bool_off:    off
+bool_y:   y
+bool_n: n
+bool_true: true
+octal: 0755
+null_val: null
+tilde: ~
+double_q: "tab:\t newline:\n"
+single_q: 'literal ''quoted'''
+literal: |
+ line one
+ line two
+folded: >-
+ folded compact
+timestamp: !!timestamp 2005-01-18T12:30:00Z
+binary: !!binary R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7
+omap: !!omap [{first: 1},{second: 2}]
+set: !!set {item1: null,item2: null}
+custom: !custom!MyType {data: val,id: 1}
+sequence:    [1,2,"three",yes,null]
+mapping:      {a: 1,b: 2,c: {d: 3}}
+base: &base {adapter: pg,host: localhost,port: 5432}
+merged: {<<: *base,database: dev}
+deep: {l1: {val: L1,l2: {val: L2,l3: {val: L3,l4: {val: L4,l5: {val: L5,arr: [{i: 1,n: {deep: yes}},{i: 2}]}}}}}}
+unicode: "Zażółć gęślą jaźń 🚀"
+last: value

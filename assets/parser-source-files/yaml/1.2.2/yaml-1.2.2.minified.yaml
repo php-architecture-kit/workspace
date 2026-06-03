@@ -1,0 +1,63 @@
+%YAML 1.2
+%TAG !custom! tag:example.com,2024:
+---
+plain: plain scalar
+integer: 12345
+negative: -456
+float: 3.14159
+exponential: 1.23e+10
+octal: 0o755
+hex: 0xFF
+infinity: .inf
+neg_inf: -.inf
+nan: .nan
+bool_true: true
+bool_false: false
+bool_True: True
+bool_FALSE: FALSE
+null_val: null
+tilde: ~
+double_q: "tab:\t newline:\n hex:\x41 unicode:\U0001F680"
+named_esc: "\0 null \a bell \b bs \e esc \N nl \_ nbsp \L lsep \P psep"
+single_q: 'literal \t no escape ''quoted'''
+multiline: "line one \
+ continued"
+literal: |
+ line 1
+ line 2
+literal_strip: |-
+ stripped
+literal_keep: |+
+ kept
+
+literal_indent: |2
+  explicit indent
+folded: >-
+ compact folded
+folded_keep: >+
+ kept newlines
+
+folded_indent: >2
+  folded indent
+tag_str: !!str 123
+tag_int: !!int "456"
+tag_float: !!float "3.14"
+tag_bool: !!bool "true"
+tag_null: !!null ""
+tag_binary: !!binary R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7
+tag_seq: !!seq [1,2,3]
+tag_map: !!map {key: val}
+custom: !custom!MyType {data: val,id: 42}
+verbatim: !<tag:example.com,2024:custom> val
+flow_obj: {key1: v1,key2: v2,nested: {deep: ok}}
+flow_arr: [1,"two",true,false,null,.inf,0o7,0xFF]
+flow_trailing: {a: 1,b: 2,}
+base: &defaults {adapter: pg,host: localhost,port: 5432}
+dev: {<<: *defaults,database: dev_db}
+extra: &extra {timeout: 30,retries: 3}
+staging: {<<: [*defaults,*extra],database: staging}
+anchor_str: &greet "Hello World"
+alias_str: *greet
+timestamp: 2024-12-21T15:30:00Z
+date: 2024-12-21
+deep: {l1: {val: L1,l2: {val: L2,l3: {val: L3,l4: {val: L4,l5: {val: L5,arr: [{i: 1,n: {deep: true}},{i: 2,mat: [[1,2,3],[4,5,[6,7,[8]]]]}]}}}}}}

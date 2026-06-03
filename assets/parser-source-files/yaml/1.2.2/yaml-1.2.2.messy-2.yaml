@@ -1,0 +1,118 @@
+# leading comment messy-2 yaml 1.2.2
+# current yaml specification — all features
+
+%YAML 1.2
+%TAG !custom! tag:example.com,2024:
+---
+plain:          current spec value
+integer:                  -99999
+octal_perms:           0o755
+hex_color:    0xFF5733
+infinity_val:      .inf
+neg_infinity:           -.inf
+nan_val:    .nan
+bool_true:   true
+bool_false:        false
+bool_True:     True
+bool_False:          False
+null_val:   null
+tilde:     ~
+double_q:       "tab:\t hex:\x41 unicode:\U0001F680 null:\0"
+named_esc:          "\a bell \b bs \e esc \N nl \_ nbsp"
+single_q:           'literal \n is two chars here'
+multiline_str:          "part one \
+ part two no newline"
+
+literal_block: |
+              four space indent block
+              second line here
+
+              blank preserved
+literal_strip: |-
+              no trailing newline here
+literal_keep: |+
+              kept trailing newlines
+
+literal_indent: |2
+              explicit two indent
+              second explicit
+folded_block: >
+              folded text flows together
+              continues on next line
+
+              paragraph break
+folded_strip: >-
+              folded strip compact
+folded_indent: >2
+              folded explicit indent
+
+tag_str:          !!str 42
+tag_int:      !!int "0o644"
+tag_float:       !!float "2.71828"
+tag_bool:     !!bool "true"
+tag_null:     !!null "null"
+tag_binary: !!binary |
+             R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7
+tag_seq: !!seq [a,b,c]
+tag_map: !!map {x: 1,y: 2}
+custom_tagged:       !custom!Item {id:   99,label: "item label",active: true}
+verbatim_tagged:          !<tag:example.com,2024:node> value
+
+flow_obj: {name: Bob,age:     25,roles: [admin, user, viewer]}
+flow_nested: {outer: {inner: {deep:      true}}}
+flow_trailing: {x: 1,y: 2,z: 3,}
+
+sequence:
+               - one
+               - two
+               -    three
+               -          {inline: obj,val: 42}
+               - [a,     b,  c]
+               - true
+               - false
+               - null
+               - 0o644
+
+mapping:
+             alpha:         1
+             beta:
+               2
+             gamma: {nested: {deep:      val}}
+             delta:    [x,y,z]
+
+defaults: &defaults {adapter: pg,host: db.local,port: 5432}
+extra: &extra {timeout: 30,retries: 3}
+dev: {<<: *defaults,database: dev_db}
+staging: {<<: [*defaults,*extra],database: staging_db}
+anchor_scalar: &msg "Hello World"
+alias_scalar: *msg
+
+timestamps:
+  canonical:             2024-12-21T15:30:00Z
+  iso8601:      2024-12-21t15:30:00.123+01:00
+  spaced:           2024-12-21 15:30:00
+  date:       2024-12-21
+
+deep_nesting:
+          level1:
+            value:       L1
+            level2:
+              value:     L2
+              level3:
+                value:   L3
+                level4:
+                  value: L4
+                  level5:
+                             value: L5
+                             array_of_objects:
+                               - {item: 1,nested: {deep: true}}
+                               - item:     2
+                                 matrix: [[1,2,3],[4,5,[6,7,[8]]]]
+
+unicode_vals: ["Zażółć gęślą jaźń","Привет мир","你好世界","日本語","العربية","🚀💻🔧"]
+
+last_entry: done
+
+# trailing comment messy-2 yaml 1.2.2
+# end of representative file
+

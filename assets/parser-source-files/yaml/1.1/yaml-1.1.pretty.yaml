@@ -1,0 +1,183 @@
+%YAML 1.1
+%TAG !custom! tag:example.com,2005:
+---
+# === YAML 1.1 REPRESENTATIVE FILE ===
+# YAML 1.1 (January 2005) — %TAG directive, extended booleans, type library
+
+# === SCALARS — PLAIN (UNQUOTED) ===
+plain_string: This is a plain scalar
+plain_integer: 12345
+plain_float: 3.14159
+
+# === SCALARS — QUOTED ===
+double_quoted: "Double quoted with escapes: \t tab, \n newline, \\ backslash"
+double_unicode: "Unicode escapes: Hello \U0001F680"
+single_quoted: 'Single quoted: no escapes, ''double single quote'' for literal'
+empty_double: ""
+empty_single: ''
+
+# === SCALARS — LITERAL BLOCK (preserves newlines) ===
+literal_block: |
+  This is a literal block scalar.
+  Newlines are preserved exactly.
+
+  Including blank lines.
+
+literal_strip: |-
+  Trailing newline stripped.
+  No newline at end.
+
+literal_keep: |+
+  Trailing newlines kept.
+
+
+# === SCALARS — FOLDED BLOCK (newlines become spaces) ===
+folded_block: >
+  This is a folded block scalar.
+  Single newlines become spaces.
+
+  Blank lines become newlines.
+
+folded_strip: >-
+  Trailing newline stripped.
+  Becomes single line.
+
+folded_keep: >+
+  Trailing newlines kept.
+
+
+# === YAML 1.1 — EXTENDED BOOLEANS ===
+bool_true_canonical: true
+bool_false_canonical: false
+bool_yes: yes
+bool_no: no
+bool_on: on
+bool_off: off
+bool_y: y
+bool_n: n
+bool_true_upper: True
+bool_yes_upper: YES
+bool_on_upper: ON
+
+# === YAML 1.1 — OCTAL (leading zero) ===
+octal_permissions: 0755
+octal_mode: 0644
+octal_small: 07
+
+# === YAML 1.1 — TYPE LIBRARY TAGS ===
+timestamp_canonical: !!timestamp 2005-01-18T12:30:00Z
+timestamp_iso8601: !!timestamp 2005-01-18t12:30:00.123+01:00
+timestamp_spaced: !!timestamp 2005-01-18 12:30:00
+timestamp_date: !!timestamp 2005-01-18
+
+binary_data: !!binary |
+  R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7
+
+ordered_map: !!omap
+  - first: 1
+  - second: 2
+  - third: 3
+
+set_values: !!set
+  ? item1
+  ? item2
+  ? item3
+
+# === YAML 1.1 — CUSTOM TAGS ===
+custom_type: !custom!MyType {data: value, id: 42}
+
+# === BLOCK COLLECTIONS ===
+block_mapping:
+  key1: value1
+  key2: value2
+  nested:
+    deep:
+      deeper: value
+
+block_sequence:
+  - item1
+  - item2
+  - nested:
+      key: value
+  - - nested
+    - sequence
+
+empty_mapping: {}
+empty_sequence: []
+
+# === FLOW COLLECTIONS (JSON-like) ===
+flow_mapping: {key1: value1, key2: value2, nested: {deep: value}}
+flow_sequence: [1, 2, 3, "mixed", true, null]
+
+# === ANCHORS AND ALIASES ===
+defaults: &defaults
+  adapter: postgres
+  host: localhost
+  port: 5432
+
+development:
+  <<: *defaults
+  database: dev_db
+
+production:
+  <<: *defaults
+  database: prod_db
+  host: prod.example.com
+
+multi_merge: &extra
+  timeout: 30
+  retries: 3
+
+staging:
+  <<: [*defaults, *extra]
+  database: staging_db
+
+# === SPECIAL VALUES ===
+null_values:
+  - null
+  - ~
+  -
+
+numbers:
+  integer: 12345
+  positive: +12345
+  negative: -12345
+  float: 3.14159
+  exponential: 1.23e+10
+
+# === UNICODE ===
+unicode:
+  polish: "Zażółć gęślą jaźń"
+  cyrillic: "Привет мир"
+  chinese: "你好世界"
+  japanese: "日本語"
+  arabic: "العربية"
+  emoji: "🚀 Deploy 💻 Code 🔧"
+
+# === DEEP NESTING (5+ levels) ===
+deep_nesting:
+  level1:
+    value: L1
+    level2:
+      value: L2
+      level3:
+        value: L3
+        level4:
+          value: L4
+          level5:
+            value: L5
+            array_of_objects:
+              - item: 1
+                nested:
+                  deep: true
+              - item: 2
+                matrix:
+                  - [1, 2, 3]
+                  - [4, 5, [6, 7, [8]]]
+
+...
+---
+# Second document in the same stream
+second_document: yes
+values: [1, 2, 3]
+...

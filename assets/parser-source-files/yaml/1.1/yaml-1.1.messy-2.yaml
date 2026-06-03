@@ -1,0 +1,95 @@
+# leading comment messy-2
+# yaml 1.1 with type library chaos
+
+%YAML 1.1
+%TAG !custom! tag:example.com,2005:
+---
+plain:          value
+integer:                  -9999
+bool_yes:    YES
+bool_no:   NO
+bool_on:          ON
+bool_off:    OFF
+bool_y:   Y
+bool_n:       N
+bool_true:   true
+bool_false:        false
+octal_perms:           0755
+octal_mode:    0644
+null_val:   null
+tilde:     ~
+double_q:       "escapes: \t \n \\"
+single_q:           'single ''quoted'''
+
+literal_block: |
+              four spaces of indent
+              second line here
+
+              blank line preserved
+folded_block: >
+              folded text continues
+              on this line too
+
+              paragraph break here
+
+timestamp_full: !!timestamp 2005-01-18T12:30:00.500+02:00
+timestamp_date: !!timestamp       2005-01-18
+binary_data: !!binary |
+             R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7
+
+omap_data: !!omap
+           - alpha:   1
+           - beta:      2
+           - gamma:         3
+
+set_data: !!set
+          ?    alpha
+          ?        beta
+          ?   gamma
+
+custom_tagged:       !custom!Item {id:   99,label: "test item"}
+
+sequence:
+               - one
+               - two
+               -    three
+               -          {inline: obj,val: 42}
+               - [a,     b,  c]
+
+mapping:
+             alpha:         1
+             beta:
+               2
+             gamma: {nested: {deep:      val}}
+             delta:    [x,y,z]
+
+base_cfg: &cfg {adapter: pg,host: db.local,port: 5432}
+alias_cfg: *cfg
+merged_cfg: {<<: *cfg,database: test_db}
+
+multi_merge_base: &extra {timeout: 30,retries: 3}
+full_merged: {<<: [*cfg, *extra],database: staging}
+
+deep_nesting:
+          level1:
+            value:       L1
+            level2:
+              value:     L2
+              level3:
+                value:   L3
+                level4:
+                  value: L4
+                  level5:
+                             value: L5
+                             array_of_objects:
+                               - {item: 1,nested: {deep: yes}}
+                               - item:     2
+                                 matrix: [[1,2,3],[4,5,[6,7,[8]]]]
+
+unicode_vals: ["Zażółć gęślą jaźń","Привет мир","你好世界","العربية","🚀💻🔧"]
+
+last_entry: done
+
+# trailing comment — messy-2 pattern
+# end of document trivia
+

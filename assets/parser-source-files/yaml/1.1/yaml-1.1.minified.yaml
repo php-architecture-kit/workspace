@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !custom! tag:example.com,2005:
+---
+plain: scalar value
+integer: 12345
+negative: -456
+float: 3.14159
+exponential: 1.23e+10
+bool_yes: yes
+bool_no: no
+bool_on: on
+bool_off: off
+bool_y: y
+bool_n: n
+bool_true: true
+bool_false: false
+octal: 0755
+null_val: null
+tilde: ~
+double_q: "tab:\t newline:\n backslash:\\"
+single_q: 'literal ''quote'' here'
+literal: |
+ line 1
+ line 2
+folded: >-
+ compact folded single line
+timestamp: !!timestamp 2005-01-18T12:30:00Z
+binary: !!binary R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7
+omap: !!omap [{first: 1},{second: 2}]
+set: !!set {item1: null,item2: null}
+custom: !custom!MyType {data: val,id: 1}
+sequence: [1,"two",yes,null,~]
+mapping: {key1: val1,key2: val2,key3: 3}
+base: &base {adapter: pg,host: localhost,port: 5432}
+merged: {<<: *base,database: dev_db}
+anchor_val: &ref simple value
+alias_val: *ref
+deep: {l1: {val: L1,l2: {val: L2,l3: {val: L3,l4: {val: L4,l5: {val: L5,arr: [{i: 1,n: {deep: true}},{i: 2,mat: [[1,2,3],[4,5,[6,7,[8]]]]}]}}}}}}
