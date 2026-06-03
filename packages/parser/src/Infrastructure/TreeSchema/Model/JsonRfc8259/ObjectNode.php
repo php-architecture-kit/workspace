@@ -21,6 +21,5 @@ class ObjectNode extends Node
 
     /** @var GroupAttribute<TrailingWsNode|LeadingWsNode> */
     public GroupAttribute $trivia1 { get => $this->__get('trivia1'); }
-
     public StructureAttribute $endObject { get => $this->__get('endObject'); }
 }

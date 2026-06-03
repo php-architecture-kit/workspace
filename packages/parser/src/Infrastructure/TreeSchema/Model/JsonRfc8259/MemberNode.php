@@ -13,9 +13,7 @@ use PhpArchitecture\Parser\Foundation\Parsing\Model\Node;
 class MemberNode extends Node
 {
     public RawRegionAttribute $string { get => $this->__get('string'); }
-
     public GroupAttribute $trivia0 { get => $this->__get('trivia0'); }
-
     public StructureAttribute $colon { get => $this->__get('colon'); }
 
     /** @var GroupAttribute<InlineWsNode> */

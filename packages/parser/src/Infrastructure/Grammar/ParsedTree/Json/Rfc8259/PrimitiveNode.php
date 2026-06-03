@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Json\Rfc8259;
 
 use InvalidArgumentException;
-use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeInterface;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\ChoiceAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\RawContentAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\RawRegionAttribute;
@@ -68,7 +67,7 @@ class PrimitiveNode extends Node
                 throw new InvalidArgumentException("Content must be provided for number type.");
             }
             $this->primitive->setSelected(
-                new RawRegionAttribute(null, null, $content, 'number', null)
+                new RawRegionAttribute(null, null, $content, 'number', null),
             );
 
             return $this;
@@ -84,8 +83,8 @@ class PrimitiveNode extends Node
                     new StructureAttribute(true, 'doubleQuote', '"'),
                     $content,
                     'string',
-                    null
-                )
+                    null,
+                ),
             );
 
             return $this;

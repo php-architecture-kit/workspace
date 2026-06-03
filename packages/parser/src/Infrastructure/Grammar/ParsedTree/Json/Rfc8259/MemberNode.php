@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Json\Rfc8259;
 
-use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeInterface;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\ChoiceAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\GroupAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\NodeAttribute;
@@ -16,9 +15,7 @@ use PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Technical\Whitespac
 class MemberNode extends Node
 {
     public RawRegionAttribute $identifier { get => $this->attributes[0]; }
-
     public GroupAttribute $trivia0 { get => $this->attributes[1]; }
-
     public StructureAttribute $colon { get => $this->attributes[2]; }
 
     /** @var GroupAttribute<InlineWsNode> */

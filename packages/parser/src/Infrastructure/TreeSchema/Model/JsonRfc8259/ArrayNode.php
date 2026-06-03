@@ -22,6 +22,5 @@ class ArrayNode extends Node
 
     /** @var GroupAttribute<TrailingWsNode|LeadingWsNode> */
     public GroupAttribute $trivia1 { get => $this->__get('trivia1'); }
-
     public StructureAttribute $endArray { get => $this->__get('endArray'); }
 }

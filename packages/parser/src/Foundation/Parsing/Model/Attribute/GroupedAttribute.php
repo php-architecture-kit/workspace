@@ -25,7 +25,6 @@ class GroupedAttribute implements NodeAttributeInterface, MetaInterface
 
     /** @var NodeAttributeInterface[] */
     public array $attributes;
-
     private ?SequenceValidityCursor $validityCursor = null;
     private ?NestedSequence $nestedSequence = null;
 
@@ -165,6 +164,43 @@ class GroupedAttribute implements NodeAttributeInterface, MetaInterface
         }
 
         return $this->attributes[$this->contentOffsets[$contentIndex]];
+    }
+
+    /**
+     * Returns all attributes that make up the unit at the given index:
+     * the content attribute together with its surrounding structural
+     * attributes (trivia, comma, etc.).
+     *
+     * Requires withValidSequence() to have been called first.
+     *
+     * @return NodeAttributeInterface[]
+     * @throws OutOfRangeException when index is out of bounds
+     */
+    public function getUnit(int $contentIndex): array
+    {
+        $n = count($this->contentOffsets);
+
+        if ($contentIndex < 0 || $contentIndex >= $n) {
+            throw new OutOfRangeException(
+                "Content index {$contentIndex} is out of range [0, {$n}).",
+            );
+        }
+
+        if ($contentIndex === 0) {
+            $start = 0;
+            $end   = $n === 1
+                ? count($this->attributes) - 1
+                : $this->contentOffsets[1] - 1;
+        } elseif ($contentIndex === $n - 1) {
+            $start = $this->contentOffsets[$contentIndex - 1] + 1;
+            $end   = $this->contentOffsets[$contentIndex];
+        } else {
+            // Middle unit: preceding separator + content + following separator
+            $start = $this->contentOffsets[$contentIndex - 1] + 1;
+            $end   = $this->contentOffsets[$contentIndex + 1] - 1;
+        }
+
+        return array_values(array_slice($this->attributes, $start, $end - $start + 1));
     }
 
     public function getName(): string

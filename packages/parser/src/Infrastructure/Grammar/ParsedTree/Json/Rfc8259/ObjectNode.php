@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Json\Rfc8259;
 
 use PhpArchitecture\Parser\Foundation\Matching\Model\NestedSequence;
-use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeInterface;
+use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeAttributeInterface;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\GroupAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\GroupedAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\NodeAttribute;
@@ -13,6 +13,7 @@ use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\SequenceValidityCu
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\StructureAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Node;
 use PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Technical\Whitespace\EmptyLineNode;
+use PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Technical\Whitespace\InlineWsNode;
 use PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Technical\Whitespace\LeadingWsNode;
 use PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Technical\Whitespace\TrailingWsNode;
 
@@ -20,15 +21,14 @@ class ObjectNode extends Node
 {
     public StructureAttribute $beginObject { get => $this->attributes[0]; }
 
-    /** @var GroupAttribute<TrailingWsNode|EmptyLineNode|LeadingWsNode> */
+    /** @var GroupAttribute<TrailingWsNode|EmptyLineNode|InlineWsNode|LeadingWsNode> */
     public GroupAttribute $trivia0 { get => $this->attributes[1]; }
 
-    /** @var GroupedAttribute<MemberNode|StructureAttribute|TrailingWsNode|EmptyLineNode|LeadingWsNode> */
+    /** @var GroupedAttribute<MemberNode|StructureAttribute|TrailingWsNode|EmptyLineNode|InlineWsNode|LeadingWsNode> */
     public GroupedAttribute $members { get => $this->attributes[2]; }
 
-    /** @var GroupAttribute<TrailingWsNode|EmptyLineNode|LeadingWsNode> */
+    /** @var GroupAttribute<TrailingWsNode|EmptyLineNode|InlineWsNode|LeadingWsNode> */
     public GroupAttribute $trivia1 { get => $this->attributes[3]; }
-
     public StructureAttribute $endObject { get => $this->attributes[4]; }
 
     public static function create(): self
@@ -88,6 +88,18 @@ class ObjectNode extends Node
         $this->members->removeUnit($index);
 
         return $this;
+    }
+
+    /**
+     * Returns all attributes making up the member unit at the given index
+     * (the MemberNode attribute together with its trivia and comma).
+     * Requires withMembersValidation() to have been called first.
+     *
+     * @return NodeAttributeInterface[]
+     */
+    public function getMemberUnitFromMembers(int $index): array
+    {
+        return $this->members->getUnit($index);
     }
 
     /**

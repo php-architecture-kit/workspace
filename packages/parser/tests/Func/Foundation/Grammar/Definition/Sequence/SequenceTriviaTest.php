@@ -74,7 +74,7 @@ final class SequenceTriviaTest extends GrammarTestCase
                 $attributes = $node->getAttributes();
 
                 $test->assertCount(3, $attributes);
-                $test->assertSame('leadingTrivia', $attributes[0]->getName());
+                $test->assertSame('trivia0', $attributes[0]->getName());
             },
             requireBofEof: false,
         );
@@ -95,7 +95,7 @@ final class SequenceTriviaTest extends GrammarTestCase
                 $attributes = $node->getAttributes();
 
                 $test->assertCount(3, $attributes);
-                $test->assertSame('trailingTrivia', $attributes[2]->getName());
+                $test->assertSame('trivia1', $attributes[2]->getName());
             },
             requireBofEof: false,
         );
@@ -117,9 +117,9 @@ final class SequenceTriviaTest extends GrammarTestCase
                 $attributes = $node->getAttributes();
 
                 $test->assertCount(5, $attributes);
-                $test->assertSame('leadingTrivia', $attributes[0]->getName());
-                $test->assertSame('inlineTrivia', $attributes[2]->getName());
-                $test->assertSame('trailingTrivia', $attributes[4]->getName());
+                $test->assertSame('trivia0', $attributes[0]->getName());
+                $test->assertSame('trivia1', $attributes[2]->getName());
+                $test->assertSame('trivia2', $attributes[4]->getName());
             },
             requireBofEof: false,
         );

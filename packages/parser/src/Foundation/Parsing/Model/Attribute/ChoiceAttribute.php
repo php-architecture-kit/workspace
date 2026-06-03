@@ -9,6 +9,7 @@ use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeInterface;
 use PhpArchitecture\Parser\Foundation\Shared\Meta\MetaInterface;
 use PhpArchitecture\Parser\Foundation\Shared\Meta\MetaTrait;
 use PhpArchitecture\Parser\Foundation\Shared\Tags\TagsTrait;
+use InvalidArgumentException;
 
 class ChoiceAttribute implements NodeAttributeInterface, MetaInterface
 {
@@ -41,7 +42,7 @@ class ChoiceAttribute implements NodeAttributeInterface, MetaInterface
     public function setSelected(NodeAttributeInterface $selected): void
     {
         if (!in_array($selected->getName(), $this->choices, true)) {
-            throw new \InvalidArgumentException("Selected attribute must be one of the defined choices.");
+            throw new InvalidArgumentException("Selected attribute must be one of the defined choices.");
         }
 
         $this->selected = $selected;
