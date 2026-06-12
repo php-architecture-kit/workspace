@@ -14,14 +14,14 @@ use PhpArchitecture\Parser\Foundation\Shared\Meta\MetaInterface;
 use PhpArchitecture\Parser\Foundation\Shared\Meta\MetaTrait;
 use PhpArchitecture\Parser\Foundation\Shared\Tags\TagsTrait;
 
-class GroupedAttribute implements NodeAttributeInterface, MetaInterface
+class SequenceAttribute implements NodeAttributeInterface, MetaInterface
 {
     use MetaTrait;
     use TagsTrait;
 
-    public const TAG = 'GroupedAttribute';
-    public const DEFAULT_NAME = 'grouped';
-    public const ANCHOR_NAME_META_KEY = 'groupedAnchorName';
+    public const TAG = 'SequenceAttribute';
+    public const DEFAULT_NAME = 'sequence';
+    public const ANCHOR_NAME_META_KEY = 'sequenceAnchorName';
 
     /** @var NodeAttributeInterface[] */
     public array $attributes;

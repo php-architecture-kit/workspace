@@ -7,13 +7,9 @@ namespace PhpArchitecture\Parser\Foundation\Grammar\Compiled\Compiler;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\EventListener\Tokenization\StartRegionEventListener;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\EventSubscriber;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Grammar;
-use PhpArchitecture\Parser\Foundation\Grammar\Definition\Model\Sequence\NestedSequence;
-use PhpArchitecture\Parser\Foundation\Grammar\Definition\Model\Sequence\SequenceNode;
-use PhpArchitecture\Parser\Foundation\Grammar\Definition\Model\Sequence\SequenceRule;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Model\Technical\TaggedRule;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Region;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Rule;
-use PhpArchitecture\Parser\Foundation\Grammar\Definition\Service\SequenceExtender\SequenceExtender;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\NodeType;
 
 class TagToChoiceCompiler implements GrammarCompilerInterface
@@ -33,7 +29,7 @@ class TagToChoiceCompiler implements GrammarCompilerInterface
 
         foreach ($tagsMap as $tag => $options) {
             if (!isset($region->rules[$tag]) || $region->rules[$tag]->definition instanceof TaggedRule) {
-                $region->addRule(Rule::choice($tag, $options, type: NodeType::Node));
+                $region->addRule(Rule::choice($tag, $options, type: NodeType::Tag)->priority($tag === '-' ? -9999 : -999));
             }
         }
     }

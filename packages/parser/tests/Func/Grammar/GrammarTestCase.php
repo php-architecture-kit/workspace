@@ -12,7 +12,7 @@ use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeAttributeInterface;
 use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeInterface;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\ChoiceAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\GroupAttribute;
-use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\GroupedAttribute;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\SequenceAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\NodeAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\OptionalAttribute;
 use PhpArchitecture\Parser\Foundation\Tokenization\Lexer;
@@ -200,7 +200,7 @@ abstract class GrammarTestCase extends TestCase
                 NodeAttribute::class => $this->assertNodeAttrIsValidRecursive($attr, $parent),
                 OptionalAttribute::class => $this->assertOptionalAttrIsValidRecursive($attr, $parent),
                 GroupAttribute::class => $this->assertGroupAttrIsValidRecursive($attr, $parent),
-                GroupedAttribute::class => $this->assertGroupedAttrIsValidRecursive($attr, $parent),
+                SequenceAttribute::class => $this->assertGroupedAttrIsValidRecursive($attr, $parent),
                 ChoiceAttribute::class => $this->assertChoiceAttrIsValidRecursive($attr, $parent),
                 default => null,
             };
@@ -229,9 +229,9 @@ abstract class GrammarTestCase extends TestCase
         }
     }
 
-    private function assertGroupedAttrIsValidRecursive(GroupedAttribute $attr, NodeInterface $parent): void
+    private function assertGroupedAttrIsValidRecursive(SequenceAttribute $attr, NodeInterface $parent): void
     {
-        $this->assertSame($parent, $attr->parent, '[PARSING] Parent mismatch between GroupedAttribute and its actual parent.');
+        $this->assertSame($parent, $attr->parent, '[PARSING] Parent mismatch between SequenceAttribute and its actual parent.');
         $attributes = $attr->attributes;
         $this->assertAttributesAreValidRecursive($attributes, $parent);
     }

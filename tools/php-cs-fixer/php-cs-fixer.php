@@ -3,8 +3,7 @@
 $finder = (new PhpCsFixer\Finder())
     ->in([
         dirname(__DIR__, 2)
-    ])
-;
+    ]);
 
 return (new PhpCsFixer\Config())
     ->setCacheFile(__DIR__ . '/.php-cs-fixer.cache')
@@ -16,6 +15,7 @@ return (new PhpCsFixer\Config())
             'import_functions' => true,
         ],
         'psr_autoloading' => true,
+        'array_indentation' => true,
         'fully_qualified_strict_types' => false,
         'phpdoc_to_comment' => ['ignored_tags' => ['var', 'phpstan-var', 'phpstan-ignore-next-line', 'phpstan-return', 'phpstan-assert', 'phpstan-type', 'phpstan-template']],
         'phpdoc_annotation_without_dot' => false,

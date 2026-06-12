@@ -7,7 +7,7 @@ namespace PhpArchitecture\Parser\Tests\Func\Grammar\TreeSchema;
 use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeInterface;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\ChoiceAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\GroupAttribute;
-use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\GroupedAttribute;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\SequenceAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\NodeAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Node;
 use PhpArchitecture\Parser\Infrastructure\Grammar\Definition\Json\JsonRfc8259;
@@ -226,7 +226,7 @@ final class JsonRfc8259FacadeNodeTest extends GrammarTestCase
                     return $found;
                 }
             }
-            if ($attr instanceof GroupedAttribute) {
+            if ($attr instanceof SequenceAttribute) {
                 foreach ($attr->attributes as $nested) {
                     if ($nested instanceof NodeAttribute) {
                         if ($nested->node->getName() === $name) {
@@ -264,7 +264,7 @@ final class JsonRfc8259FacadeNodeTest extends GrammarTestCase
             if ($attr instanceof ChoiceAttribute && $attr->selected instanceof NodeAttribute) {
                 array_push($result, ...$this->collectWhitespaceNodes($attr->selected->node));
             }
-            if ($attr instanceof GroupedAttribute) {
+            if ($attr instanceof SequenceAttribute) {
                 foreach ($attr->attributes as $nested) {
                     if ($nested instanceof NodeAttribute) {
                         array_push($result, ...$this->collectWhitespaceNodes($nested->node));

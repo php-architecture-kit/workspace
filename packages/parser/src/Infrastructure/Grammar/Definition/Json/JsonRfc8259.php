@@ -10,11 +10,6 @@ use PhpArchitecture\Parser\Foundation\Grammar\Definition\Region;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Rule;
 use PhpArchitecture\Parser\Infrastructure\Grammar\Definition\Technical\Whitespace;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\NodeType;
-use PhpArchitecture\Parser\Infrastructure\TreeSchema\Model\Json\Rfc8259\ArrayNode;
-use PhpArchitecture\Parser\Infrastructure\TreeSchema\Model\Json\Rfc8259\JsonNode;
-use PhpArchitecture\Parser\Infrastructure\TreeSchema\Model\Json\Rfc8259\MemberNode;
-use PhpArchitecture\Parser\Infrastructure\TreeSchema\Model\Json\Rfc8259\ObjectNode;
-use PhpArchitecture\Parser\Infrastructure\TreeSchema\Model\Json\Rfc8259\PrimitiveNode;
 
 class JsonRfc8259 extends Whitespace
 {
@@ -100,14 +95,6 @@ class JsonRfc8259 extends Whitespace
         $grammar->setRootRegion($jsonText);
 
         $grammar->stampOrigin(new GrammarOrigin(self::FORMAT, self::VARIANT));
-
-        $grammar->nodeClassMap = array_merge($grammar->nodeClassMap, [
-            'json'      => JsonNode::class,
-            'object'    => ObjectNode::class,
-            'array'     => ArrayNode::class,
-            'member'    => MemberNode::class,
-            'primitive' => PrimitiveNode::class,
-        ]);
 
         return $grammar;
     }

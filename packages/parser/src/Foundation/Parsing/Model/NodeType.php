@@ -6,6 +6,7 @@ namespace PhpArchitecture\Parser\Foundation\Parsing\Model;
 
 enum NodeType: string
 {
+    case Tag = 'NodeType.Tag';
     case Node = 'NodeType.Node';
     case Raw = 'NodeType.Raw';
     case Skip = 'NodeType.Skip';

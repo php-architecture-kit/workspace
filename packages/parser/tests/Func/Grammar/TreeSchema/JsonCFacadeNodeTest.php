@@ -7,7 +7,7 @@ namespace PhpArchitecture\Parser\Tests\Func\Grammar\TreeSchema;
 use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeInterface;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\ChoiceAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\GroupAttribute;
-use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\GroupedAttribute;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\SequenceAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\NodeAttribute;
 use PhpArchitecture\Parser\Infrastructure\Grammar\Definition\Json\JsonC;
 use PhpArchitecture\Parser\Infrastructure\TreeSchema\Model\Json\C\ArrayNode;
@@ -158,7 +158,7 @@ final class JsonCFacadeNodeTest extends GrammarTestCase
                     return $found;
                 }
             }
-            if ($attr instanceof GroupedAttribute) {
+            if ($attr instanceof SequenceAttribute) {
                 foreach ($attr->attributes as $nested) {
                     if ($nested instanceof NodeAttribute) {
                         if ($nested->node->getName() === $name) {

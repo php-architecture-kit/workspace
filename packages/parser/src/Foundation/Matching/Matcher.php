@@ -12,7 +12,7 @@ use PhpArchitecture\Parser\Foundation\Matching\Model\MatchedSequenceNode;
 use PhpArchitecture\Parser\Foundation\Matching\Model\NestedSequence;
 use PhpArchitecture\Parser\Foundation\Matching\Model\Sequence;
 use PhpArchitecture\Parser\Foundation\Matching\Model\SequenceNode;
-use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\GroupedAttribute;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\SequenceAttribute;
 use PhpArchitecture\Parser\Foundation\Tokenization\Model\Token;
 use PhpArchitecture\Parser\Foundation\Tokenization\Model\TokenRegion;
 use PhpArchitecture\Parser\Foundation\Tokenization\Model\TokenStream;
@@ -152,20 +152,16 @@ class Matcher
         }
 
         $firstToken = $stream->peek($offset);
-        $firstTokenName = $firstToken instanceof Token ? $firstToken->name : $firstToken->name;
 
         // Use precomputed expanded first valid tokens from SequenceLibrary
         $expandedValidTokens = $this->context->getSequenceLibrary()->getExpandedFirstValidTokens($sequence->name);
 
         if (!empty($expandedValidTokens)) {
-            $isValid = in_array($firstTokenName, $expandedValidTokens);
-
-            if (!$isValid) {
-                foreach ($firstToken->tags as $tag) {
-                    if (in_array($tag, $expandedValidTokens)) {
-                        $isValid = true;
-                        break;
-                    }
+            $isValid = false;
+            foreach ($expandedValidTokens as $validToken) {
+                $isValid = $firstToken->name === $validToken || in_array($validToken, $firstToken->tags);
+                if ($isValid) {
+                    break;
                 }
             }
 
@@ -271,7 +267,7 @@ class Matcher
                         break;
                     }
                     if ($node->anchorName !== null && count($matched) > 0) {
-                        $matched[array_key_first($matched)]->setMeta(GroupedAttribute::ANCHOR_NAME_META_KEY, $node->anchorName);
+                        $matched[array_key_first($matched)]->setMeta(SequenceAttribute::ANCHOR_NAME_META_KEY, $node->anchorName);
                     }
                     $items = array_merge($items, $matched);
                 } else {
@@ -391,10 +387,10 @@ class Matcher
         }
 
         return new MatchedSequenceNode(
-            $node->anchorName ?? ($node->isNegation
-                ? '!' . implode('|', $node->alternatives)
-                : implode('|', $node->alternatives)),
+            $node->anchorName,
+            $node->alternatives,
             $items,
+            $node->isNegation,
             $node->min,
             $node->max,
             $node->meta,

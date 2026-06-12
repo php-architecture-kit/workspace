@@ -11,7 +11,7 @@ use PhpArchitecture\Parser\Foundation\Matching\Model\Sequence;
 use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeAttributeInterface;
 use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeInterface;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\ChoiceAttribute;
-use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\GroupedAttribute;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\SequenceAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\NodeAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\SequenceValidityCursor;
 use PhpArchitecture\Parser\Infrastructure\Grammar\Definition\Json\JsonRfc8259;
@@ -20,7 +20,7 @@ use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 
 #[Group('func')]
-final class GroupedAttributeValidityCursorTest extends GrammarTestCase
+final class SequenceAttributeValidityCursorTest extends GrammarTestCase
 {
     private function grammar(): Grammar
     {
@@ -40,9 +40,9 @@ final class GroupedAttributeValidityCursorTest extends GrammarTestCase
     }
 
     /**
-     * Finds the first NodeAttribute (child node) inside a GroupedAttribute.
+     * Finds the first NodeAttribute (child node) inside a SequenceAttribute.
      */
-    private function findFirstNodeAttrInGrouped(GroupedAttribute $grouped): ?NodeAttributeInterface
+    private function findFirstNodeAttrInGrouped(SequenceAttribute $grouped): ?NodeAttributeInterface
     {
         foreach ($grouped->attributes as $attr) {
             if ($attr instanceof NodeAttribute) {
@@ -55,7 +55,7 @@ final class GroupedAttributeValidityCursorTest extends GrammarTestCase
     // -------------------------------------------------------------------------
 
     /**
-     * Attaching a cursor to a GroupedAttribute that already holds attributes
+     * Attaching a cursor to a SequenceAttribute that already holds attributes
      * parsed from real JSON must replay without throwing — the parsed tree is
      * structurally correct, so the cursor should advance through every existing
      * attribute without error.
@@ -73,7 +73,7 @@ final class GroupedAttributeValidityCursorTest extends GrammarTestCase
             },
             assertParsingResultValid: function (NodeInterface $result, self $test) use (&$objectSequence): void {
                 $membersAttr = $this->findMembersGroupedAttr($result);
-                $test->assertNotNull($membersAttr, 'Expected a "members" GroupedAttribute on the object node');
+                $test->assertNotNull($membersAttr, 'Expected a "members" SequenceAttribute on the object node');
 
                 // Must not throw — all parsed attributes are in correct order
                 $membersAttr->withValidSequence(
@@ -83,14 +83,14 @@ final class GroupedAttributeValidityCursorTest extends GrammarTestCase
                 $test->assertCount(
                     count($membersAttr->attributes),
                     $membersAttr->attributes,
-                    'GroupedAttribute attributes must be unchanged after cursor attachment',
+                    'SequenceAttribute attributes must be unchanged after cursor attachment',
                 );
             },
         );
     }
 
     /**
-     * After attaching a cursor to a fully-replayed GroupedAttribute, trying to
+     * After attaching a cursor to a fully-replayed SequenceAttribute, trying to
      * add an attribute whose name does not belong at the next valid position
      * must throw InvalidArgumentException.
      */
@@ -178,15 +178,15 @@ final class GroupedAttributeValidityCursorTest extends GrammarTestCase
 
     // -------------------------------------------------------------------------
 
-    private function findMembersGroupedAttr(NodeInterface $result): ?GroupedAttribute
+    private function findMembersGroupedAttr(NodeInterface $result): ?SequenceAttribute
     {
         return $this->searchGroupedAttr($result, 'members');
     }
 
-    private function searchGroupedAttr(NodeInterface $node, string $name): ?GroupedAttribute
+    private function searchGroupedAttr(NodeInterface $node, string $name): ?SequenceAttribute
     {
         foreach ($node->getAttributes() as $attr) {
-            if ($attr instanceof GroupedAttribute && $attr->getName() === $name) {
+            if ($attr instanceof SequenceAttribute && $attr->getName() === $name) {
                 return $attr;
             }
 

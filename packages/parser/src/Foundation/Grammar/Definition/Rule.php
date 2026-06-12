@@ -20,7 +20,6 @@ use PhpArchitecture\Parser\Foundation\Matching\Event\Contract\MatchingEventListe
 use PhpArchitecture\Parser\Foundation\Tokenization\Event\Contract\TokenizationEventListener;
 use PhpArchitecture\Parser\Foundation\Tokenization\Event\TokenAddedEvent;
 use PhpArchitecture\Parser\Foundation\Tokenization\Event\TokenMatchedEvent;
-use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\ChoiceAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\NodeType;
 use PhpArchitecture\Parser\Foundation\Tokenization\Model\Token;
 use PhpArchitecture\Parser\Foundation\Shared\Meta\MetaTrait;
@@ -52,6 +51,7 @@ class Rule
         public RuleDefinition $definition,
         public ?NodeType $nodeType = null,
         array $tags = [],
+        public readonly ?string $literalContent = null,
     ) {
         if (!empty($tags)) {
             $this->addTag(...$tags);
@@ -71,6 +71,7 @@ class Rule
             RegexRule::fromString(preg_quote($token, '~')),
             $type,
             $tags,
+            literalContent: $token,
         );
     }
 
@@ -88,6 +89,7 @@ class Rule
             RegexRule::fromString(preg_quote($keyword, '~'), $caseSensitive),
             $type,
             $tags,
+            literalContent: $keyword,
         );
     }
 
@@ -215,7 +217,6 @@ class Rule
         ));
 
         $instance->inheritedRuleDefs = $addedRules;
-        $instance->addTag(ChoiceAttribute::TAG);
 
         return $instance;
     }

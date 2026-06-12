@@ -12,7 +12,7 @@ use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeAttributeInterface;
 use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeInterface;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\ChoiceAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\GroupAttribute;
-use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\GroupedAttribute;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\SequenceAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\NodeAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\SequenceValidityCursor;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\StructureAttribute;
@@ -22,7 +22,7 @@ use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 
 #[Group('func')]
-final class GroupedAttributeGetUnitTest extends GrammarTestCase
+final class SequenceAttributeGetUnitTest extends GrammarTestCase
 {
     private function grammar(): Grammar
     {
@@ -46,7 +46,7 @@ final class GroupedAttributeGetUnitTest extends GrammarTestCase
         return $positions;
     }
 
-    private function attachValidSequence(GroupedAttribute $membersAttr, Sequence $objectSequence): void
+    private function attachValidSequence(SequenceAttribute $membersAttr, Sequence $objectSequence): void
     {
         $membersAttr->withValidSequence(
             SequenceValidityCursor::fromSequence($objectSequence, 'members'),
@@ -58,10 +58,10 @@ final class GroupedAttributeGetUnitTest extends GrammarTestCase
         );
     }
 
-    private function findMembersGroupedAttr(NodeInterface $node): ?GroupedAttribute
+    private function findMembersGroupedAttr(NodeInterface $node): ?SequenceAttribute
     {
         foreach ($node->getAttributes() as $attr) {
-            if ($attr instanceof GroupedAttribute && $attr->getName() === 'members') {
+            if ($attr instanceof SequenceAttribute && $attr->getName() === 'members') {
                 return $attr;
             }
             if ($attr instanceof NodeAttribute) {
@@ -101,7 +101,7 @@ final class GroupedAttributeGetUnitTest extends GrammarTestCase
             },
             assertParsingResultValid: function (NodeInterface $result, self $test) use (&$objectSequence): void {
                 $membersAttr = $this->findMembersGroupedAttr($result);
-                $test->assertNotNull($membersAttr, 'Expected a "members" GroupedAttribute');
+                $test->assertNotNull($membersAttr, 'Expected a "members" SequenceAttribute');
 
                 $this->attachValidSequence($membersAttr, $objectSequence);
 
@@ -115,7 +115,7 @@ final class GroupedAttributeGetUnitTest extends GrammarTestCase
                 $test->assertSame(
                     array_values($attrs),
                     array_values($unit0),
-                    'getUnit(0) on a single-unit GroupedAttribute must equal the entire attributes array',
+                    'getUnit(0) on a single-unit SequenceAttribute must equal the entire attributes array',
                 );
             },
         );
@@ -145,7 +145,7 @@ final class GroupedAttributeGetUnitTest extends GrammarTestCase
             },
             assertParsingResultValid: function (NodeInterface $result, self $test) use (&$objectSequence): void {
                 $membersAttr = $this->findMembersGroupedAttr($result);
-                $test->assertNotNull($membersAttr, 'Expected a "members" GroupedAttribute');
+                $test->assertNotNull($membersAttr, 'Expected a "members" SequenceAttribute');
 
                 $this->attachValidSequence($membersAttr, $objectSequence);
 
@@ -204,7 +204,7 @@ final class GroupedAttributeGetUnitTest extends GrammarTestCase
             },
             assertParsingResultValid: function (NodeInterface $result, self $test) use (&$objectSequence): void {
                 $membersAttr = $this->findMembersGroupedAttr($result);
-                $test->assertNotNull($membersAttr, 'Expected a "members" GroupedAttribute');
+                $test->assertNotNull($membersAttr, 'Expected a "members" SequenceAttribute');
 
                 $this->attachValidSequence($membersAttr, $objectSequence);
 

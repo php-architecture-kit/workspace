@@ -15,10 +15,6 @@ use PhpArchitecture\Parser\Foundation\Tokenization\Event\TokenRegionEndedEvent;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\NodeType;
 use PhpArchitecture\Parser\Foundation\Tokenization\Model\Token;
 use PhpArchitecture\Parser\Foundation\Tokenization\Model\TokenRegion;
-use PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Technical\Whitespace\EmptyLineNode;
-use PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Technical\Whitespace\InlineWsNode;
-use PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Technical\Whitespace\LeadingWsNode;
-use PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Technical\Whitespace\TrailingWsNode;
 
 class Whitespace implements GrammarDefinitionInterface
 {
@@ -37,7 +33,7 @@ class Whitespace implements GrammarDefinitionInterface
             Rule::token("cr", "\r", ['_ws']),
             Rule::token("newline", "\n", ['_ws']),
             Rule::taggedWith('_ws')
-                ->startRegion('whitespace_region', true)
+                ->startRegion('whitespace', true)
                 ->add(
                     Rule::technical("bof", ['_ws']),
                     Rule::technical("eof", ['_ws'])
@@ -55,7 +51,7 @@ class Whitespace implements GrammarDefinitionInterface
                             $firstToken = $event->region->firstToken();
                             $lastToken = $event->region->lastToken();
 
-                            $isLastTokenNewLine = $lastToken?->name === 'newline' || $lastToken?->name === 'eof';
+                            $isLastTokenEOL = $lastToken?->name === 'newline' || $lastToken?->name === 'eof';
                             $isStartedByNewLine = $startedBy?->name === 'newline';
                             $isStartedByBof = $startedBy?->name === 'bof';
                             $isTriggerTokenIncluded = $startedBy === $firstToken;
@@ -73,13 +69,13 @@ class Whitespace implements GrammarDefinitionInterface
                                 }
                             }
 
-                            if ($isLastTokenNewLine) {
+                            if ($isLastTokenEOL) {
                                 if ($isStartedByNewLine && !$isTriggerTokenIncluded) {
                                     $event->region->rename('emptyLine');
                                 } elseif ($isStartedByBof) {
                                     $event->region->rename('emptyLine');
                                 } else {
-                                    $event->region->rename('trailingWs');
+                                    $event->region->rename($previousEndedWithNewline ? 'emptyLine' : 'trailingWs');
                                 }
                             } else {
                                 if ($isStartedByNewLine && !$isTriggerTokenIncluded) {
@@ -100,13 +96,6 @@ class Whitespace implements GrammarDefinitionInterface
         );
 
         $grammar->stampOrigin(new GrammarOrigin(self::FORMAT, self::VARIANT));
-
-        $grammar->nodeClassMap = array_merge($grammar->nodeClassMap, [
-            'leadingWs'  => LeadingWsNode::class,
-            'trailingWs' => TrailingWsNode::class,
-            'emptyLine'  => EmptyLineNode::class,
-            'inlineWs'   => InlineWsNode::class,
-        ]);
 
         return $grammar;
     }

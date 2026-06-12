@@ -7,7 +7,7 @@ namespace PhpArchitecture\Parser\Tests\Func\Foundation\Grammar\Definition\Sequen
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Grammar;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Rule;
 use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeInterface;
-use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\GroupedAttribute;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\SequenceAttribute;
 use PhpArchitecture\Parser\Tests\Func\Grammar\GrammarTestCase;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
@@ -79,7 +79,7 @@ final class SequenceGroupTagTest extends GrammarTestCase
     }
 
     #[Test]
-    public function shouldProduceNoGroupedAttributeForEmptyList(): void
+    public function shouldProduceNoSequenceAttributeForEmptyList(): void
     {
         $this->assertGrammarParsing(
             string: '[]',
@@ -89,14 +89,14 @@ final class SequenceGroupTagTest extends GrammarTestCase
                 $attributes = $node->getAttributes();
 
                 foreach ($attributes as $attr) {
-                    $test->assertNotInstanceOf(GroupedAttribute::class, $attr);
+                    $test->assertNotInstanceOf(SequenceAttribute::class, $attr);
                 }
             },
         );
     }
 
     #[Test]
-    public function shouldProduceSingleGroupedAttributeWithOneNodeForSingleItem(): void
+    public function shouldProduceSingleSequenceAttributeWithOneNodeForSingleItem(): void
     {
         $this->assertGrammarParsing(
             string: '[x]',
@@ -105,7 +105,7 @@ final class SequenceGroupTagTest extends GrammarTestCase
             assertParsingResultValid: function (NodeInterface $node, self $test): void {
                 $groupAttrs = array_filter(
                     $node->getAttributes(),
-                    static fn($a) => $a instanceof GroupedAttribute && $a->name === GroupedAttribute::DEFAULT_NAME,
+                    static fn($a) => $a instanceof SequenceAttribute && $a->name === SequenceAttribute::DEFAULT_NAME,
                 );
 
                 $test->assertCount(1, $groupAttrs);
@@ -117,7 +117,7 @@ final class SequenceGroupTagTest extends GrammarTestCase
     }
 
     #[Test]
-    public function shouldProduceSingleGroupedAttributeWithFiveNodesForThreeItems(): void
+    public function shouldProduceSingleSequenceAttributeWithFiveNodesForThreeItems(): void
     {
         // Grammar: ?(item (comma item)*)/g → for [x,x,x]: item, comma, item, comma, item = 5 nodes
         $this->assertGrammarParsing(
@@ -127,7 +127,7 @@ final class SequenceGroupTagTest extends GrammarTestCase
             assertParsingResultValid: function (NodeInterface $node, self $test): void {
                 $groupAttrs = array_filter(
                     $node->getAttributes(),
-                    static fn($a) => $a instanceof GroupedAttribute && $a->name === GroupedAttribute::DEFAULT_NAME,
+                    static fn($a) => $a instanceof SequenceAttribute && $a->name === SequenceAttribute::DEFAULT_NAME,
                 );
 
                 $test->assertCount(1, $groupAttrs);
@@ -138,7 +138,7 @@ final class SequenceGroupTagTest extends GrammarTestCase
     }
 
     #[Test]
-    public function shouldCollectItemsAndSeparatorsInOrderIntoGroupedAttribute(): void
+    public function shouldCollectItemsAndSeparatorsInOrderIntoSequenceAttribute(): void
     {
         $this->assertGrammarParsing(
             string: '[x,x,x]',
@@ -147,7 +147,7 @@ final class SequenceGroupTagTest extends GrammarTestCase
             assertParsingResultValid: function (NodeInterface $node, self $test): void {
                 $groupAttr = array_values(array_filter(
                     $node->getAttributes(),
-                    static fn($a) => $a instanceof GroupedAttribute && $a->name === GroupedAttribute::DEFAULT_NAME,
+                    static fn($a) => $a instanceof SequenceAttribute && $a->name === SequenceAttribute::DEFAULT_NAME,
                 ))[0];
 
                 $test->assertSame('x,x,x', (string) $groupAttr);
@@ -156,9 +156,9 @@ final class SequenceGroupTagTest extends GrammarTestCase
     }
 
     #[Test]
-    public function shouldProduceGroupedAttributeEvenForSingleItemSoTreeSchemaKnowsItIsList(): void
+    public function shouldProduceSequenceAttributeEvenForSingleItemSoTreeSchemaKnowsItIsList(): void
     {
-        // This is the key test: a single item must STILL produce GroupedAttribute (not NodeAttribute),
+        // This is the key test: a single item must STILL produce SequenceAttribute (not NodeAttribute),
         // so TreeSchema can distinguish list vs single-node semantics.
         $this->assertGrammarParsing(
             string: '[x]',
@@ -167,16 +167,16 @@ final class SequenceGroupTagTest extends GrammarTestCase
             assertParsingResultValid: function (NodeInterface $node, self $test): void {
                 $itemAttrs = array_filter(
                     $node->getAttributes(),
-                    static fn($a) => $a instanceof GroupedAttribute && $a->name === GroupedAttribute::DEFAULT_NAME,
+                    static fn($a) => $a instanceof SequenceAttribute && $a->name === SequenceAttribute::DEFAULT_NAME,
                 );
 
-                $test->assertNotEmpty($itemAttrs, 'Single item must produce GroupedAttribute, not NodeAttribute');
+                $test->assertNotEmpty($itemAttrs, 'Single item must produce SequenceAttribute, not NodeAttribute');
             },
         );
     }
 
     #[Test]
-    public function anchorNameOnNestedSequenceBecomesGroupedAttributeName(): void
+    public function anchorNameOnNestedSequenceBecomesSequenceAttributeName(): void
     {
         $this->assertGrammarParsing(
             string: '[x,x,x]',
@@ -185,16 +185,16 @@ final class SequenceGroupTagTest extends GrammarTestCase
             assertParsingResultValid: function (NodeInterface $node, self $test): void {
                 $groupAttrs = array_filter(
                     $node->getAttributes(),
-                    static fn($a) => $a instanceof GroupedAttribute,
+                    static fn($a) => $a instanceof SequenceAttribute,
                 );
 
-                $test->assertNotEmpty($groupAttrs, 'Expected GroupedAttribute on node');
+                $test->assertNotEmpty($groupAttrs, 'Expected SequenceAttribute on node');
 
                 foreach ($groupAttrs as $grouped) {
                     $test->assertEquals(
                         'items',
                         $grouped->getName(),
-                        'GroupedAttribute must use the anchorName from the nested sequence, not DEFAULT_NAME',
+                        'SequenceAttribute must use the anchorName from the nested sequence, not DEFAULT_NAME',
                     );
                 }
             },
@@ -211,7 +211,7 @@ final class SequenceGroupTagTest extends GrammarTestCase
             assertParsingResultValid: function (NodeInterface $node, self $test): void {
                 $groupAttrs = array_filter(
                     $node->getAttributes(),
-                    static fn($a) => $a instanceof GroupedAttribute,
+                    static fn($a) => $a instanceof SequenceAttribute,
                 );
 
                 $test->assertNotEmpty($groupAttrs);

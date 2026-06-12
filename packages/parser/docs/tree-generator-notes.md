@@ -117,9 +117,9 @@ to tak jakbyśmy mieli NodeAttribute, ale zagnieżdżony w ChoiceAttribute
     }
 ```
 
-#### Metody atrybutu GroupedAttribute
+#### Metody atrybutu SequenceAttribute
 
-`GroupedAttribute` reprezentuje powtarzalną sekwencję o nieznanej długości, np.
+`SequenceAttribute` reprezentuje powtarzalną sekwencję o nieznanej długości, np.
 `?(member (-* comma -* member)*)[members]/g`.
 
 Jej wewnętrzna struktura to linearna tablica atrybutów składających się z:
@@ -127,16 +127,16 @@ Jej wewnętrzna struktura to linearna tablica atrybutów składających się z:
 - **unitᵢ (i > 0)** — blok strukturalny + content: `[S₁, S₂, …, Sₖ, Mᵢ]`
 
 **Podział odpowiedzialności:**
-- `GroupedAttribute` zna pojęcie unit i zarządza strukturą (add/remove całych unitów,
+- `SequenceAttribute` zna pojęcie unit i zarządza strukturą (add/remove całych unitów,
   nigdy pojedynczych atrybutów strukturalnych). Zawsze pozostaje w prawidłowym stanie.
 - Fasada dostarcza **definicję** tego, co jest structural vs content — poprzez `autoFactories`
   (fabryki atrybutów strukturalnych). Generator wyprowadza je z `NestedSequence` w czasie
   kompilacji i wpisuje do wygenerowanej metody `withXValidation()`.
 
-Fasada deleguje add/remove do `GroupedAttribute`, typując argumenty:
+Fasada deleguje add/remove do `SequenceAttribute`, typując argumenty:
 
 ```php
-    // Fasada dostarcza definicję unitu przez autoFactories, GroupedAttribute rządzi strukturą.
+    // Fasada dostarcza definicję unitu przez autoFactories, SequenceAttribute rządzi strukturą.
     // Generator wyprowadza fabryki z NestedSequence (zna typy i wartości atrybutów structural).
     public function withMembersValidation(NestedSequence|SequenceValidityCursor $sequence): self
     {
@@ -149,7 +149,7 @@ Fasada deleguje add/remove do `GroupedAttribute`, typując argumenty:
         return $this;
     }
 
-    // Fasada typuje argument (MemberNode), GroupedAttribute obsługuje auto-insert structural.
+    // Fasada typuje argument (MemberNode), SequenceAttribute obsługuje auto-insert structural.
     public function addMemberToMembers(MemberNode $member): self
     {
         $this->members->addUnit(NodeAttribute::fromNode($member->setParent($this)));
@@ -157,7 +157,7 @@ Fasada deleguje add/remove do `GroupedAttribute`, typując argumenty:
         return $this;
     }
 
-    // Fasada deleguje do GroupedAttribute::removeUnit() — to GroupedAttribute wie jak usunąć
+    // Fasada deleguje do SequenceAttribute::removeUnit() — to SequenceAttribute wie jak usunąć
     // cały unit (preceding structural + content) nie łamiąc sekwencji.
     public function removeMemberFromMembersByIndex(int $index): self
     {

@@ -12,10 +12,10 @@ use PhpArchitecture\Parser\Foundation\Matching\Model\NestedSequence;
 use PhpArchitecture\Parser\Foundation\Matching\Model\SequenceNode;
 use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeAttributeInterface;
 use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeInterface;
-use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\GroupedAttribute;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\SequenceAttribute;
 
 #[Group('unit')]
-final class GroupedAttributeTest extends TestCase
+final class SequenceAttributeTest extends TestCase
 {
     private static function attr(string $name): NodeAttributeInterface
     {
@@ -42,7 +42,7 @@ final class GroupedAttributeTest extends TestCase
     #[Test]
     public function withValidSequence_onEmptyGrouped_startsAtPositionZero(): void
     {
-        $grouped = new GroupedAttribute('members', null);
+        $grouped = new SequenceAttribute('members', null);
         $grouped->withValidSequence(self::seq([
             self::node('A'),
             self::node('B'),
@@ -56,8 +56,8 @@ final class GroupedAttributeTest extends TestCase
     #[Test]
     public function withValidSequence_withExistingAttributes_replaysAndAdvancesCursor(): void
     {
-        // GroupedAttribute already has 'member' added (e.g., built from AST)
-        $grouped = new GroupedAttribute('members', null, [self::attr('member')]);
+        // SequenceAttribute already has 'member' added (e.g., built from AST)
+        $grouped = new SequenceAttribute('members', null, [self::attr('member')]);
 
         // Attach cursor AFTER the attribute was added
         $grouped->withValidSequence(self::seq([
@@ -76,8 +76,8 @@ final class GroupedAttributeTest extends TestCase
     #[Test]
     public function withValidSequence_withExistingAttributesInWrongOrder_throws(): void
     {
-        // GroupedAttribute built incorrectly — 'comma' before 'member'
-        $grouped = new GroupedAttribute('members', null, [self::attr('comma')]);
+        // SequenceAttribute built incorrectly — 'comma' before 'member'
+        $grouped = new SequenceAttribute('members', null, [self::attr('comma')]);
 
         $this->expectException(InvalidArgumentException::class);
         $grouped->withValidSequence(self::seq([
@@ -89,7 +89,7 @@ final class GroupedAttributeTest extends TestCase
     #[Test]
     public function withValidSequence_calledTwice_resetsAndReplays(): void
     {
-        $grouped = new GroupedAttribute('members', null, [self::attr('A')]);
+        $grouped = new SequenceAttribute('members', null, [self::attr('A')]);
 
         $seq = self::seq([self::node('A'), self::node('B')]);
 

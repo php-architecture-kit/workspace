@@ -7,7 +7,7 @@ namespace PhpArchitecture\Parser\Tests\Func\Grammar\Json;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Grammar;
 use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeInterface;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\ChoiceAttribute;
-use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\GroupedAttribute;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\SequenceAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\RawRegionAttribute;
 use PhpArchitecture\Parser\Tests\Func\Grammar\GrammarTestCase;
 use PhpArchitecture\Parser\Infrastructure\Grammar\Definition\Json\JsonRfc8259;
@@ -23,19 +23,19 @@ final class JsonRfc8259ParsedTreeTest extends GrammarTestCase
     }
 
     // -------------------------------------------------------------------------
-    // Feature: object member GroupedAttribute name
+    // Feature: object member SequenceAttribute name
     // -------------------------------------------------------------------------
 
     /**
      * The sequence `?(member (-* comma -* member)*)/g` uses an anchor `/g` on
-     * the nested group sequence. The resulting GroupedAttribute must carry the
+     * the nested group sequence. The resulting SequenceAttribute must carry the
      * anchor name derived from that nested sequence — NOT the literal "member"
      * rule name. When no anchorName is provided on the nested sequence the
-     * GroupedAttribute name must fall back to GroupedAttribute::DEFAULT_NAME
+     * SequenceAttribute name must fall back to SequenceAttribute::DEFAULT_NAME
      * (i.e. "grouped"), NOT "member".
      */
     #[Test]
-    public function objectMemberGroupedAttributeNameIsNotMember(): void
+    public function objectMemberSequenceAttributeNameIsNotMember(): void
     {
         $this->assertGrammarParsing(
             string: '{"key":"value"}',
@@ -46,15 +46,15 @@ final class JsonRfc8259ParsedTreeTest extends GrammarTestCase
 
                 $groupedAttrs = array_filter(
                     $objectNode->getAttributes(),
-                    static fn($attr) => $attr instanceof GroupedAttribute,
+                    static fn($attr) => $attr instanceof SequenceAttribute,
                 );
-                $test->assertNotEmpty($groupedAttrs, 'Expected at least one GroupedAttribute on "object" node');
+                $test->assertNotEmpty($groupedAttrs, 'Expected at least one SequenceAttribute on "object" node');
 
                 foreach ($groupedAttrs as $grouped) {
                     $test->assertNotEquals(
                         'member',
                         $grouped->getName(),
-                        'GroupedAttribute name must NOT be "member" — it should derive from the nested sequence anchorName or fall back to the DEFAULT_NAME',
+                        'SequenceAttribute name must NOT be "member" — it should derive from the nested sequence anchorName or fall back to the DEFAULT_NAME',
                     );
                 }
             },
@@ -62,11 +62,11 @@ final class JsonRfc8259ParsedTreeTest extends GrammarTestCase
     }
 
     #[Test]
-    public function objectMemberGroupedAttributeNameIsAnchorNameWhenProvided(): void
+    public function objectMemberSequenceAttributeNameIsAnchorNameWhenProvided(): void
     {
         // The nested sequence `(member (-* comma -* member)*)` does not have an
         // explicit anchorName in current grammar, so the fallback default name
-        // should be used. This test verifies the fallback is GroupedAttribute's
+        // should be used. This test verifies the fallback is SequenceAttribute's
         // DEFAULT_NAME constant value ("grouped"), not an arbitrary rule name.
         $this->assertGrammarParsing(
             string: '{"a":1,"b":2}',
@@ -77,14 +77,14 @@ final class JsonRfc8259ParsedTreeTest extends GrammarTestCase
 
                 $groupedAttrs = array_filter(
                     $objectNode->getAttributes(),
-                    static fn($attr) => $attr instanceof GroupedAttribute,
+                    static fn($attr) => $attr instanceof SequenceAttribute,
                 );
 
                 foreach ($groupedAttrs as $grouped) {
                     $test->assertEquals(
                         'members',
                         $grouped->getName(),
-                        'GroupedAttribute without an explicit anchorName must use the default name "grouped"',
+                        'SequenceAttribute without an explicit anchorName must use the default name "grouped"',
                     );
                 }
             },
@@ -303,7 +303,7 @@ final class JsonRfc8259ParsedTreeTest extends GrammarTestCase
                     }
                 }
             }
-            if ($attr instanceof GroupedAttribute) {
+            if ($attr instanceof SequenceAttribute) {
                 foreach ($attr->attributes as $nestedAttr) {
                     $tempNode = new \PhpArchitecture\Parser\Foundation\Parsing\Model\Node('_tmp', [$nestedAttr], null);
                     $found = $this->findFirstNodeByName($tempNode, $name);

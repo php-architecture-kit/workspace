@@ -8,12 +8,6 @@ use PhpArchitecture\Parser\Foundation\Grammar\Definition\Grammar;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\GrammarOrigin;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Rule;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\NodeType;
-use PhpArchitecture\Parser\Infrastructure\TreeSchema\Model\Json\C\ArrayNode;
-use PhpArchitecture\Parser\Infrastructure\TreeSchema\Model\Json\C\BlockCommentNode;
-use PhpArchitecture\Parser\Infrastructure\TreeSchema\Model\Json\C\JsonNode;
-use PhpArchitecture\Parser\Infrastructure\TreeSchema\Model\Json\C\MemberNode;
-use PhpArchitecture\Parser\Infrastructure\TreeSchema\Model\Json\C\ObjectNode;
-use PhpArchitecture\Parser\Infrastructure\TreeSchema\Model\Json\C\PrimitiveNode;
 
 class JsonC extends JsonRfc8259
 {
@@ -68,12 +62,12 @@ class JsonC extends JsonRfc8259
         $grammar->stampOrigin(new GrammarOrigin(self::FORMAT, self::VARIANT));
 
         $grammar->nodeClassMap = array_merge($grammar->nodeClassMap, [
-            'json'         => JsonNode::class,
-            'object'       => ObjectNode::class,
-            'array'        => ArrayNode::class,
-            'member'       => MemberNode::class,
-            'primitive'    => PrimitiveNode::class,
-            'blockComment' => BlockCommentNode::class,
+            'json' => \PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Json\C\JsonNode::class,
+            'object' => \PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Json\C\ObjectNode::class,
+            'member' => \PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Json\C\MemberNode::class,
+            'primitive' => \PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Json\C\PrimitiveNode::class,
+            'array' => \PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Json\C\ArrayNode::class,
+            'blockComment' => \PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Json\C\BlockCommentNode::class,
         ]);
 
         return $grammar;

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace PhpArchitecture\Parser\Foundation\Grammar\Compiled\Compiler;
 
 use LogicException;
+use PhpArchitecture\Parser\Foundation\Grammar\Definition\Model\Sequence\SequenceRule;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Region;
 use PhpArchitecture\Parser\Foundation\Matching\Model\NestedSequence;
 use PhpArchitecture\Parser\Foundation\Matching\Model\Sequence;
@@ -97,7 +98,6 @@ class SequenceNodeEnricher
     private function enrichNode(CompiledSequenceNode $node, Region $region, string $sequenceName): CompiledSequenceNode
     {
         $nodeTypesMap = [];
-
         foreach ($node->alternatives as $alternative) {
             $nodeType = $this->resolveNodeType($alternative, $region);
 
@@ -117,12 +117,30 @@ class SequenceNodeEnricher
         // Add NodeType to tags only when all alternatives agree — mixed types are resolved per-item at runtime
         $tags = $node->tags;
         if (!empty($nodeTypesMap)) {
-            $uniqueNodeTypes = array_unique(array_map(fn(NodeType $nt) => $nt->value, $nodeTypesMap));
+            $uniqueNodeTypes = array_unique(array_map(static fn(NodeType $nt) => $nt->value, $nodeTypesMap));
             if (count($uniqueNodeTypes) === 1) {
                 $nodeType = array_values($nodeTypesMap)[0];
                 if (!in_array($nodeType->value, $tags)) {
                     $tags[] = $nodeType->value;
                 }
+            }
+        }
+
+        if (in_array(NodeType::Tag->value, $tags) && count($node->alternatives) === 1) {
+            $tagName = $node->alternatives[0];
+            $tagRule = $region->rules[$tagName] ?? null;
+            if ($tagRule->definition instanceof SequenceRule && isset($tagRule->definition->nodes[0])) {
+                return new CompiledSequenceNode(
+                    $tagRule->definition->nodes[0]->alternatives,
+                    $node->min,
+                    $node->max,
+                    $node->isLookahead,
+                    $node->isLookbehind,
+                    $node->anchorName ?? $tagRule->name,
+                    $node->meta,
+                    array_merge($tags, $tagRule->tags, [NodeType::Node->value]),
+                    $node->isNegation,
+                );
             }
         }
 

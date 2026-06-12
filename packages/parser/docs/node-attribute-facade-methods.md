@@ -60,9 +60,9 @@ Schemat: `{akcja}{Byt}{Przyimek}{Prop}`
 | `GroupAttribute` (get kolekcji) | `Nodes` |
 | `ChoiceAttribute` — choices to NodeInterface | `Node` |
 | `ChoiceAttribute` — choices to raw | brak — metody nazywane bezpośrednio od `{Prop}` (np. `set{Prop}`, `get{Prop}Type`, `get{Prop}Content`) |
-| `GroupedAttribute` — add/remove/getUnit | nazwa klasy content-elementu (np. `Member`, `Item`) |
-| `GroupedAttribute` — getAll | nazwa klasy content-elementu w liczbie mnogiej (np. `Members`, `Items`) |
-| `GroupedAttribute` — withValidation | brak bytu — `with{Prop}Validation` |
+| `SequenceAttribute` — add/remove/getUnit | nazwa klasy content-elementu (np. `Member`, `Item`) |
+| `SequenceAttribute` — getAll | nazwa klasy content-elementu w liczbie mnogiej (np. `Members`, `Items`) |
+| `SequenceAttribute` — withValidation | brak bytu — `with{Prop}Validation` |
 | `RawContentAttribute` / `RawRegionAttribute` | `Raw` |
 
 **Przykłady:**
@@ -74,7 +74,7 @@ removeNodeFromTrivia0ByOffset  → remove + Node + From + trivia0
 getNodeValue            → get + Node     +       + value    (ChoiceAttribute nodes, brak przyimka)
 setNodeValue            → set + Node     +       + value
 removeNodeValue         → remove + Node  +       + value
-addMemberToMembers      → add + Member   + To   + members   (GroupedAttribute)
+addMemberToMembers      → add + Member   + To   + members   (SequenceAttribute)
 getMembersFromMembers   → get + Members  + From + members
 getMemberUnitFromMembers→ get + MemberUnit + From + members
 withMembersValidation   → with +          +       + members + Validation
@@ -385,17 +385,17 @@ public function getPrimitiveContent(): string|null
 
 ---
 
-## `GroupedAttribute`
+## `SequenceAttribute`
 
-Powtarzalna sekwencja z zagnieżdżonymi atrybutami strukturalnymi (separatory, trivia). Jeden `GroupedAttribute` generuje 5 metod.
+Powtarzalna sekwencja z zagnieżdżonymi atrybutami strukturalnymi (separatory, trivia). Jeden `SequenceAttribute` generuje 5 metod.
 
 ### Metody
 
 **withValidation** — zawsze. Rejestruje `autoFactories` dla atrybutów structural (separator, trivia) na podstawie `NestedSequence` z gramatyki. Bez wywołania tej metody `addUnit()` nie wstawia structural automatycznie.
 
-**add** — zawsze. Przyjmuje content-element (jedyny `{Content}`, który nie jest structural). Deleguje do `GroupedAttribute::addUnit()`.
+**add** — zawsze. Przyjmuje content-element (jedyny `{Content}`, który nie jest structural). Deleguje do `SequenceAttribute::addUnit()`.
 
-**remove** — zawsze. Usuwa cały unit po indeksie logicznym (content + poprzedzające structural). Deleguje do `GroupedAttribute::removeUnit()`.
+**remove** — zawsze. Usuwa cały unit po indeksie logicznym (content + poprzedzające structural). Deleguje do `SequenceAttribute::removeUnit()`.
 
 **getUnit** — zawsze. Zwraca pełen unit po indeksie (array atrybutów: content + structural). Wymaga wcześniejszego wywołania `withValidation`.
 
@@ -408,13 +408,13 @@ Powtarzalna sekwencja z zagnieżdżonymi atrybutami strukturalnymi (separatory, 
 | Nazwa właściwości (`{prop}`) | output parsowania — `anchorName ?? name` atrybutu |
 | Typ content-elementu (`{Content}`) | output parsowania — klasa node'a faktycznie pojawiającego się jako content w unitach **+** CompiledGrammar — pełna lista dopuszczalnych content-typów z `NestedSequence` |
 | Definicja structural-elementów (`autoFactories`) | CompiledGrammar — `NestedSequence` zna typy, nazwy i wartości domyślne każdego atrybutu structural (np. `comma = ','`, `trivia = GroupAttribute`); output parsowania tylko potwierdza jakie structural faktycznie wystąpiły |
-| Nazwa content-atrybutu w `getAll` (filtr po `getName()`) | output parsowania — faktyczna `name` atrybutu content w `GroupedAttribute::$attributes` |
+| Nazwa content-atrybutu w `getAll` (filtr po `getName()`) | output parsowania — faktyczna `name` atrybutu content w `SequenceAttribute::$attributes` |
 | Origin content-typów i structural-typów | CompiledGrammar — `Rule::META_ORIGIN.format` każdej reguły; inny format niż generowana gramatyka → importuj z namespace'u tamtej gramatyki (dotyczy też factory lambda w `autoFactories`); ten sam format (dowolny wariant) → generuj w namespace'ie docelowej gramatyki |
 
 ```php
 // --- property hook ---
-/** @var GroupedAttribute<MemberNode|StructureAttribute|TrailingWsNode|EmptyLineNode|InlineWsNode|LeadingWsNode> */
-public GroupedAttribute $members { get => $this->attributes[2]; }
+/** @var SequenceAttribute<MemberNode|StructureAttribute|TrailingWsNode|EmptyLineNode|InlineWsNode|LeadingWsNode> */
+public SequenceAttribute $members { get => $this->attributes[2]; }
 
 // --- withValidation ---
 public function withMembersValidation(NestedSequence|SequenceValidityCursor $sequence): self
@@ -578,7 +578,7 @@ public function setRawIdentifier(string $identifier): self
 | `ChoiceAttribute` (nodes, cardinality 0) | **tak** | gramatyka dopuszcza brak |
 | `ChoiceAttribute` (nodes, cardinality 1) | nie | gramatyka wymaga obecności |
 | `ChoiceAttribute` (raws) | nie | "jaki token", nie "czy obecny" |
-| `GroupedAttribute` | **tak** (by index) | usuwa cały unit |
+| `SequenceAttribute` | **tak** (by index) | usuwa cały unit |
 | `StructureAttribute` | nie | brak metod w ogóle |
 | `RawContentAttribute` | nie | zawsze obecny, zmieniamy tylko content |
 | `RawRegionAttribute` | nie | zawsze obecny, zmieniamy tylko content |
