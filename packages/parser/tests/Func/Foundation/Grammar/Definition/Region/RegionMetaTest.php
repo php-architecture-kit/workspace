@@ -9,7 +9,7 @@ use PhpArchitecture\Parser\Foundation\Grammar\Definition\Grammar;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Region;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Rule;
 use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeInterface;
-use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\NodeAttribute;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Node\NodeAttribute;
 use PhpArchitecture\Parser\Foundation\Tokenization\Contract\TokenizationContext;
 use PhpArchitecture\Parser\Foundation\Tokenization\Event\TokenRegionEndedEvent;
 use PhpArchitecture\Parser\Foundation\Tokenization\Model\TokenRegion;

@@ -10,6 +10,7 @@ use PhpArchitecture\Parser\Foundation\Grammar\Definition\Model\Sequence\Sequence
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Model\Sequence\SequenceRule;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Rule;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Service\SequenceExtender\SequenceExtender;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\NodeType;
 
 final class TriviaSequenceNamingMiddleware implements GrammarMiddleware
 {
@@ -54,7 +55,8 @@ final class TriviaSequenceNamingMiddleware implements GrammarMiddleware
             $extender
                 ->when(fn($n) => $this->isTriviaNode($n))
                 ->modify(function (SequenceNode $node, array $ctx) use ($triviaCount, &$position): SequenceNode {
-                    $node->anchorName = $this->computeName($position, $triviaCount);
+                    $node->anchorName = $this->computeName($node->alternatives[0], $position, $triviaCount);
+                    $node->nodeType = NodeType::Node;
                     $position++;
                     return $node;
                 })
@@ -89,15 +91,21 @@ final class TriviaSequenceNamingMiddleware implements GrammarMiddleware
     private function isTriviaNode(SequenceNode|NestedSequence $node): bool
     {
         return $node instanceof SequenceNode
-            && $node->alternatives === ['-']
+            && in_array($node->alternatives, [['-'], ['-l'], ['-t']], true)
             && $node->anchorName === null;
     }
 
-    private function computeName(int $position, int $total): string
+    private function computeName(string $nodeName, int $position, int $total): string
     {
+        $prefix = match ($nodeName) {
+            // '-l' => 'leadingTrivia',
+            // '-t' => 'trailingTrivia',
+            default => 'trivia',
+        };
+
         return match (true) {
-            $total === 1 => 'trivia',
-            default => 'trivia' . $position,
+            $total === 1 => $prefix,
+            default => $prefix . $position,
         };
     }
 }

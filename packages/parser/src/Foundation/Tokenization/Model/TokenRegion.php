@@ -20,6 +20,11 @@ final class TokenRegion implements Stringable
         public private(set) TokenStream $stream,
     ) {}
 
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
     public static function new(string $name): self
     {
         return new self($name, new TokenStream());

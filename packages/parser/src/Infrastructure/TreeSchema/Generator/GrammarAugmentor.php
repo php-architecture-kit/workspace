@@ -15,8 +15,8 @@ use PhpArchitecture\Parser\Infrastructure\TreeSchema\Generator\Schema\RawChoiceI
 /**
  * Extends NodeSchema[] with data from CompiledGrammar:
  *   - GrammarOrigin (import vs generate decision)
- *   - Union type extension for GroupAttribute / ChoiceAttribute
- *   - Missing RawChoiceInfo cases for ChoiceAttribute(raws) from grammar's choice list
+ *   - Union type extension for GroupAttribute / NodeAttribute (via meta.alternatives)
+ *   - Missing RawChoiceInfo cases for raw attributes with alternatives from grammar's choice list
  */
 final class GrammarAugmentor
 {
@@ -26,30 +26,35 @@ final class GrammarAugmentor
      * @param array<string, NodeSchema> $schemas
      * @return array<string, NodeSchema>
      */
-    public function augment(array $schemas, CompiledGrammar $grammar, string $targetFormat, string $targetNamespace): array
+    public function augment(array $schemas, CompiledGrammar $grammar, string $targetFormat): array
     {
-        // Build set of dynamically-renamed whitespace node names (leadingWs, trailingWs, etc.)
-        // These nodes are renamed at parse time from whitespace_region; they share its origin.
-        $wsRegion = $grammar->regions['whitespace_region'] ?? null;
-        $wsNodeNames = $wsRegion !== null
-            ? ($wsRegion->getMeta(CompiledRegion::META_POSSIBLE_NAMES) ?? [])
-            : [];
-
-        // Ensure all whitespace node names have schemas (even if not seen in parse output).
+        // Build a generic map: possible-name → owning region, for any region that renames itself at runtime.
         $collector = new NodeSchemaCollector();
-        foreach ($wsNodeNames as $wsName) {
-            if (!isset($schemas[$wsName]) && $wsRegion !== null) {
-                $schemas[$wsName] = new NodeSchema($wsName, $collector->toClassName($wsName));
+        $possibleNameToRegion = [];
+        foreach ($grammar->regions as $region) {
+            $possibleNames = $region->getMeta(CompiledRegion::META_POSSIBLE_NAMES) ?? [];
+            foreach ($possibleNames as $possibleName) {
+                $possibleNameToRegion[$possibleName] = $region;
+                if (!isset($schemas[$possibleName])) {
+                    $schemas[$possibleName] = new NodeSchema($possibleName, $collector->toClassName($possibleName));
+                }
             }
         }
 
         foreach ($schemas as $nodeName => $schema) {
-            $region = $grammar->regions[$nodeName] ?? null;
-            if ($region === null && in_array($nodeName, $wsNodeNames, true)) {
-                $region = $wsRegion;
-            }
+            $region = $grammar->regions[$nodeName] ?? $possibleNameToRegion[$nodeName] ?? null;
             if ($region !== null) {
-                $this->applyOrigin($schema, $region, $targetFormat, $targetNamespace);
+                $this->applyOrigin($schema, $region, $targetFormat);
+            }
+        }
+
+        // Build sibling-families: for each region with possible names, group those names together.
+        // Used by augmentGroupUnion to expand union types with all siblings from the same family.
+        $siblingFamilies = [];
+        foreach ($grammar->regions as $region) {
+            $possibleNames = $region->getMeta(CompiledRegion::META_POSSIBLE_NAMES) ?? [];
+            if (!empty($possibleNames)) {
+                $siblingFamilies[] = $possibleNames;
             }
         }
 
@@ -58,14 +63,14 @@ final class GrammarAugmentor
                 continue;
             }
             foreach ($schema->attributes as $attrSchema) {
-                $this->augmentAttribute($attrSchema, $grammar, $schemas, $targetFormat, $targetNamespace);
+                $this->augmentAttribute($attrSchema, $grammar, $schemas, $siblingFamilies);
             }
         }
 
         return $schemas;
     }
 
-    private function applyOrigin(NodeSchema $schema, CompiledRegion $region, string $targetFormat, string $targetNamespace): void
+    private function applyOrigin(NodeSchema $schema, CompiledRegion $region, string $targetFormat): void
     {
         /** @var ?GrammarOrigin $origin */
         $origin = $region->getMeta(Region::META_ORIGIN);
@@ -101,21 +106,22 @@ final class GrammarAugmentor
         return $result;
     }
 
-    private function augmentAttribute(AttributeSchema $attr, CompiledGrammar $grammar, array $schemas, string $targetFormat, string $targetNamespace): void
+    /** @param string[][] $siblingFamilies */
+    private function augmentAttribute(AttributeSchema $attr, CompiledGrammar $grammar, array $schemas, array $siblingFamilies): void
     {
-        if ($attr->isChoiceAttribute() && !$attr->isChoiceRaw()) {
+        if ($attr->isChoiceNodes()) {
             $this->augmentChoiceNodeUnion($attr, $grammar, $schemas);
         }
 
         if ($attr->isGroupAttribute()) {
-            $this->augmentGroupUnion($attr, $grammar);
+            $this->augmentGroupUnion($attr, $siblingFamilies);
         }
 
         if ($attr->isChoiceRaw()) {
             $this->augmentRawChoices($attr);
         }
 
-        if ($attr->isGroupedAttribute()) {
+        if ($attr->isSequenceAttribute()) {
             $this->augmentGroupedContentUnion($attr, $grammar);
         }
     }
@@ -136,27 +142,19 @@ final class GrammarAugmentor
         }
     }
 
-    private function augmentGroupUnion(AttributeSchema $attr, CompiledGrammar $grammar): void
+    /** @param string[][] $siblingFamilies */
+    private function augmentGroupUnion(AttributeSchema $attr, array $siblingFamilies): void
     {
-        // Group union is extended by checking whitespace_region possible names
-        $whitespaceRegion = $grammar->regions['whitespace_region'] ?? null;
-        if ($whitespaceRegion === null) {
-            return;
-        }
-        /** @var string[]|null $possibleNames */
-        $possibleNames = $whitespaceRegion->getMeta(CompiledRegion::META_POSSIBLE_NAMES);
-        if ($possibleNames === null) {
-            return;
-        }
-        foreach ($attr->unionNodeNames as $name) {
-            // if any existing union member is a whitespace node, also include siblings
-            if (in_array($name, $possibleNames, true)) {
-                foreach ($possibleNames as $sibling) {
-                    if (!in_array($sibling, $attr->unionNodeNames, true)) {
-                        $attr->unionNodeNames[] = $sibling;
+        foreach ($siblingFamilies as $family) {
+            foreach ($attr->unionNodeNames as $name) {
+                if (in_array($name, $family, true)) {
+                    foreach ($family as $sibling) {
+                        if (!in_array($sibling, $attr->unionNodeNames, true)) {
+                            $attr->unionNodeNames[] = $sibling;
+                        }
                     }
+                    break;
                 }
-                break;
             }
         }
     }
@@ -201,7 +199,6 @@ final class GrammarAugmentor
         }
     }
 
-    /** @param array<string,NodeSchema> $schemas */
     private function stubSchema(string $nodeName, string $className): NodeSchema
     {
         return new NodeSchema($nodeName, $className);

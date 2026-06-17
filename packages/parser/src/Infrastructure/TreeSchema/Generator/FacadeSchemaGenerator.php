@@ -53,7 +53,7 @@ final class FacadeSchemaGenerator
         $schemas = $this->collector->getSchemas();
 
         $targetFormat  = $compiledGrammar->name;
-        $schemas = $this->augmentor->augment($schemas, $compiledGrammar, $targetFormat, $namespace);
+        $schemas = $this->augmentor->augment($schemas, $compiledGrammar, $targetFormat);
 
         $rootNodeName = $compiledGrammar->rootRegionName;
 

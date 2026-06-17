@@ -20,14 +20,14 @@ class RegionOpenerCloserCompiler implements GrammarCompilerInterface
 
             if ($region->config->opener !== null) {
                 $parentRegion = $this->findParentRegion($region, $allRegions);
-                
+
                 if ($parentRegion !== null) {
                     $parentRegion->add($region->config->opener);
-                    
+
                     $openerRuleName = $region->config->opener->onlyForRuleName;
                     if ($openerRuleName !== null) {
                         $openerRule = $this->findRuleInRegion($region, $openerRuleName);
-                        if ($openerRule !== null) {
+                        if ($openerRule !== null && !isset($parentRegion->rules[$openerRule->name])) {
                             $parentRegion->add($openerRule);
                         }
                     }
@@ -43,7 +43,7 @@ class RegionOpenerCloserCompiler implements GrammarCompilerInterface
                 return $rule;
             }
         }
-        
+
         return null;
     }
 

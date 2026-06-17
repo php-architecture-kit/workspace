@@ -227,11 +227,26 @@ final class TokenizationRenderer
             $icon,
             $index,
             $token->name,
-            json_encode($raw),
+            $this->quoteContent($raw),
             $pos,
             $regionName,
             $tags,
         );
+    }
+
+    /**
+     * Renders a content string without json_encode's slash/unicode escaping noise —
+     * only escapes what would otherwise break the single-line display.
+     */
+    private function quoteContent(string $value): string
+    {
+        $escaped = str_replace(
+            ['\\', '"', "\n", "\r", "\t"],
+            ['\\\\', '\\"', '\\n', '\\r', '\\t'],
+            $value,
+        );
+
+        return '"' . $escaped . '"';
     }
 
     private function formatPosition(TokenViewData $token): string

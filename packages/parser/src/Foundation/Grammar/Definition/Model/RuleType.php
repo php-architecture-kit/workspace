@@ -16,6 +16,8 @@ enum RuleType
     case Choice;
     case Sequence;
 
+    case Ref;
+
     /** @return RuleType[] */
     public function tokenizationRuleTypes(): array
     {

@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace PhpArchitecture\Parser\Infrastructure\Grammar\Definition\Json;
 
+use PhpArchitecture\Parser\Foundation\Grammar\Definition\Defaults;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Grammar;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\GrammarOrigin;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Region;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Rule;
+use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeInterface;
 use PhpArchitecture\Parser\Infrastructure\Grammar\Definition\Technical\Whitespace;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\NodeType;
 
@@ -16,14 +18,17 @@ class JsonRfc8259 extends Whitespace
     public const FORMAT = "json";
     public const VARIANT = "rfc8259";
 
+    public const STYLE_MINIFIED = 'minified';
+    public const STYLE_PRETTY = 'pretty';
+
     public function grammar(): Grammar
     {
-        $grammar = parent::grammar();
+        parent::grammar();
         $jsonText = (new Region("json"))
             ->setInheritanceFromGlobal()
             ->withRootSequence("-* value -*");
 
-        $grammar->global->add(
+        $this->grammar->global->add(
             $jsonText,
             Rule::token("beginArray", "[", type: NodeType::Structure)
                 ->startRegion('array')
@@ -31,7 +36,7 @@ class JsonRfc8259 extends Whitespace
                 ->add(
                     Rule::token("comma", ",", type: NodeType::Structure),
                 )
-                ->withRootSequence("beginArray -* ?(value[item] (-* comma -* value[item])*)[items]/g -* endArray")
+                ->withRootSequence("beginArray -t* ?(-l* value[item] (-* comma -t* -l* value[item])* -t*)[items]/g -l* endArray")
                 ->closeWith(
                     Rule::token("endArray", "]", type: NodeType::Structure),
                 )
@@ -42,9 +47,31 @@ class JsonRfc8259 extends Whitespace
                 ->add(
                     Rule::token("colon", ":", type: NodeType::Structure),
                     Rule::token("comma", ",", type: NodeType::Structure),
-                    Rule::seq("member", "string[identifier] -* colon -* value"),
+                    Rule::seq("member", "string[identifier] -* colon -* value")
+                    // ->withDefaults([
+                    //     '-.0' => static fn() => '',
+                    //     '-.1' => [
+                    //         self::STYLE_MINIFIED => static fn() => '',
+                    //         self::STYLE_PRETTY => static fn() => ' ',
+                    //     ]
+                    // ]),
                 )
-                ->withRootSequence("beginObject -* ?(member (-* comma -* member)*)[members]/g -* endObject")
+                ->withRootSequence("beginObject -t* ?(-l* member (-* comma -t* -l* member)* -t*)[members]/g -l* endObject")
+                // ->withDefaults([
+                //     '-t.0' => [
+                //         self::STYLE_MINIFIED => static fn() => '',
+                //         self::STYLE_PRETTY => Whitespace::trailingWs(),
+                //     ],
+                //     '-l.1' => static fn() => '',
+                //     '-.2' => [
+                //         self::STYLE_MINIFIED => static fn() => '',
+                //         self::STYLE_PRETTY => $this->indentationResolver(true),
+                //     ],
+                //     '-t.3' => [
+                //         self::STYLE_MINIFIED => static fn() => '',
+                //         self::STYLE_PRETTY => $this->indentationResolver(true),
+                //     ],
+                // ])
                 ->closeWith(
                     Rule::token("endObject", "}", type: NodeType::Structure),
                 )
@@ -92,10 +119,21 @@ class JsonRfc8259 extends Whitespace
                 ->closeWith(Rule::taggedWith("_number_part"), true, false),
         );
 
-        $grammar->setRootRegion($jsonText);
+        $this->grammar->setRootRegion($jsonText);
 
-        $grammar->stampOrigin(new GrammarOrigin(self::FORMAT, self::VARIANT));
+        $this->grammar->stampOrigin(new GrammarOrigin(self::FORMAT, self::VARIANT));
 
-        return $grammar;
+        $this->withIndentationSupport(
+            [Defaults::DEFAULT_STYLE, self::STYLE_PRETTY],
+            static fn() => "    ",
+        );
+
+        $this->grammar->setStyleResolver(
+            static function (NodeInterface $rootNode): string {
+                return self::STYLE_PRETTY;
+            },
+        );
+
+        return $this->grammar;
     }
 }

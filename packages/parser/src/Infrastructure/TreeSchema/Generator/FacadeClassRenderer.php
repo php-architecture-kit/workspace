@@ -8,13 +8,12 @@ use PhpArchitecture\Parser\Foundation\Matching\Model\NestedSequence;
 use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeAttributeInterface;
 use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeInterface;
 use PhpArchitecture\Parser\Foundation\Parsing\Contract\Placement;
-use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\ChoiceAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\GroupAttribute;
-use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\GroupedAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\NodeAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\OptionalAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\RawContentAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\RawRegionAttribute;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\SequenceAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\SequenceValidityCursor;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\StructureAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Node;
@@ -45,7 +44,7 @@ final class FacadeClassRenderer
         $createMethod  = $this->renderCreate($schema, $allSchemas, $namespace, $imports);
         $methods       = $this->renderMethods($schema, $allSchemas, $namespace, $imports, $rootNodeName);
 
-        $hasGroupedWithParent = $this->nodeHasGroupedAttribute($schema);
+        $hasGroupedWithParent = $this->nodeHasSequenceAttribute($schema);
 
         sort($imports);
         $imports = array_unique($imports);
@@ -112,13 +111,13 @@ final class FacadeClassRenderer
             return '/** @var ' . $this->shortName($attr->attrClass) . '<' . implode('|', $unionTypes) . '> */';
         }
 
-        if ($attr->isGroupedAttribute()) {
+        if ($attr->isSequenceAttribute()) {
             $all = [];
             if ($attr->groupedContentIsChoice) {
                 $choiceTypes = $this->resolveUnionTypes($attr->unionNodeNames, $allSchemas, $namespace, $imports);
                 if (!empty($choiceTypes)) {
-                    $imports[] = ChoiceAttribute::class;
-                    $all[] = 'ChoiceAttribute<' . implode('|', $choiceTypes) . '>';
+                    $imports[] = NodeAttribute::class;
+                    $all[] = 'NodeAttribute<' . implode('|', $choiceTypes) . '>';
                 }
             } else {
                 if ($attr->groupedContentNodeName !== null) {
@@ -154,10 +153,7 @@ final class FacadeClassRenderer
         }
 
         if ($attr->isChoiceRaw()) {
-            $rawTypes = ['RawRegionAttribute', 'RawContentAttribute'];
-            $imports[] = RawRegionAttribute::class;
-            $imports[] = RawContentAttribute::class;
-            return '/** @var ' . $this->shortName($attr->attrClass) . '<' . implode('|', $rawTypes) . '> */';
+            return '';
         }
 
         return '';
@@ -181,19 +177,11 @@ final class FacadeClassRenderer
             } elseif ($attr->isGroupAttribute()) {
                 $attrInits[] = self::I . self::I . self::I . 'new GroupAttribute(' . var_export($attr->propName, true) . ', []),';
                 $imports[] = GroupAttribute::class;
-            } elseif ($attr->isGroupedAttribute()) {
-                $attrInits[] = self::I . self::I . self::I . 'new GroupedAttribute(' . var_export($attr->propName, true) . ', null, []),';
-                $imports[] = GroupedAttribute::class;
+            } elseif ($attr->isSequenceAttribute()) {
+                $attrInits[] = self::I . self::I . self::I . 'new SequenceAttribute(' . var_export($attr->propName, true) . ', null, []),';
+                $imports[] = SequenceAttribute::class;
                 $hasGrouped = true;
                 $postLines[] = self::I . self::I . '$node->' . $attr->propName . '->withParent($node);';
-            } elseif ($attr->isChoiceAttribute() && !$attr->isChoiceRaw()) {
-                $choices = '[' . implode(', ', array_map('var_export', $attr->choicesList, array_fill(0, count($attr->choicesList), true))) . ']';
-                $attrInits[] = self::I . self::I . self::I . 'new ChoiceAttribute(' . var_export($attr->propName, true) . ', ' . $choices . ', null),';
-                $imports[] = ChoiceAttribute::class;
-            } elseif ($attr->isChoiceRaw()) {
-                $choices = '[' . implode(', ', array_map(fn(RawChoiceInfo $r) => var_export($r->tokenName, true), $attr->rawChoices)) . ']';
-                $attrInits[] = self::I . self::I . self::I . 'new ChoiceAttribute(' . var_export($attr->propName, true) . ', ' . $choices . ', null),';
-                $imports[] = ChoiceAttribute::class;
             } elseif ($attr->isRawRegionAttribute()) {
                 $paramVar = '$' . $attr->propName;
                 $params[] = 'string ' . $paramVar;
@@ -289,12 +277,10 @@ final class FacadeClassRenderer
                 if ($isRoot || !$this->isTriviaName($attr->propName)) {
                     $m = $this->renderGroupAttributeMethods($attr, $allSchemas, $namespace, $imports);
                 }
-            } elseif ($attr->isChoiceNodes()) {
-                $m = $this->renderChoiceNodeMethods($attr, $allSchemas, $namespace, $imports);
             } elseif ($attr->isChoiceRaw()) {
                 $m = $this->renderChoiceRawMethods($attr, $allSchemas, $namespace, $imports, $schema->className);
-            } elseif ($attr->isGroupedAttribute()) {
-                $m = $this->renderGroupedAttributeMethods($attr, $allSchemas, $namespace, $imports);
+            } elseif ($attr->isSequenceAttribute()) {
+                $m = $this->renderSequenceAttributeMethods($attr, $allSchemas, $namespace, $imports);
             } elseif ($attr->isRawContentAttribute()) {
                 $m = $this->renderRawContentMethods($attr, $imports);
             } elseif ($attr->isRawRegionAttribute()) {
@@ -399,31 +385,6 @@ final class FacadeClassRenderer
         return $m;
     }
 
-    private function renderChoiceNodeMethods(AttributeSchema $attr, array $allSchemas, string $namespace, array &$imports): string
-    {
-        $prop = $attr->propName;
-        $propU = ucfirst($prop);
-        $types = $this->resolveUnionTypes($attr->unionNodeNames, $allSchemas, $namespace, $imports);
-        $union = implode('|', $types);
-
-        $imports[] = NodeAttribute::class;
-
-        $m  = self::I . 'public function getNode' . $propU . '(): ' . $union . '|null' . PHP_EOL;
-        $m .= self::I . '{' . PHP_EOL;
-        $m .= self::I . self::I . '/** @var ?NodeAttribute $attribute */' . PHP_EOL;
-        $m .= self::I . self::I . '$attribute = $this->' . $prop . '->selected;' . PHP_EOL;
-        $m .= self::I . self::I . 'return $attribute?->node;' . PHP_EOL;
-        $m .= self::I . '}' . PHP_EOL;
-        $m .= PHP_EOL;
-        $m .= self::I . 'public function setNode' . $propU . '(' . $union . ' $value): self' . PHP_EOL;
-        $m .= self::I . '{' . PHP_EOL;
-        $m .= self::I . self::I . '$this->' . $prop . '->setSelected(NodeAttribute::fromNode($value->setParent($this)));' . PHP_EOL;
-        $m .= self::I . self::I . 'return $this;' . PHP_EOL;
-        $m .= self::I . '}' . PHP_EOL;
-
-        return $m;
-    }
-
     private function renderChoiceRawMethods(AttributeSchema $attr, array $allSchemas, string $namespace, array &$imports, string $className): string
     {
         $prop = $attr->propName;
@@ -442,7 +403,7 @@ final class FacadeClassRenderer
             $m .= self::I . self::I . 'if ($type === ' . $enumClass . '::' . $choice->caseName . ') {' . PHP_EOL;
             if ($choice->isKeyword) {
                 $val = var_export($choice->keywordContent ?? $choice->tokenName, true);
-                $m .= self::I . self::I . self::I . '$this->' . $prop . '->setSelected(new RawContentAttribute(' . $val . ', ' . var_export($choice->tokenName, true) . ', null));' . PHP_EOL;
+                $m .= self::I . self::I . self::I . '$this->' . $prop . ' = new RawContentAttribute(' . $val . ', ' . var_export($choice->tokenName, true) . ', null);' . PHP_EOL;
             } elseif ($choice->hasOpener) {
                 $m .= self::I . self::I . self::I . 'if ($content === null) {' . PHP_EOL;
                 $m .= self::I . self::I . self::I . self::I . 'throw new InvalidArgumentException(\'Content required for ' . $choice->tokenName . '.\');' . PHP_EOL;
@@ -450,16 +411,16 @@ final class FacadeClassRenderer
                 $openerName = 'doubleQuote';
                 $openerVal  = var_export($choice->openerContent ?? '"', true);
                 $closerVal  = var_export($choice->closerContent ?? $choice->openerContent ?? '"', true);
-                $m .= self::I . self::I . self::I . '$this->' . $prop . '->setSelected(new RawRegionAttribute(' . PHP_EOL;
+                $m .= self::I . self::I . self::I . '$this->' . $prop . ' = new RawRegionAttribute(' . PHP_EOL;
                 $m .= self::I . self::I . self::I . self::I . 'new StructureAttribute(true, ' . var_export($openerName, true) . ', ' . $openerVal . '),' . PHP_EOL;
                 $m .= self::I . self::I . self::I . self::I . 'new StructureAttribute(true, ' . var_export($openerName, true) . ', ' . $closerVal . '),' . PHP_EOL;
                 $m .= self::I . self::I . self::I . self::I . '$content, ' . var_export($choice->tokenName, true) . ', null,' . PHP_EOL;
-                $m .= self::I . self::I . self::I . '));' . PHP_EOL;
+                $m .= self::I . self::I . self::I . ');' . PHP_EOL;
             } else {
                 $m .= self::I . self::I . self::I . 'if ($content === null) {' . PHP_EOL;
                 $m .= self::I . self::I . self::I . self::I . 'throw new InvalidArgumentException(\'Content required for ' . $choice->tokenName . '.\');' . PHP_EOL;
                 $m .= self::I . self::I . self::I . '}' . PHP_EOL;
-                $m .= self::I . self::I . self::I . '$this->' . $prop . '->setSelected(new RawRegionAttribute(null, null, $content, ' . var_export($choice->tokenName, true) . ', null));' . PHP_EOL;
+                $m .= self::I . self::I . self::I . '$this->' . $prop . ' = new RawRegionAttribute(null, null, $content, ' . var_export($choice->tokenName, true) . ', null);' . PHP_EOL;
             }
             $m .= self::I . self::I . self::I . 'return $this;' . PHP_EOL;
             $m .= self::I . self::I . '}' . PHP_EOL;
@@ -471,19 +432,18 @@ final class FacadeClassRenderer
         $m .= PHP_EOL;
         $m .= self::I . 'public function get' . $propU . 'Type(): ' . $enumClass . '|null' . PHP_EOL;
         $m .= self::I . '{' . PHP_EOL;
-        $m .= self::I . self::I . '$attribute = $this->' . $prop . '->selected;' . PHP_EOL;
-        $m .= self::I . self::I . 'return $attribute !== null ? ' . $enumClass . '::from($attribute->name) : null;' . PHP_EOL;
+        $m .= self::I . self::I . 'return ' . $enumClass . '::from($this->' . $prop . '->name);' . PHP_EOL;
         $m .= self::I . '}' . PHP_EOL;
         $m .= PHP_EOL;
         $m .= self::I . 'public function get' . $propU . 'Content(): string|null' . PHP_EOL;
         $m .= self::I . '{' . PHP_EOL;
-        $m .= self::I . self::I . 'return $this->' . $prop . '->selected?->content;' . PHP_EOL;
+        $m .= self::I . self::I . 'return $this->' . $prop . '->content;' . PHP_EOL;
         $m .= self::I . '}' . PHP_EOL;
 
         return $m;
     }
 
-    private function renderGroupedAttributeMethods(AttributeSchema $attr, array $allSchemas, string $namespace, array &$imports): string
+    private function renderSequenceAttributeMethods(AttributeSchema $attr, array $allSchemas, string $namespace, array &$imports): string
     {
         $prop  = $attr->propName;
         $propU = ucfirst($prop);
@@ -537,15 +497,9 @@ final class FacadeClassRenderer
         // add
         $imports[] = NodeAttribute::class;
         if ($attr->groupedContentIsChoice) {
-            $imports[] = ChoiceAttribute::class;
-            $choiceListStr = '[' . implode(', ', array_map('var_export', $attr->groupedChoicesList, array_fill(0, count($attr->groupedChoicesList), true))) . ']';
             $m .= self::I . 'public function add' . $contentU . $toSuffix . '(' . $addMethodType . ' $node): self' . PHP_EOL;
             $m .= self::I . '{' . PHP_EOL;
-            $m .= self::I . self::I . '$this->' . $prop . '->addUnit(new ChoiceAttribute(' . PHP_EOL;
-            $m .= self::I . self::I . self::I . var_export($contentAttrName, true) . ',' . PHP_EOL;
-            $m .= self::I . self::I . self::I . $choiceListStr . ',' . PHP_EOL;
-            $m .= self::I . self::I . self::I . 'NodeAttribute::fromNode($node->setParent($this)),' . PHP_EOL;
-            $m .= self::I . self::I . '));' . PHP_EOL;
+            $m .= self::I . self::I . '$this->' . $prop . '->addUnit(NodeAttribute::fromNode($node->setParent($this)));' . PHP_EOL;
         } else {
             $m .= self::I . 'public function add' . $contentU . $toSuffix . '(' . $addMethodType . ' $' . lcfirst($addMethodType) . '): self' . PHP_EOL;
             $m .= self::I . '{' . PHP_EOL;
@@ -581,15 +535,12 @@ final class FacadeClassRenderer
             $m .= self::I . '{' . PHP_EOL;
             $m .= self::I . self::I . '$result = [];' . PHP_EOL;
             $m .= self::I . self::I . 'foreach ($this->' . $prop . '->attributes as $attr) {' . PHP_EOL;
-            $m .= self::I . self::I . self::I . 'if ($attr instanceof ChoiceAttribute && $attr->getName() === ' . var_export($contentAttrName, true) . ') {' . PHP_EOL;
-            $m .= self::I . self::I . self::I . self::I . 'if ($attr->selected instanceof NodeAttribute) {' . PHP_EOL;
-            $m .= self::I . self::I . self::I . self::I . self::I . '$result[] = $attr->selected->node;' . PHP_EOL;
-            $m .= self::I . self::I . self::I . self::I . '}' . PHP_EOL;
+            $m .= self::I . self::I . self::I . 'if ($attr instanceof NodeAttribute && $attr->getName() === ' . var_export($contentAttrName, true) . ') {' . PHP_EOL;
+            $m .= self::I . self::I . self::I . self::I . '$result[] = $attr->node;' . PHP_EOL;
             $m .= self::I . self::I . self::I . '}' . PHP_EOL;
             $m .= self::I . self::I . '}' . PHP_EOL;
             $m .= self::I . self::I . 'return $result;' . PHP_EOL;
             $m .= self::I . '}' . PHP_EOL;
-            $imports[] = ChoiceAttribute::class;
             $imports[] = NodeAttribute::class;
         } else {
             $plural = ucfirst($contentAttrName) . 's';
@@ -695,10 +646,10 @@ final class FacadeClassRenderer
         return (bool) preg_match('/^trivia\d+$/', $name);
     }
 
-    private function nodeHasGroupedAttribute(NodeSchema $schema): bool
+    private function nodeHasSequenceAttribute(NodeSchema $schema): bool
     {
         foreach ($schema->attributes as $attr) {
-            if ($attr->isGroupedAttribute()) {
+            if ($attr->isSequenceAttribute()) {
                 return true;
             }
         }

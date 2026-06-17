@@ -11,7 +11,7 @@ final class ParseTreeRenderer
 {
     public function renderTree(ParseTreeViewData $data, ?int $maxDepth = null): string
     {
-        return $this->renderNode($data->root, $maxDepth, 0, true);
+        return $this->renderNode($data->root, $maxDepth, 0, true, []);
     }
 
     public function renderJson(ParseTreeViewData $data): string
@@ -60,23 +60,31 @@ final class ParseTreeRenderer
         return $result;
     }
 
-    private function renderNode(ParseNodeViewData $node, ?int $maxDepth, int $depth, bool $isLast): string
+    /**
+     * @param bool[] $ancestorContinues  per ancestor depth: whether that ancestor has
+     *                                   further siblings after it (needs a `│` guide)
+     */
+    private function renderNode(ParseNodeViewData $node, ?int $maxDepth, int $depth, bool $isLast, array $ancestorContinues): string
     {
         if ($maxDepth !== null && $depth > $maxDepth) {
             return '';
         }
 
-        $indent = str_repeat('  ', $depth);
+        $indent = '';
+        foreach ($ancestorContinues as $continues) {
+            $indent .= $continues ? '│ ' : '  ';
+        }
         $prefix = $depth === 0 ? '' : ($isLast ? '└─ ' : '├─ ');
         $tags   = !empty($node->tags) ? ' [tags: ' . implode(', ', $node->tags) . ']' : '';
-        $meta   = !empty($node->meta) ? ' [meta: ' . json_encode($node->meta) . ']' : '';
+        $meta   = !empty($node->meta) ? ' [meta: ' . json_encode($node->meta, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . ']' : '';
 
         $line = match ($node->type) {
             ParseNodeViewData::TYPE_NODE => sprintf(
-                "%s%sNode: %s%s%s\n",
+                "%s%sNode: %s%s%s%s\n",
                 $indent,
                 $prefix,
                 $node->name,
+                $node->origin !== null ? " (origin: {$node->origin})" : '',
                 $meta,
                 $tags,
             ),
@@ -85,15 +93,6 @@ final class ParseTreeRenderer
                 $indent,
                 $prefix,
                 $node->name,
-                $meta,
-                $tags,
-            ),
-            ParseNodeViewData::TYPE_CHOICE_ATTR => sprintf(
-                "%s%sChoiceAttribute: %s (choices: %s)%s%s\n",
-                $indent,
-                $prefix,
-                $node->name,
-                $node->content ?? '',
                 $meta,
                 $tags,
             ),
@@ -106,8 +105,17 @@ final class ParseTreeRenderer
                 $meta,
                 $tags,
             ),
-            ParseNodeViewData::TYPE_GROUPED_ATTR => sprintf(
-                "%s%sGroupedAttribute: %s (count: %d)%s%s\n",
+            ParseNodeViewData::TYPE_SEQUENCE_ATTR => sprintf(
+                "%s%sSequenceAttribute: %s (count: %d)%s%s\n",
+                $indent,
+                $prefix,
+                $node->name,
+                $node->childCount ?? 0,
+                $meta,
+                $tags,
+            ),
+            ParseNodeViewData::TYPE_RAW_GROUP_ATTR => sprintf(
+                "%s%sRawGroupAttribute: %s (count: %d)%s%s\n",
                 $indent,
                 $prefix,
                 $node->name,
@@ -124,24 +132,35 @@ final class ParseTreeRenderer
                 $meta,
                 $tags,
             ),
+            ParseNodeViewData::TYPE_OPTIONAL_RAW_ATTR => sprintf(
+                "%s%sOptionalRawAttribute: %s (%s)%s%s\n",
+                $indent,
+                $prefix,
+                $node->name,
+                $node->present ? 'present' : 'absent',
+                $meta,
+                $tags,
+            ),
             ParseNodeViewData::TYPE_RAW_REGION_ATTR,
-            ParseNodeViewData::TYPE_RAW_CONTENT_ATTR => sprintf(
+            ParseNodeViewData::TYPE_RAW_CONTENT_ATTR,
+            ParseNodeViewData::TYPE_RAW_SEQUENCE_ATTR => sprintf(
                 "%s%s%s: %s = %s%s%s\n",
                 $indent,
                 $prefix,
                 $node->type,
                 $node->name,
-                json_encode(strlen($node->content ?? '') > 50 ? substr($node->content, 0, 50) . '...' : ($node->content ?? '')),
+                $this->quoteContent($node->content),
                 $meta,
                 $tags,
             ),
             ParseNodeViewData::TYPE_STRUCTURE_ATTR => sprintf(
-                "%s%sStructureAttribute: %s (%s) = %s%s%s\n",
+                "%s%sStructureAttribute: %s (%s%s) = %s%s%s\n",
                 $indent,
                 $prefix,
                 $node->name,
                 $node->present ? 'present' : 'absent',
-                json_encode(strlen($node->content ?? '') > 50 ? substr($node->content, 0, 50) . '...' : ($node->content ?? '')),
+                $node->cardinality !== null ? ", {$node->cardinality}" : '',
+                $this->quoteContent($node->content),
                 $meta,
                 $tags,
             ),
@@ -150,11 +169,32 @@ final class ParseTreeRenderer
 
         $result = $line;
         $count  = count($node->children);
+        $childAncestors = $depth === 0 ? [] : [...$ancestorContinues, !$isLast];
         foreach ($node->children as $i => $child) {
-            $result .= $this->renderNode($child, $maxDepth, $depth + 1, $i === $count - 1);
+            $result .= $this->renderNode($child, $maxDepth, $depth + 1, $i === $count - 1, $childAncestors);
         }
 
         return $result;
+    }
+
+    /**
+     * Renders a content string for the tree view without json_encode's slash/unicode
+     * escaping noise — only escapes what would otherwise break the single-line display.
+     */
+    private function quoteContent(?string $content): string
+    {
+        $value = $content ?? '';
+        if (strlen($value) > 50) {
+            $value = substr($value, 0, 50) . '...';
+        }
+
+        $escaped = str_replace(
+            ['\\', '"', "\n", "\r", "\t"],
+            ['\\\\', '\\"', '\\n', '\\r', '\\t'],
+            $value,
+        );
+
+        return '"' . $escaped . '"';
     }
 
     private function nodeToArray(ParseNodeViewData $node): array
@@ -173,12 +213,19 @@ final class ParseTreeRenderer
         if ($node->present !== null) {
             $data['present'] = $node->present;
         }
+        if ($node->cardinality !== null) {
+            $data['cardinality'] = $node->cardinality;
+        }
+        if ($node->origin !== null) {
+            $data['origin'] = $node->origin;
+        }
         if (!empty($node->children)) {
             $key = match ($node->type) {
-                ParseNodeViewData::TYPE_NODE        => 'attributes',
+                ParseNodeViewData::TYPE_NODE          => 'attributes',
                 ParseNodeViewData::TYPE_GROUP_ATTR    => 'nodes',
-                ParseNodeViewData::TYPE_GROUPED_ATTR  => 'attributes',
-                default                             => 'children',
+                ParseNodeViewData::TYPE_SEQUENCE_ATTR => 'attributes',
+                ParseNodeViewData::TYPE_RAW_GROUP_ATTR => 'raws',
+                default                               => 'children',
             };
             $data[$key] = array_map($this->nodeToArray(...), $node->children);
         }

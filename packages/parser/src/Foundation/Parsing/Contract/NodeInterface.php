@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace PhpArchitecture\Parser\Foundation\Parsing\Contract;
 
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Context\ContextStack;
 use PhpArchitecture\Parser\Foundation\Shared\Meta\MetaInterface;
 use PhpArchitecture\Parser\Foundation\Shared\Tags\TagsInterface;
 use Stringable;
@@ -14,6 +15,8 @@ interface NodeInterface extends MetaInterface, Stringable, TagsInterface
 
     /** @return NodeAttributeInterface[] */
     public function getAttributes(): array;
+
+    public function getContextStack(): ContextStack;
 
     public function getName(): string;
 

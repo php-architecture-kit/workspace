@@ -7,11 +7,10 @@ namespace PhpArchitecture\Parser\Infrastructure\TreeSchema\Generator;
 use LogicException;
 use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeAttributeInterface;
 use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeInterface;
-use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\ChoiceAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\GroupAttribute;
-use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\GroupedAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\NodeAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\OptionalAttribute;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\SequenceAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Node;
 use PhpArchitecture\Parser\Infrastructure\TreeSchema\Renderer\Template\ClassStmtTemplate;
 use PhpArchitecture\Parser\Infrastructure\TreeSchema\Renderer\Template\DocblockTemplate;
@@ -99,10 +98,7 @@ final class TreeSchemaGenerator
                 fn(NodeInterface $n) => new TypeRef($this->processNode($n)),
                 $attribute->nodes,
             ))),
-            $attribute instanceof ChoiceAttribute   => $attribute->selected !== null
-                ? $this->buildItemTypeRefs($attribute->selected)
-                : [],
-            $attribute instanceof GroupedAttribute  => array_values(array_merge(
+            $attribute instanceof SequenceAttribute  => array_values(array_merge(
                 ...array_map(
                     fn(NodeAttributeInterface $a) => $this->buildItemTypeRefs($a),
                     $attribute->attributes,
@@ -124,8 +120,7 @@ final class TreeSchemaGenerator
                 fn(NodeInterface $n) => new TypeRef($this->processNode($n)),
                 $attribute->nodes,
             ))),
-            $attribute instanceof ChoiceAttribute,
-            $attribute instanceof GroupedAttribute  => [
+            $attribute instanceof SequenceAttribute => [
                 new TypeRef($attribute::class, $this->buildContainerTypeRefs($attribute)),
             ],
             default => [new TypeRef($attribute::class)],

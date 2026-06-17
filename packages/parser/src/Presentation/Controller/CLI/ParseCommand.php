@@ -6,6 +6,7 @@ namespace PhpArchitecture\Parser\Presentation\Controller\CLI;
 
 use PhpArchitecture\Parser\Foundation\Grammar\Compiled\GrammarCompiler;
 use PhpArchitecture\Parser\Foundation\Grammar\Compiled\Model\CompiledGrammar;
+use PhpArchitecture\Parser\Foundation\Grammar\Compiled\Model\CompiledRegion;
 use PhpArchitecture\Parser\Foundation\Parser;
 use PhpArchitecture\Parser\Foundation\Parsing\Context\DefaultParsingContext;
 use PhpArchitecture\Parser\Foundation\Tokenization\Model\StringStream;
@@ -41,7 +42,8 @@ final class ParseCommand extends Command
             ->addOption('output', 'o', InputOption::VALUE_OPTIONAL, 'Output file path (default: stdout)')
             ->addOption('format', 'f', InputOption::VALUE_OPTIONAL, 'Output format: tree, json, simple', 'tree')
             ->addOption('max-depth', 'd', InputOption::VALUE_OPTIONAL, 'Maximum depth to display', null)
-            ->addOption('colored-regions', null, InputOption::VALUE_NONE, 'Display source with colored background per node name instead of tree');
+            ->addOption('colored-regions', null, InputOption::VALUE_NONE, 'Display source with colored background per node name instead of tree')
+            ->addOption('max-inline-lines', null, InputOption::VALUE_OPTIONAL, 'If output exceeds this many lines and no --output was given, write it to a temp file instead of printing it', '300');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -114,10 +116,39 @@ final class ParseCommand extends Command
             file_put_contents($outputFile, $formattedOutput);
             $io->success("Parse output saved to: {$outputFile}");
         } else {
-            $output->write($formattedOutput);
+            $maxInlineLines = (int) $input->getOption('max-inline-lines');
+            $lineCount      = substr_count($formattedOutput, "\n") + 1;
+
+            if ($lineCount > $maxInlineLines) {
+                $spillFile = $this->spillToTempFile($formattedOutput, $inputFile, $format);
+                $io->warning("Output has {$lineCount} lines, exceeding the limit of {$maxInlineLines} (see --max-inline-lines). Written to: {$spillFile}");
+            } else {
+                $output->write($formattedOutput);
+            }
         }
 
         return Command::SUCCESS;
+    }
+
+    private function spillToTempFile(string $content, string $inputFile, string $format): string
+    {
+        $extension = match ($format) {
+            'json' => 'json',
+            default => 'txt',
+        };
+        $baseName = pathinfo($inputFile, PATHINFO_FILENAME);
+
+        $path = sprintf(
+            '%s/parser-parse-%s-%s.%s',
+            sys_get_temp_dir(),
+            $baseName,
+            date('Ymd-His'),
+            $extension,
+        );
+
+        file_put_contents($path, $content);
+
+        return $path;
     }
 
     /**
@@ -140,26 +171,39 @@ final class ParseCommand extends Command
         );
 
         foreach ($selectedNames as $name) {
-            $matched = [];
+            $matchedBySequence = [];
+            $matchedByRegionIdentity = [];
+
             foreach ($compiledGrammar->regions as $regionName => $region) {
+                $matchesSequence = $region->sequenceLibrary->rootSequence?->name === $name;
                 foreach ($region->sequenceLibrary->sequences as $sequence) {
                     if ($sequence->name === $name) {
-                        $matched[$regionName] = $region;
+                        $matchesSequence = true;
                         break;
                     }
                 }
-                if ($region->sequenceLibrary->rootSequence?->name === $name) {
-                    $matched[$regionName] = $region;
+
+                if ($matchesSequence) {
+                    $matchedBySequence[$regionName] = $region;
+                    continue;
+                }
+
+                // Some regions (e.g. whitespace) are renamed at runtime by event
+                // listeners (see RegionConfigApi::withPossibleNames()) — the node
+                // names seen in the parse tree never appear as a Sequence name.
+                $possibleNames = $region->getMeta(CompiledRegion::META_POSSIBLE_NAMES, []);
+                if ($region->name === $name || in_array($name, $possibleNames, true)) {
+                    $matchedByRegionIdentity[$regionName] = $region;
                 }
             }
 
-            if (empty($matched)) {
+            if (empty($matchedBySequence) && empty($matchedByRegionIdentity)) {
                 $output->writeln("<fg=gray>No compiled grammar entry found for node [{$name}].</>");
                 continue;
             }
 
             $io->section("Compiled grammar: [{$name}]");
-            foreach ($matched as $regionName => $region) {
+            foreach ($matchedBySequence as $regionName => $region) {
                 $regionView = $factory->fromRegion($region);
                 $matchingSequences = array_filter(
                     $regionView->sequences,
@@ -176,6 +220,12 @@ final class ParseCommand extends Command
                     ));
                     $output->writeln('');
                 }
+            }
+
+            foreach ($matchedByRegionIdentity as $regionName => $region) {
+                $output->writeln("<fg=gray>region: {$regionName} (renamed at runtime to [{$name}])</>");
+                $cgRenderer->renderSingle($factory->fromRegion($region));
+                $output->writeln('');
             }
         }
     }

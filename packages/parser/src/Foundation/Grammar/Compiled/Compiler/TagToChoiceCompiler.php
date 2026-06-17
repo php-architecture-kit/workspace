@@ -29,7 +29,7 @@ class TagToChoiceCompiler implements GrammarCompilerInterface
 
         foreach ($tagsMap as $tag => $options) {
             if (!isset($region->rules[$tag]) || $region->rules[$tag]->definition instanceof TaggedRule) {
-                $region->addRule(Rule::choice($tag, $options, type: NodeType::Tag)->priority($tag === '-' ? -9999 : -999));
+                $region->addRule(Rule::choice($tag, $options, type: NodeType::Tag)->priority(in_array($tag, ['-', '-l', '-t']) ? -9999 : -999));
             }
         }
     }

@@ -26,7 +26,7 @@ class Json5 extends JsonC
                     Rule::expr("escapeHex", "\\\\x[0-9a-fA-F]{2}")->priority(2),
                     Rule::expr("escapeUnicode", "\\\\u[0-9a-fA-F]{4}")->priority(2),
                     Rule::expr("escapeChar", "\\\\[bfnrtv0\\\\\"/']")->priority(1),
-                    Rule::expr("lineContinuation", "\\\\(\n|\r\n?|\x{2028}|\x{2029})")->priority(1),
+                    Rule::expr("lineContinuation", '\\\\(\n|\r\n?|\x{2028}|\x{2029})')->priority(1),
                     Rule::expr("unescaped", "[^\\x00-\\x1F\\x27\\x5C]+"),
                 )
                 ->setNodeType(NodeType::Raw)

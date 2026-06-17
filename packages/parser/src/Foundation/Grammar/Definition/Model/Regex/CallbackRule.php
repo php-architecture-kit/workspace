@@ -40,6 +40,8 @@ final class CallbackRule implements RuleDefinition
             $rule->name,
             RuleType::Expression,
             $regexRule,
+            $rule->nodeType,
+            $rule->getAllTags(),
         );
     }
 }

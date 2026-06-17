@@ -6,9 +6,12 @@ namespace PhpArchitecture\Parser\Tests\Func\Grammar\Json;
 
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Grammar;
 use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeInterface;
-use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\ChoiceAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\SequenceAttribute;
-use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\RawRegionAttribute;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Raw\RawContentAttribute;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Raw\RawRegionAttribute;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Node;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\NodeOrigin;
+use PhpArchitecture\Parser\Foundation\Shared\Meta\MetaInterface;
 use PhpArchitecture\Parser\Tests\Func\Grammar\GrammarTestCase;
 use PhpArchitecture\Parser\Infrastructure\Grammar\Definition\Json\JsonRfc8259;
 use PHPUnit\Framework\Attributes\Group;
@@ -92,17 +95,18 @@ final class JsonRfc8259ParsedTreeTest extends GrammarTestCase
     }
 
     // -------------------------------------------------------------------------
-    // Feature: primitive ChoiceAttribute wraps the selected value attribute
+    // Feature: primitive choice alternatives surface via meta['alternatives']
+    //
+    // ChoiceAttribute was removed. The "primitive" rule (Rule::choice) still
+    // produces a real "primitive" Node (one per matched alternative), but the
+    // information about which alternative matched, and what the full set of
+    // choices was, now lives directly on the Node's single content attribute
+    // (NodeAttribute/RawContentAttribute/RawRegionAttribute/...) via
+    // meta['alternatives'], rather than behind a dedicated wrapper attribute.
     // -------------------------------------------------------------------------
 
-    /**
-     * Rule::choice("primitive", [...]) must produce a ChoiceAttribute on the
-     * "primitive" node. The top-level attribute on that node must be
-     * ChoiceAttribute, NOT a bare RawRegionAttribute or any other attribute
-     * that bypasses the choice wrapper.
-     */
     #[Test]
-    public function primitiveNodeHasChoiceAttributeNotRawRegionAttributeAtTopLevel(): void
+    public function primitiveAttributeCarriesChoiceAlternativesInMeta(): void
     {
         // A JSON object with a string value — "string" is one of the choices
         $this->assertGrammarParsing(
@@ -113,13 +117,14 @@ final class JsonRfc8259ParsedTreeTest extends GrammarTestCase
                 $test->assertNotNull($primitiveNode, 'Expected a "primitive" node in the parsed tree');
 
                 $topLevelAttrs = $primitiveNode->getAttributes();
-                $test->assertNotEmpty($topLevelAttrs, 'Expected attributes on "primitive" node');
+                $test->assertCount(1, $topLevelAttrs, 'Expected exactly one attribute on "primitive" node');
 
                 $firstAttr = reset($topLevelAttrs);
-                $test->assertInstanceOf(
-                    ChoiceAttribute::class,
-                    $firstAttr,
-                    'The first (and expected sole) attribute on a "primitive" node must be a ChoiceAttribute, not a bare RawRegionAttribute',
+                $test->assertInstanceOf(MetaInterface::class, $firstAttr);
+                $test->assertSame(
+                    ['false', 'null', 'true', 'number', 'string'],
+                    $firstAttr->meta['alternatives'] ?? null,
+                    'The matched alternative\'s attribute must carry the full set of choices in meta[\'alternatives\']',
                 );
             },
         );
@@ -135,13 +140,13 @@ final class JsonRfc8259ParsedTreeTest extends GrammarTestCase
                 $primitiveNode = $this->findFirstNodeByName($result, 'primitive');
                 $test->assertNotNull($primitiveNode);
 
-                $choiceAttr = $this->findFirstChoiceAttribute($primitiveNode);
-                $test->assertNotNull($choiceAttr, 'Expected a ChoiceAttribute on "primitive" node');
+                $attr = $primitiveNode->getAttributes()[0] ?? null;
+                $test->assertNotNull($attr, 'Expected an attribute on "primitive" node');
 
                 $test->assertEquals(
                     'primitive',
-                    $choiceAttr->getName(),
-                    'ChoiceAttribute name must be "primitive" (the rule name), not a pipe-joined list of choices',
+                    $attr->getName(),
+                    'The attribute name must be "primitive" (the anchor/rule name), not a pipe-joined list of choices',
                 );
             },
         );
@@ -157,13 +162,13 @@ final class JsonRfc8259ParsedTreeTest extends GrammarTestCase
                 $primitiveNode = $this->findFirstNodeByName($result, 'primitive');
                 $test->assertNotNull($primitiveNode);
 
-                $choiceAttr = $this->findFirstChoiceAttribute($primitiveNode);
-                $test->assertNotNull($choiceAttr);
+                $attr = $primitiveNode->getAttributes()[0] ?? null;
+                $test->assertNotNull($attr);
 
                 $test->assertEquals(
                     ['false', 'null', 'true', 'number', 'string'],
-                    $choiceAttr->choices,
-                    'ChoiceAttribute choices must list all defined primitive alternatives',
+                    $attr->meta['alternatives'] ?? null,
+                    'meta[\'alternatives\'] must list all defined primitive alternatives',
                 );
             },
         );
@@ -179,21 +184,20 @@ final class JsonRfc8259ParsedTreeTest extends GrammarTestCase
                 $primitiveNode = $this->findFirstNodeByName($result, 'primitive');
                 $test->assertNotNull($primitiveNode);
 
-                $choiceAttr = $this->findFirstChoiceAttribute($primitiveNode);
-                $test->assertNotNull($choiceAttr);
+                $attr = $primitiveNode->getAttributes()[0] ?? null;
+                $test->assertNotNull($attr);
 
                 $test->assertInstanceOf(
                     RawRegionAttribute::class,
-                    $choiceAttr->selected,
-                    'For a string primitive the ChoiceAttribute::$selected must be a RawRegionAttribute',
+                    $attr,
+                    'For a string primitive the resolved attribute must be a RawRegionAttribute',
                 );
 
-                /** @var RawRegionAttribute $selected */
-                $selected = $choiceAttr->selected;
+                /** @var RawRegionAttribute $attr */
                 $test->assertEquals(
                     'string',
-                    $selected->name,
-                    'Selected RawRegionAttribute::$name must be "string" (the matched choice)',
+                    $attr->name,
+                    'RawRegionAttribute::$name must be "string" (the matched choice), even though getName() returns the anchor "primitive"',
                 );
             },
         );
@@ -212,13 +216,13 @@ final class JsonRfc8259ParsedTreeTest extends GrammarTestCase
                 $primitiveNode = $this->findFirstNodeByName($result, 'primitive');
                 $test->assertNotNull($primitiveNode);
 
-                $choiceAttr = $this->findFirstChoiceAttribute($primitiveNode);
-                $test->assertNotNull($choiceAttr);
+                $attr = $primitiveNode->getAttributes()[0] ?? null;
+                $test->assertNotNull($attr);
 
-                if ($choiceAttr->selected instanceof RawRegionAttribute) {
+                if ($attr instanceof RawRegionAttribute) {
                     $test->assertStringNotContainsString(
                         '|',
-                        (string) ($choiceAttr->selected->anchorName ?? ''),
+                        (string) ($attr->anchorName ?? ''),
                         'RawRegionAttribute::$anchorName must not contain a pipe-joined list of all choice alternatives',
                     );
                 }
@@ -236,21 +240,19 @@ final class JsonRfc8259ParsedTreeTest extends GrammarTestCase
                 $primitiveNode = $this->findFirstNodeByName($result, 'primitive');
                 $test->assertNotNull($primitiveNode);
 
-                $choiceAttr = $this->findFirstChoiceAttribute($primitiveNode);
-                $test->assertNotNull($choiceAttr);
+                $attr = $primitiveNode->getAttributes()[0] ?? null;
+                $test->assertNotNull($attr);
 
                 $test->assertInstanceOf(
-                    ChoiceAttribute::class,
-                    $choiceAttr,
-                    'Boolean true must be wrapped in ChoiceAttribute',
+                    RawContentAttribute::class,
+                    $attr,
+                    'Boolean "true" is matched as a Token, so it resolves to a RawContentAttribute',
                 );
-                $test->assertNotNull($choiceAttr->selected, 'ChoiceAttribute::$selected must not be null for "true"');
-                $test->assertNotInstanceOf(
-                    RawRegionAttribute::class,
-                    // top-level attribute on primitive node must be ChoiceAttribute:
-                    $result->getAttributes()[0] ?? null,
-                    'Top-level attribute on "primitive" node must be ChoiceAttribute when parsing standalone "true"',
+                $test->assertSame(
+                    ['false', 'null', 'true', 'number', 'string'],
+                    $attr->meta['alternatives'] ?? null,
                 );
+                $test->assertSame('true', (string) $attr);
             },
         );
     }
@@ -265,9 +267,12 @@ final class JsonRfc8259ParsedTreeTest extends GrammarTestCase
                 $primitiveNode = $this->findFirstNodeByName($result, 'primitive');
                 $test->assertNotNull($primitiveNode);
 
-                $choiceAttr = $this->findFirstChoiceAttribute($primitiveNode);
-                $test->assertNotNull($choiceAttr);
-                $test->assertNotNull($choiceAttr->selected);
+                $attr = $primitiveNode->getAttributes()[0] ?? null;
+                $test->assertNotNull($attr);
+                $test->assertSame(
+                    ['false', 'null', 'true', 'number', 'string'],
+                    $attr->meta['alternatives'] ?? null,
+                );
             },
         );
     }
@@ -283,19 +288,19 @@ final class JsonRfc8259ParsedTreeTest extends GrammarTestCase
         }
 
         foreach ($node->getAttributes() as $attr) {
-            if ($attr instanceof \PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\NodeAttribute) {
+            if ($attr instanceof \PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Node\NodeAttribute) {
                 $found = $this->findFirstNodeByName($attr->node, $name);
                 if ($found !== null) {
                     return $found;
                 }
             }
-            if ($attr instanceof \PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\OptionalAttribute && $attr->node !== null) {
+            if ($attr instanceof \PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Node\OptionalAttribute && $attr->node !== null) {
                 $found = $this->findFirstNodeByName($attr->node, $name);
                 if ($found !== null) {
                     return $found;
                 }
             }
-            if ($attr instanceof \PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\GroupAttribute) {
+            if ($attr instanceof \PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Node\GroupAttribute) {
                 foreach ($attr->nodes as $child) {
                     $found = $this->findFirstNodeByName($child, $name);
                     if ($found !== null) {
@@ -305,32 +310,15 @@ final class JsonRfc8259ParsedTreeTest extends GrammarTestCase
             }
             if ($attr instanceof SequenceAttribute) {
                 foreach ($attr->attributes as $nestedAttr) {
-                    $tempNode = new \PhpArchitecture\Parser\Foundation\Parsing\Model\Node('_tmp', [$nestedAttr], null);
+                    $tempNode = new Node('_tmp', NodeOrigin::Sequence, [$nestedAttr], null);
                     $found = $this->findFirstNodeByName($tempNode, $name);
                     if ($found !== null && $found->getName() !== '_tmp') {
                         return $found;
                     }
                 }
             }
-            if ($attr instanceof ChoiceAttribute && $attr->selected !== null) {
-                $tempNode = new \PhpArchitecture\Parser\Foundation\Parsing\Model\Node('_tmp', [$attr->selected], null);
-                $found = $this->findFirstNodeByName($tempNode, $name);
-                if ($found !== null && $found->getName() !== '_tmp') {
-                    return $found;
-                }
-            }
         }
 
-        return null;
-    }
-
-    private function findFirstChoiceAttribute(NodeInterface $node): ?ChoiceAttribute
-    {
-        foreach ($node->getAttributes() as $attr) {
-            if ($attr instanceof ChoiceAttribute) {
-                return $attr;
-            }
-        }
         return null;
     }
 }

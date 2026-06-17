@@ -95,8 +95,8 @@ final class NestedSequence
         $tags = !empty($m['tags']) ? str_split($m['tags']) : [];
         $anchorName = !empty($m['anchor']) ? $m['anchor'] : null;
 
-        if ($anchorName !== null && !in_array('g', $tags, true)) {
-            throw new InvalidArgumentException("Invalid nested sequence: `{$nestedSequence}`. anchorName is only meaningful for grouped nested sequences (tag /g required).");
+        if ($anchorName !== null && !in_array('g', $tags, true) && !in_array('r', $tags, true)) {
+            $tags[] = 'g';
         }
 
         return new self($alternativeSequences, $cardinality, $isLookahead, $isLookbehind, $tags, $anchorName);

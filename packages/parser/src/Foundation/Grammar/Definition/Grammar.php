@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace PhpArchitecture\Parser\Foundation\Grammar\Definition;
 
 use InvalidArgumentException;
+use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeInterface;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Context\ContextStack;
 
 class Grammar
 {
@@ -12,8 +14,11 @@ class Grammar
     public private(set) Region $rootRegion;
     public bool $requireBofEof = true;
 
-    /** @var array<string, class-string> */
+    /** @var array<string,class-string> */
     public array $nodeClassMap = [];
+
+    public ContextDefinition $contextDefinition;
+    public FormatDefinition $formatDefinition;
 
     public function __construct(
         public readonly string $name,
@@ -22,6 +27,8 @@ class Grammar
     ) {
         $this->global = (new Region($globalRegionName));
         $this->rootRegion = $this->global;
+        $this->contextDefinition = new ContextDefinition();
+        $this->formatDefinition = new FormatDefinition();
     }
 
     /**
@@ -49,6 +56,19 @@ class Grammar
         }
 
         $this->rootRegion = $region;
+    }
+
+    /**
+     * @param callable(NodeInterface $rootNode):string $styleResolver
+     */
+    public function setStyleResolver(callable $styleResolver): void
+    {
+        $this->contextDefinition->addContextInitializer(
+            function (NodeInterface $rootNode) use ($styleResolver): void {
+                $rootNode->getContextStack()->treeContext[ContextStack::STYLE] = $styleResolver($rootNode) ?: Defaults::DEFAULT_STYLE;
+            },
+            true
+        );
     }
 
     /**

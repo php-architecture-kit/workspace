@@ -29,6 +29,11 @@ class MatchedSequence implements MetaInterface, Stringable
         $this->tags = $tags;
     }
 
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
     public function __toString(): string
     {
         return implode('', array_map(

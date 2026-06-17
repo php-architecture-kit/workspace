@@ -4,13 +4,12 @@ declare(strict_types=1);
 
 namespace PhpArchitecture\Parser\Infrastructure\TreeSchema\Generator\Schema;
 
-use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\ChoiceAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\GroupAttribute;
-use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\GroupedAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\NodeAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\OptionalAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\RawContentAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\RawRegionAttribute;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\SequenceAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\StructureAttribute;
 
 /**
@@ -77,14 +76,9 @@ final class AttributeSchema
         return $this->attrClass === GroupAttribute::class;
     }
 
-    public function isChoiceAttribute(): bool
+    public function isSequenceAttribute(): bool
     {
-        return $this->attrClass === ChoiceAttribute::class;
-    }
-
-    public function isGroupedAttribute(): bool
-    {
-        return $this->attrClass === GroupedAttribute::class;
+        return $this->attrClass === SequenceAttribute::class;
     }
 
     public function isStructureAttribute(): bool
@@ -104,11 +98,11 @@ final class AttributeSchema
 
     public function isChoiceRaw(): bool
     {
-        return $this->isChoiceAttribute() && !empty($this->rawChoices);
+        return ($this->isRawContentAttribute() || $this->isRawRegionAttribute()) && count($this->rawChoices) > 1;
     }
 
     public function isChoiceNodes(): bool
     {
-        return $this->isChoiceAttribute() && empty($this->rawChoices);
+        return ($this->isNodeAttribute() || $this->isOptionalAttribute()) && !empty($this->choicesList);
     }
 }

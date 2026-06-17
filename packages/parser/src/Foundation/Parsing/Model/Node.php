@@ -20,6 +20,8 @@ class Node implements NodeInterface
     /** @var WeakReference<NodeInterface>|null */
     public private(set) ?WeakReference $parent = null;
 
+    public private(set) Context\ContextStack $contextStack;
+
     /**
      * @param NodeAttributeInterface[] $attributes
      * @param array<string,mixed> $meta
@@ -27,16 +29,46 @@ class Node implements NodeInterface
      */
     public function __construct(
         public readonly string $name,
+        public readonly NodeOrigin $origin,
         public private(set) array $attributes,
-        ?NodeInterface $parent,
+        ?NodeInterface $parent = null,
         array $meta = [],
         array $tags = [],
     ) {
         if ($parent !== null) {
-            $this->parent = WeakReference::create($parent);
+            $this->setParent($parent);
+        } else {
+            $this->initializeContext($this, null);
         }
+
         $this->meta = $meta;
         $this->tags = $tags;
+    }
+
+    /**
+     * Initializes the context stack for the node. Should be called when the node is created or when its parent is set/changed.
+     * So, in theory you should not call this method because it's handled internally by the constructor and setParent method.
+     */
+    protected function initializeContext(NodeInterface $node, ?Context\ContextStack $parentContextStack): void
+    {
+        if ($parentContextStack === null) {
+            $this->contextStack = new Context\ContextStack([new Context\NodeContext($node)]);
+            return;
+        }
+
+        $this->contextStack = $parentContextStack->push(new Context\NodeContext($node));
+    }
+
+    public function applyFormatting(Format\Formatter $formatter, string $style, bool $recursive = false): self
+    {
+        $this->contextStack->treeContext[Context\ContextStack::STYLE] = $style;
+        $formatter->applyFormatters($this, $style);
+
+        if ($recursive) {
+            throw new LogicException("Recursive formatting is not implemented yet.");
+        }
+
+        return $this;
     }
 
     public function addAttribute(NodeAttributeInterface $attribute, Placement $placement = Placement::After, int $offset = -1): self
@@ -59,6 +91,11 @@ class Node implements NodeInterface
     public function getAttributes(): array
     {
         return $this->attributes;
+    }
+
+    public function getContextStack(): Context\ContextStack
+    {
+        return $this->contextStack;
     }
 
     public function getName(): string
@@ -103,6 +140,7 @@ class Node implements NodeInterface
     public function setParent(NodeInterface $parent): self
     {
         $this->parent = WeakReference::create($parent);
+        $this->initializeContext($this, $parent->getContextStack());
 
         return $this;
     }

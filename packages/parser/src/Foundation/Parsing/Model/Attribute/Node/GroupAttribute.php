@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute;
+namespace PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Node;
 
 use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeAttributeInterface;
 use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeInterface;
@@ -19,14 +19,16 @@ class GroupAttribute implements NodeAttributeInterface, MetaInterface
     use MetaTrait;
     use TagsTrait;
 
+    public const DEFAULT_NAME = 'group';
+
     /**
      * @param T[] $nodes
      * @param array<string,mixed> $meta
      * @param string[] $tags
      */
     public function __construct(
-        public string $name,
-        public array $nodes,
+        public string $name = self::DEFAULT_NAME,
+        public array $nodes = [],
         array $meta = [],
         array $tags = [],
     ) {

@@ -12,6 +12,7 @@ use PhpArchitecture\Parser\Foundation\Grammar\Definition\Rule;
 use PhpArchitecture\Parser\Foundation\Matching\Model\NestedSequence as CompiledNestedSequence;
 use PhpArchitecture\Parser\Foundation\Matching\Model\SequenceNode as CompiledSequenceNode;
 use PhpArchitecture\Parser\Foundation\Matching\Model\Sequence as CompiledSequence;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Raw\RawContentAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\SequenceAttribute;
 
 class RuleToSequenceCompiler implements RuleCompilerInterface
@@ -66,9 +67,11 @@ class RuleToSequenceCompiler implements RuleCompilerInterface
         );
     }
 
-    public function compileNestedSequence(NestedSequence $definition, bool $inGroup = false): CompiledNestedSequence
+    public function compileNestedSequence(NestedSequence $definition, bool $inGroup = false, bool $inRawGroup = false): CompiledNestedSequence
     {
-        $childInGroup = in_array('g', $definition->tags) || $inGroup;
+        $isRaw = in_array('r', $definition->tags, true);
+        $childInRawGroup = $isRaw || $inRawGroup;
+        $childInGroup = !$isRaw && (in_array('g', $definition->tags, true) || $inGroup);
 
         return new CompiledNestedSequence(
             array_map(
@@ -78,8 +81,8 @@ class RuleToSequenceCompiler implements RuleCompilerInterface
                  */
                 fn(array $alternatives): array => array_map(
                     fn(NestedSequence|SequenceNode $def): CompiledNestedSequence|CompiledSequenceNode => $def instanceof NestedSequence
-                        ? $this->compileNestedSequence($def, $childInGroup)
-                        : $this->compileSequenceNode($def, $childInGroup),
+                        ? $this->compileNestedSequence($def, $childInGroup, $childInRawGroup)
+                        : $this->compileSequenceNode($def, $childInGroup, $childInRawGroup),
                     $alternatives,
                 ),
                 $definition->alternativeSequences,
@@ -94,12 +97,14 @@ class RuleToSequenceCompiler implements RuleCompilerInterface
         );
     }
 
-    public function compileSequenceNode(SequenceNode $definition, bool $inGroup = false): CompiledSequenceNode
+    public function compileSequenceNode(SequenceNode $definition, bool $inGroup = false, bool $inRawGroup = false): CompiledSequenceNode
     {
         $tags = $definition->nodeType
             ? array_merge($definition->tags, [$definition->nodeType->value])
             : $definition->tags;
-        if ($inGroup) {
+        if ($inRawGroup) {
+            $tags[] = RawContentAttribute::TAG;
+        } elseif ($inGroup) {
             $tags[] = SequenceAttribute::TAG;
         }
 

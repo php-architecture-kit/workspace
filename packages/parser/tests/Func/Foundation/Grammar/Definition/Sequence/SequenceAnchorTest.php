@@ -7,8 +7,8 @@ namespace PhpArchitecture\Parser\Tests\Func\Foundation\Grammar\Definition\Sequen
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Grammar;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Rule;
 use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeInterface;
-use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\OptionalAttribute;
-use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\RawContentAttribute;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Node\OptionalAttribute;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Raw\RawContentAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\NodeType;
 use PhpArchitecture\Parser\Tests\Func\Grammar\GrammarTestCase;
 use PHPUnit\Framework\Attributes\Group;

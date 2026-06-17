@@ -2,41 +2,36 @@
 
 declare(strict_types=1);
 
-namespace PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute;
+namespace PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Raw;
 
-use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeAttributeInterface;
 use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeInterface;
-use PhpArchitecture\Parser\Foundation\Shared\Meta\MetaInterface;
 use PhpArchitecture\Parser\Foundation\Shared\Meta\MetaTrait;
 use PhpArchitecture\Parser\Foundation\Shared\Tags\TagsTrait;
 
-class StructureAttribute implements NodeAttributeInterface, MetaInterface
+class RawGroupAttribute implements RawAttributeInterface
 {
     use MetaTrait;
     use TagsTrait;
 
-    public const DEFAULT_NAME = 'raw';
-    public string $content;
-
     /**
+     * @param RawAttributeInterface[] $raws
      * @param array<string,mixed> $meta
      * @param string[] $tags
      */
     public function __construct(
-        public bool $present,
+        public array $raws,
         public string $name = self::DEFAULT_NAME,
-        ?string $content = null,
+        public ?string $anchorName = null,
         array $meta = [],
         array $tags = [],
     ) {
         $this->meta = $meta;
         $this->tags = $tags;
-        $this->content = $content ?? $this->meta[self::DEFAULT_VALUE_KEY] ?? '';
     }
 
     public function getName(): string
     {
-        return $this->name;
+        return $this->anchorName ?? $this->name;
     }
 
     public function withParent(NodeInterface $parent): static
@@ -46,6 +41,6 @@ class StructureAttribute implements NodeAttributeInterface, MetaInterface
 
     public function __toString(): string
     {
-        return $this->present ? $this->content : '';
+        return implode('', array_map(static fn(RawAttributeInterface $raw): string => $raw->__toString(), $this->raws));
     }
 }

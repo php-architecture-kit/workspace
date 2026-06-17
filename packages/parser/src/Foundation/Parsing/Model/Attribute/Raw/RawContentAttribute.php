@@ -2,20 +2,18 @@
 
 declare(strict_types=1);
 
-namespace PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute;
+namespace PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Raw;
 
-use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeAttributeInterface;
 use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeInterface;
-use PhpArchitecture\Parser\Foundation\Shared\Meta\MetaInterface;
 use PhpArchitecture\Parser\Foundation\Shared\Meta\MetaTrait;
 use PhpArchitecture\Parser\Foundation\Shared\Tags\TagsTrait;
 
-class RawContentAttribute implements NodeAttributeInterface, MetaInterface
+class RawContentAttribute implements RawAttributeInterface
 {
     use MetaTrait;
     use TagsTrait;
 
-    public const DEFAULT_NAME = 'raw';
+    public const TAG = 'RawContentAttribute';
 
     /**
      * @param array<string,mixed> $meta
@@ -44,6 +42,6 @@ class RawContentAttribute implements NodeAttributeInterface, MetaInterface
 
     public function __toString(): string
     {
-        return $this->content;
+        return $this->content ?? '';
     }
 }

@@ -13,13 +13,11 @@ use PhpArchitecture\Parser\Foundation\Parsing\NodeFactoryInterface;
 use PhpArchitecture\Parser\Foundation\Matching\Contract\MatchingContext;
 use PhpArchitecture\Parser\Foundation\Parsing\Contract\ParsingContext;
 use PhpArchitecture\Parser\Foundation\Tokenization\Contract\TokenizationContext;
-use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeInterface;
 use PhpArchitecture\Parser\Foundation\Tokenization\Model\TokenRegion;
 use PhpArchitecture\Parser\Foundation\Tokenization\Context\TokenizationContextCompiler;
 
 class DefaultParsingContext implements ParsingContext
 {
-    private NodeInterface $rootNode;
     private TokenizationContext $tokenizationContext;
 
     public function __construct(
@@ -57,7 +55,7 @@ class DefaultParsingContext implements ParsingContext
             return null;
         }
 
-        if (!$compiledRegion->sequenceLibrary->rootSequence && empty($compiledRegion->sequenceLibrary->sequences)) {
+        if (!$compiledRegion->innerGrammar && !$compiledRegion->sequenceLibrary->rootSequence && empty($compiledRegion->sequenceLibrary->sequences)) {
             return null;
         }
 

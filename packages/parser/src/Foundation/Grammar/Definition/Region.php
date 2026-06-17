@@ -178,6 +178,7 @@ class Region
         int $scope = self::MERGE_DEFAULT_SCOPE,
         int $applyMiddlewares = self::MERGE_DEFAULT_MIDDLEWARES,
         bool $overrideSource = self::MERGE_DEFAULT_OVERRIDE,
+        array $excludeRegionNames = [],
     ): self {
         foreach (
             [
@@ -203,6 +204,10 @@ class Region
                             $this->$method($nestedItem, $applyTargetMiddlewares);
                         }
 
+                        continue;
+                    }
+
+                    if ($scopeFlag === self::REGIONS && in_array($key, $excludeRegionNames, true)) {
                         continue;
                     }
 

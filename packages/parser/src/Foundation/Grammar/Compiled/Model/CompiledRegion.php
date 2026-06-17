@@ -26,6 +26,7 @@ final class CompiledRegion implements MetaInterface
         public readonly array $eventSubscribers,
         public readonly PatternLibrary $patternLibrary,
         public readonly SequenceLibrary $sequenceLibrary,
+        public readonly ?CompiledGrammar $innerGrammar,
         public readonly ?NodeDefinition $definition = null,
         public readonly array $tags = [],
         array $meta = [],

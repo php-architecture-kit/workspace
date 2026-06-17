@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace PhpArchitecture\Parser\Foundation\Shared\Hash;
 
 use Closure;
+use Error;
 use ReflectionException;
 use ReflectionFunction;
 
@@ -36,7 +37,7 @@ trait HashClosure
             }
 
             return implode(':', $parts);
-        } catch (ReflectionException) {
+        } catch (Error | ReflectionException $e) {
             // Fallback for runtime-generated closures
             return spl_object_hash($closure);
         }

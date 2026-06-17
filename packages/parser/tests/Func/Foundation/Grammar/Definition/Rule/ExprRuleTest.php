@@ -7,7 +7,7 @@ namespace PhpArchitecture\Parser\Tests\Func\Foundation\Grammar\Definition\Rule;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Grammar;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Rule;
 use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeInterface;
-use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\RawContentAttribute;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Raw\RawContentAttribute;
 use PhpArchitecture\Parser\Foundation\Tokenization\Model\Token;
 use PhpArchitecture\Parser\Foundation\Tokenization\Model\TokenRegion;
 use PhpArchitecture\Parser\Tests\Func\Grammar\GrammarTestCase;

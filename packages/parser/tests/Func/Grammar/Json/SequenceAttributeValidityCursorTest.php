@@ -12,7 +12,7 @@ use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeAttributeInterface;
 use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeInterface;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\ChoiceAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\SequenceAttribute;
-use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\NodeAttribute;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Node\NodeAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\SequenceValidityCursor;
 use PhpArchitecture\Parser\Infrastructure\Grammar\Definition\Json\JsonRfc8259;
 use PhpArchitecture\Parser\Tests\Func\Grammar\GrammarTestCase;

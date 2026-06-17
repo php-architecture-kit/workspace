@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace PhpArchitecture\Parser\Foundation\Tokenization\Pratt;
 
+use PhpArchitecture\Parser\Foundation\Parsing\Model\NodeType;
 use PhpArchitecture\Parser\Foundation\Tokenization\Model\Token;
 use PhpArchitecture\Parser\Foundation\Tokenization\Model\TokenRegion;
 use PhpArchitecture\Parser\Foundation\Tokenization\Model\TokenStream;
@@ -74,6 +75,7 @@ final class PrattParser
             $right = $this->parseExpression($rightBP);
 
             $region = TokenRegion::new($this->groupedRegionName);
+            $region->addTag(NodeType::Node->value);
             $region->stream->add($left);
             foreach ($triviaBeforeOp as $t) {
                 $region->stream->add($t);

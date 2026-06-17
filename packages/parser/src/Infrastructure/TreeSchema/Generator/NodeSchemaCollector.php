@@ -7,9 +7,8 @@ namespace PhpArchitecture\Parser\Infrastructure\TreeSchema\Generator;
 use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeAttributeInterface;
 use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeInterface;
 use PhpArchitecture\Parser\Foundation\Shared\Meta\MetaInterface;
-use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\ChoiceAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\GroupAttribute;
-use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\GroupedAttribute;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\SequenceAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\NodeAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\OptionalAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\RawContentAttribute;
@@ -78,13 +77,13 @@ final class NodeSchemaCollector
 
             $attrSchema = $schema->attributes[$propName];
 
-            // Keep the highest observed index — optional attributes (e.g. GroupedAttribute)
+            // Keep the highest observed index — optional attributes (e.g. SequenceAttribute)
             // are absent in some nodes, shifting indices of following attributes.
             if ($index > $attrSchema->index) {
                 $attrSchema->index = $index;
             }
 
-            // Prefer the richer attribute type (GroupedAttribute > GroupAttribute).
+            // Prefer the richer attribute type (SequenceAttribute > GroupAttribute).
             if ($attrSchema->attrClass !== $attribute::class) {
                 $attrSchema->attrClass = $this->preferredClass($attrSchema->attrClass, $attribute::class);
             }
@@ -99,14 +98,13 @@ final class NodeSchemaCollector
     private function mergeAttribute(AttributeSchema $schema, NodeAttributeInterface $attribute): void
     {
         match (true) {
-            $attribute instanceof GroupedAttribute => $this->mergeGrouped($schema, $attribute),
-            $attribute instanceof GroupAttribute   => $this->mergeGroup($schema, $attribute),
-            $attribute instanceof ChoiceAttribute  => $this->mergeChoice($schema, $attribute),
-            $attribute instanceof NodeAttribute    => $this->mergeNodeAttr($schema, $attribute),
-            $attribute instanceof OptionalAttribute => $this->mergeOptional($schema, $attribute),
+            $attribute instanceof SequenceAttribute  => $this->mergeSequenced($schema, $attribute),
+            $attribute instanceof GroupAttribute     => $this->mergeGroup($schema, $attribute),
+            $attribute instanceof NodeAttribute      => $this->mergeNodeAttr($schema, $attribute),
+            $attribute instanceof OptionalAttribute  => $this->mergeOptional($schema, $attribute),
             $attribute instanceof RawRegionAttribute => $this->mergeRawRegion($schema, $attribute),
             $attribute instanceof RawContentAttribute => $this->mergeRawContent($schema, $attribute),
-            $attribute instanceof StructureAttribute => $this->mergeStructure($schema, $attribute),
+            $attribute instanceof StructureAttribute  => $this->mergeStructure($schema, $attribute),
             default => null,
         };
     }
@@ -116,6 +114,11 @@ final class NodeSchemaCollector
         $nodeName = $attr->node->getName();
         if ($this->isValidNodeName($nodeName) && !in_array($nodeName, $schema->unionNodeNames, true)) {
             $schema->unionNodeNames[] = $nodeName;
+        }
+
+        $alternatives = $attr->getMeta('alternatives');
+        if (is_array($alternatives) && !empty($alternatives) && empty($schema->choicesList)) {
+            $schema->choicesList = $alternatives;
         }
     }
 
@@ -127,6 +130,11 @@ final class NodeSchemaCollector
                 $schema->unionNodeNames[] = $nodeName;
             }
         }
+
+        $alternatives = $attr->getMeta('alternatives');
+        if (is_array($alternatives) && !empty($alternatives) && empty($schema->choicesList)) {
+            $schema->choicesList = $alternatives;
+        }
     }
 
     private function mergeGroup(AttributeSchema $schema, GroupAttribute $attr): void
@@ -137,25 +145,10 @@ final class NodeSchemaCollector
                 $schema->unionNodeNames[] = $nodeName;
             }
         }
-    }
 
-    private function mergeChoice(AttributeSchema $schema, ChoiceAttribute $attr): void
-    {
-        if (empty($schema->choicesList)) {
-            $schema->choicesList = $attr->choices;
-        }
-
-        if ($attr->selected === null) {
-            return;
-        }
-
-        if ($attr->selected instanceof NodeAttribute) {
-            $nodeName = $attr->selected->node->getName();
-            if ($this->isValidNodeName($nodeName) && !in_array($nodeName, $schema->unionNodeNames, true)) {
-                $schema->unionNodeNames[] = $nodeName;
-            }
-        } elseif ($attr->selected instanceof RawContentAttribute || $attr->selected instanceof RawRegionAttribute) {
-            $this->mergeRawChoice($schema, $attr->selected);
+        $alternatives = $attr->getMeta('alternatives');
+        if (is_array($alternatives) && !empty($alternatives) && empty($schema->choicesList)) {
+            $schema->choicesList = $alternatives;
         }
     }
 
@@ -183,31 +176,31 @@ final class NodeSchemaCollector
         );
     }
 
-    private function mergeGrouped(AttributeSchema $schema, GroupedAttribute $attr): void
+    private function mergeSequenced(AttributeSchema $schema, SequenceAttribute $attr): void
     {
         $anchorName = $attr->getName();
 
         foreach ($attr->attributes as $child) {
             $isMeta = ($child instanceof MetaInterface)
-                && $child->getMeta(GroupedAttribute::ANCHOR_NAME_META_KEY) === $anchorName;
+                && $child->getMeta(SequenceAttribute::ANCHOR_NAME_META_KEY) === $anchorName;
 
             if ($isMeta) {
-                // content element
                 if ($child instanceof NodeAttribute && $schema->groupedContentNodeName === null) {
-                    $schema->groupedContentNodeName = $child->node->getName();
-                    $schema->groupedContentAttrName = $child->getName();
-                    $schema->groupedContentIsChoice = false;
-                } elseif ($child instanceof ChoiceAttribute && $schema->groupedContentNodeName === null) {
-                    $schema->groupedContentIsChoice = true;
-                    $schema->groupedContentAttrName = $child->getName();
-                    if (empty($schema->groupedChoicesList)) {
-                        $schema->groupedChoicesList = $child->choices;
-                    }
-                    if ($child->selected instanceof NodeAttribute) {
-                        $nodeName = $child->selected->node->getName();
+                    $alternatives = $child->getMeta('alternatives');
+                    if (is_array($alternatives) && !empty($alternatives)) {
+                        $schema->groupedContentIsChoice = true;
+                        $schema->groupedContentAttrName = $child->getName();
+                        if (empty($schema->groupedChoicesList)) {
+                            $schema->groupedChoicesList = $alternatives;
+                        }
+                        $nodeName = $child->node->getName();
                         if ($this->isValidNodeName($nodeName) && !in_array($nodeName, $schema->unionNodeNames, true)) {
                             $schema->unionNodeNames[] = $nodeName;
                         }
+                    } else {
+                        $schema->groupedContentNodeName = $child->node->getName();
+                        $schema->groupedContentAttrName = $child->getName();
+                        $schema->groupedContentIsChoice = false;
                     }
                 }
             } else {
@@ -255,22 +248,37 @@ final class NodeSchemaCollector
             $schema->rawRegionOpenerName    = $attr->opener->name;
             $schema->rawRegionCloserContent = $attr->closer?->content;
         }
+
+        $alternatives = $attr->getMeta('alternatives');
+        if (is_array($alternatives) && !empty($alternatives)) {
+            if (empty($schema->choicesList)) {
+                $schema->choicesList = $alternatives;
+            }
+            $this->mergeRawChoice($schema, $attr);
+        }
     }
 
     private function mergeRawContent(AttributeSchema $schema, RawContentAttribute $attr): void
     {
         $schema->rawTokenName     = $attr->name;
         $schema->rawDefaultContent ??= $attr->content;
+
+        $alternatives = $attr->getMeta('alternatives');
+        if (is_array($alternatives) && !empty($alternatives)) {
+            if (empty($schema->choicesList)) {
+                $schema->choicesList = $alternatives;
+            }
+            $this->mergeRawChoice($schema, $attr);
+        }
     }
 
     private function descend(NodeAttributeInterface $attribute): void
     {
         match (true) {
-            $attribute instanceof NodeAttribute    => $this->walk($attribute->node),
+            $attribute instanceof NodeAttribute     => $this->walk($attribute->node),
             $attribute instanceof OptionalAttribute => $attribute->node !== null ? $this->walk($attribute->node) : null,
-            $attribute instanceof GroupAttribute   => $this->walkGroup($attribute),
-            $attribute instanceof ChoiceAttribute  => $this->walkChoice($attribute),
-            $attribute instanceof GroupedAttribute => $this->walkGrouped($attribute),
+            $attribute instanceof GroupAttribute    => $this->walkGroup($attribute),
+            $attribute instanceof SequenceAttribute => $this->walkSequenced($attribute),
             default => null,
         };
     }
@@ -282,20 +290,11 @@ final class NodeSchemaCollector
         }
     }
 
-    private function walkChoice(ChoiceAttribute $attr): void
-    {
-        if ($attr->selected instanceof NodeAttribute) {
-            $this->walk($attr->selected->node);
-        }
-    }
-
-    private function walkGrouped(GroupedAttribute $attr): void
+    private function walkSequenced(SequenceAttribute $attr): void
     {
         foreach ($attr->attributes as $child) {
             if ($child instanceof NodeAttribute) {
                 $this->walk($child->node);
-            } elseif ($child instanceof ChoiceAttribute && $child->selected instanceof NodeAttribute) {
-                $this->walk($child->selected->node);
             } elseif ($child instanceof GroupAttribute) {
                 $this->walkGroup($child);
             }
@@ -304,9 +303,9 @@ final class NodeSchemaCollector
 
     private function preferredClass(string $existing, string $incoming): string
     {
-        // GroupedAttribute > GroupAttribute (richer structural information wins)
-        if ($incoming === GroupedAttribute::class) {
-            return GroupedAttribute::class;
+        // SequenceAttribute > GroupAttribute (richer structural information wins)
+        if ($incoming === SequenceAttribute::class) {
+            return SequenceAttribute::class;
         }
         return $existing;
     }

@@ -8,6 +8,7 @@ use Closure;
 use PhpArchitecture\Parser\Foundation\AST\Definition\AstDefinitionInterface;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\EventListener\Tokenization\EndRegionEventListener;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Model\Cardinality;
+use PhpArchitecture\Parser\Foundation\Grammar\Definition\Model\Ref\RefRuleDefinition;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Model\Regex\CallbackRule;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Model\Regex\RegexRule;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Model\RuleDefinition;
@@ -44,6 +45,7 @@ class Rule
 
     /**
      * @param string[] $tags
+     * @param array<string,mixed> $meta
      */
     public function __construct(
         public readonly string $name,
@@ -51,10 +53,14 @@ class Rule
         public RuleDefinition $definition,
         public ?NodeType $nodeType = null,
         array $tags = [],
-        public readonly ?string $literalContent = null,
+        array $meta = [],
     ) {
         if (!empty($tags)) {
             $this->addTag(...$tags);
+        }
+
+        foreach ($meta as $key => $value) {
+            $this->setMeta($key, $value);
         }
     }
 
@@ -65,13 +71,15 @@ class Rule
         array $tags = [],
         NodeType $type = NodeType::Raw,
     ): self {
+        $def = RegexRule::fromString(preg_quote($token, '~'));
+        $def->defaults = new Defaults([Defaults::DEFAULT_STYLE => static fn() => $token]);
+
         return new self(
             $name,
             RuleType::Token,
-            RegexRule::fromString(preg_quote($token, '~')),
+            $def,
             $type,
             $tags,
-            literalContent: $token,
         );
     }
 
@@ -83,13 +91,15 @@ class Rule
         array $tags = [],
         NodeType $type = NodeType::Raw,
     ): self {
+        $def = RegexRule::fromString(preg_quote($keyword, '~'), $caseSensitive);
+        $def->defaults = new Defaults([Defaults::DEFAULT_STYLE => static fn() => $keyword]);
+
         return new self(
             $name ?? $keyword,
             RuleType::Keyword,
-            RegexRule::fromString(preg_quote($keyword, '~'), $caseSensitive),
+            $def,
             $type,
             $tags,
-            literalContent: $keyword,
         );
     }
 
@@ -130,6 +140,11 @@ class Rule
             $type,
             $tags,
         );
+    }
+
+    public static function ref(string $name): self
+    {
+        return new self($name, RuleType::Ref, new RefRuleDefinition($name));
     }
 
     public static function taggedWith(string $tag): self
@@ -209,7 +224,7 @@ class Rule
             RuleType::Choice,
             new SequenceRule(
                 [
-                    new Model\Sequence\SequenceNode($rulesNames, $cardinality)
+                    new Model\Sequence\SequenceNode($rulesNames, $cardinality, anchorName: $name)
                 ],
             ),
             $type,
@@ -306,6 +321,12 @@ class Rule
     public function prattInfix(int $bindingPower, bool $rightAssociative = false): self
     {
         $this->prattRole = PrattRoleDefinition::infix($bindingPower, $rightAssociative);
+        return $this;
+    }
+
+    public function withDefaults(array $defaults): self
+    {
+        
         return $this;
     }
 }

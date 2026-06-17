@@ -6,8 +6,10 @@ namespace PhpArchitecture\Parser\Tests\Func\Foundation\Grammar\Definition\Rule;
 
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Grammar;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Rule;
+use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeAttributeInterface;
 use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeInterface;
-use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\ChoiceAttribute;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Node\NodeAttribute;
+use PhpArchitecture\Parser\Foundation\Shared\Meta\MetaInterface;
 use PhpArchitecture\Parser\Tests\Func\Grammar\GrammarTestCase;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
@@ -64,8 +66,12 @@ final class ChoiceRuleTest extends GrammarTestCase
 
     // --- Parsing result (NodeInterface) ---
 
+    /**
+     * `ChoiceAttribute` was removed — the matched alternative's identity now lives
+     * in `meta['alternatives']` on whichever attribute it resolves to.
+     */
     #[Test]
-    public function shouldProduceChoiceAttributeForMatchedChoice(): void
+    public function shouldProduceAttributeWithAlternativesInMetaForMatchedChoice(): void
     {
         $grammar = $this->buildGrammar();
 
@@ -77,10 +83,33 @@ final class ChoiceRuleTest extends GrammarTestCase
                 $attributes = $node->getAttributes();
 
                 $test->assertCount(1, $attributes);
-                $test->assertInstanceOf(ChoiceAttribute::class, $attributes[0]);
-                $test->assertSame('value', $attributes[0]->name);
+                $test->assertInstanceOf(NodeAttribute::class, $attributes[0]);
+                $test->assertSame('value', $attributes[0]->getName());
+
+                $resolved = $this->findAttributeWithAlternatives($node, ['null', 'true', 'false']);
+                $test->assertNotNull($resolved, "Expected an attribute carrying the choice alternatives in meta['alternatives']");
+                $test->assertSame('null', (string) $resolved);
             },
         );
+    }
+
+    /**
+     * @param string[] $alternatives
+     */
+    private function findAttributeWithAlternatives(NodeInterface $node, array $alternatives): ?NodeAttributeInterface
+    {
+        foreach ($node->getAttributes() as $attr) {
+            if ($attr instanceof MetaInterface && ($attr->meta['alternatives'] ?? null) === $alternatives) {
+                return $attr;
+            }
+            if ($attr instanceof NodeAttribute) {
+                $found = $this->findAttributeWithAlternatives($attr->node, $alternatives);
+                if ($found !== null) {
+                    return $found;
+                }
+            }
+        }
+        return null;
     }
 
     #[Test]

@@ -6,9 +6,12 @@ namespace PhpArchitecture\Parser\Foundation\Parsing\Model;
 
 enum NodeType: string
 {
-    case Tag = 'NodeType.Tag';
+    // technical
+    case Tag = 'NodeType.Tag'; # spreads tagged alternatives directly into the sequence node
+    case Skip = 'NodeType.Skip'; # skips eof/bof tokens but can be used for any rules that should be ignored
+
+    // semantic
     case Node = 'NodeType.Node';
     case Raw = 'NodeType.Raw';
-    case Skip = 'NodeType.Skip';
     case Structure = 'NodeType.Structure';
 }

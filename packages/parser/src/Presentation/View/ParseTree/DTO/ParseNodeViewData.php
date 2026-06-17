@@ -8,18 +8,20 @@ final class ParseNodeViewData
 {
     public const TYPE_NODE              = 'Node';
     public const TYPE_NODE_ATTR         = 'NodeAttribute';
-    public const TYPE_CHOICE_ATTR       = 'ChoiceAttribute';
     public const TYPE_GROUP_ATTR        = 'GroupAttribute';
-    public const TYPE_GROUPED_ATTR      = 'GroupedAttribute';
+    public const TYPE_SEQUENCE_ATTR     = 'SequenceAttribute';
     public const TYPE_OPTIONAL_ATTR     = 'OptionalAttribute';
     public const TYPE_RAW_CONTENT_ATTR  = 'RawContentAttribute';
     public const TYPE_RAW_REGION_ATTR   = 'RawRegionAttribute';
+    public const TYPE_RAW_GROUP_ATTR    = 'RawGroupAttribute';
+    public const TYPE_RAW_SEQUENCE_ATTR = 'RawSequenceAttribute';
+    public const TYPE_OPTIONAL_RAW_ATTR = 'OptionalRawAttribute';
     public const TYPE_STRUCTURE_ATTR    = 'StructureAttribute';
 
     /**
-     * @param string[]             $tags
-     * @param array<string,scalar> $meta   serializable meta only
-     * @param ParseNodeViewData[]  $children
+     * @param string[]            $tags
+     * @param array<string,mixed> $meta   serializable meta only
+     * @param ParseNodeViewData[] $children
      */
     public function __construct(
         public readonly string $type,
@@ -30,5 +32,7 @@ final class ParseNodeViewData
         public readonly ?string $content     = null,
         public readonly ?bool   $present     = null,
         public readonly ?int    $childCount  = null,
+        public readonly ?string $cardinality = null,
+        public readonly ?string $origin      = null,
     ) {}
 }

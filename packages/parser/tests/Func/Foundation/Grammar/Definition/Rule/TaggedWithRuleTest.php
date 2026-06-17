@@ -7,7 +7,7 @@ namespace PhpArchitecture\Parser\Tests\Func\Foundation\Grammar\Definition\Rule;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Grammar;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Rule;
 use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeInterface;
-use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\ChoiceAttribute;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Node\NodeAttribute;
 use PhpArchitecture\Parser\Foundation\Tokenization\Model\Token;
 use PhpArchitecture\Parser\Foundation\Tokenization\Model\TokenRegion;
 use PhpArchitecture\Parser\Tests\Func\Grammar\GrammarTestCase;
@@ -58,10 +58,12 @@ final class TaggedWithRuleTest extends GrammarTestCase
     // --- Parsing result (NodeInterface) ---
 
     #[Test]
-    public function shouldProduceChoiceAttributeNamedAfterTag(): void
+    public function shouldProduceNodeAttributeNamedAfterTagWithAlternativesInMeta(): void
     {
-        // TagToChoiceCompiler replaces Rule::taggedWith('keyword') with Rule::choice('keyword', [...], NodeType::Node).
-        // Rule::choice always produces a ChoiceAttribute.
+        // TagToChoiceCompiler replaces Rule::taggedWith('keyword') with Rule::choice('keyword', [...], NodeType::Tag).
+        // SequenceNodeEnricher then spreads the single Tag-typed alternative inline as
+        // NodeType::Node — ChoiceAttribute was removed, so the tag's alternatives now
+        // live in meta['alternatives'] on the resulting NodeAttribute.
         $grammar = $this->buildGrammar();
 
         $this->assertGrammarParsing(
@@ -72,8 +74,9 @@ final class TaggedWithRuleTest extends GrammarTestCase
                 $attributes = $node->getAttributes();
 
                 $test->assertCount(1, $attributes);
-                $test->assertInstanceOf(ChoiceAttribute::class, $attributes[0]);
-                $test->assertSame('keyword', $attributes[0]->name);
+                $test->assertInstanceOf(NodeAttribute::class, $attributes[0]);
+                $test->assertSame('keyword', $attributes[0]->getName());
+                $test->assertSame(['null', 'true'], $attributes[0]->meta['alternatives']);
             },
         );
     }

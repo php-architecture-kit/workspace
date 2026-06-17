@@ -5,16 +5,13 @@ declare(strict_types=1);
 namespace PhpArchitecture\Parser\Foundation\Parsing\Factory;
 
 use PhpArchitecture\Parser\Foundation\Matching\Matcher;
-use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\RawContentAttribute;
-use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\StructureAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Node;
 use PhpArchitecture\Parser\Foundation\Parsing\NodeFactoryInterface;
-use PhpArchitecture\Parser\Foundation\Parsing\Resolver\NodeTypeResolver;
 use PhpArchitecture\Parser\Foundation\Parsing\Contract\ParsingContext;
 use PhpArchitecture\Parser\Foundation\Matching\Model\MatchedRegion;
 use PhpArchitecture\Parser\Foundation\Matching\Model\MatchedSequence;
 use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeInterface;
-use PhpArchitecture\Parser\Foundation\Parsing\Model\NodeType;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\NodeOrigin;
 use PhpArchitecture\Parser\Foundation\Tokenization\Model\Token;
 use PhpArchitecture\Parser\Foundation\Tokenization\Model\TokenRegion;
 
@@ -26,20 +23,12 @@ class NodeFactory implements NodeFactoryInterface
 
     public function fromToken(Token $token, NodeInterface $parent): NodeInterface
     {
-        $nodeType = NodeTypeResolver::resolveNodeType($token);
+        $nodeClass = $this->context->grammar()->nodeClassMap[$token->name] ?? Node::class;
+        $node = new $nodeClass($token->name, NodeOrigin::Token, [], $parent, $token->meta, $token->tags);
 
-        return new Node(
-            $token->name,
-            [
-                match ($nodeType) {
-                    NodeType::Structure => new StructureAttribute($token->raw !== '', StructureAttribute::DEFAULT_NAME, $token->raw === '' ? null : $token->raw),
-                    NodeType::Raw, NodeType::Node => new RawContentAttribute($token->raw),
-                }
-            ],
-            $parent,
-            $token->meta,
-            $token->tags,
-        );
+        $this->context->nodeAttrFactory()->fillTokenBasedNodeWithAttributes($node, $token);
+
+        return $node;
     }
 
     public function fromTokenRegion(TokenRegion $region, ?NodeInterface $parent): NodeInterface
@@ -72,9 +61,9 @@ class NodeFactory implements NodeFactoryInterface
     private function createNodeFromTokenRegion(TokenRegion $region, ?NodeInterface $parent = null): NodeInterface
     {
         $nodeClass = $this->context->grammar()->nodeClassMap[$region->name] ?? Node::class;
-        $node = new $nodeClass($region->name, [], $parent, $region->meta, $region->tags);
+        $node = new $nodeClass($region->name, NodeOrigin::Region, [], $parent, $region->meta, $region->tags);
 
-        $this->context->nodeAttrFactory()->fillRegionBasedNodeWithAttributes($node, NodeTypeResolver::resolveNodeType($region), $region->stream->tokens);
+        $this->context->nodeAttrFactory()->fillRegionBasedNodeWithAttributes($node, $region);
 
         return $node;
     }
@@ -82,9 +71,9 @@ class NodeFactory implements NodeFactoryInterface
     private function createNodeFromMatchedRegion(MatchedRegion $region, ?NodeInterface $parent = null): NodeInterface
     {
         $nodeClass = $this->context->grammar()->nodeClassMap[$region->name] ?? Node::class;
-        $node = new $nodeClass($region->name, [], $parent, $region->meta, $region->tags);
+        $node = new $nodeClass($region->name, NodeOrigin::Region, [], $parent, $region->meta, $region->tags);
 
-        $this->context->nodeAttrFactory()->fillRegionBasedNodeWithAttributes($node, NodeTypeResolver::resolveNodeType($region), $region->items);
+        $this->context->nodeAttrFactory()->fillRegionBasedNodeWithAttributes($node, $region);
 
         return $node;
     }
@@ -92,9 +81,9 @@ class NodeFactory implements NodeFactoryInterface
     private function createNodeFromMatchedSequence(MatchedSequence $sequence, ?NodeInterface $parent = null): NodeInterface
     {
         $nodeClass = $this->context->grammar()->nodeClassMap[$sequence->name] ?? Node::class;
-        $node = new $nodeClass($sequence->name, [], $parent, $sequence->meta, $sequence->tags);
+        $node = new $nodeClass($sequence->name, NodeOrigin::Sequence, [], $parent, $sequence->meta, $sequence->tags);
 
-        $this->context->nodeAttrFactory()->fillSequenceBasedNodeWithAttributes($node, $sequence->items);
+        $this->context->nodeAttrFactory()->fillSequenceBasedNodeWithAttributes($node, $sequence);
 
         return $node;
     }

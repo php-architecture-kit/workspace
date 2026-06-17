@@ -31,6 +31,11 @@ class MatchedRegion implements MetaInterface, Stringable
         $this->tags = $tags;
     }
 
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
     public function addItem(Token|TokenRegion|MatchedSequence $item): void
     {
         $this->items[] = $item;

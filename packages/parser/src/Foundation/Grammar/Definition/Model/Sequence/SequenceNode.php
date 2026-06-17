@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace PhpArchitecture\Parser\Foundation\Grammar\Definition\Model\Sequence;
 
 use InvalidArgumentException;
+use PhpArchitecture\Parser\Foundation\Grammar\Definition\Defaults;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Model\Cardinality;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\NodeType;
 
 final class SequenceNode
 {
     public ?NodeType $nodeType = null;
+    public ?Defaults $defaults = null;
 
     /**
      * @param string[] $alternatives

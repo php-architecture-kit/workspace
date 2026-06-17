@@ -11,6 +11,8 @@ use PhpArchitecture\Parser\Foundation\Grammar\Compiled\Model\CompiledRegion;
 use PhpArchitecture\Parser\Foundation\Matching\Model\NestedSequence;
 use PhpArchitecture\Parser\Foundation\Matching\Model\Sequence;
 use PhpArchitecture\Parser\Foundation\Matching\Model\SequenceNode;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Raw\RawContentAttribute;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\SequenceAttribute;
 use PhpArchitecture\Parser\Foundation\Tokenization\Model\Pattern;
 use PhpArchitecture\Parser\Presentation\View\CompiledGrammar\DTO\CompiledEventSubscriberViewData;
 use PhpArchitecture\Parser\Presentation\View\CompiledGrammar\DTO\CompiledGrammarViewData;
@@ -99,7 +101,7 @@ final class CompiledGrammarViewFactory
             foreach ($node->tags as $tag) {
                 if (str_starts_with($tag, 'NodeType.')) {
                     $nodeType = substr($tag, 9);
-                } else {
+                } elseif ($tag !== SequenceAttribute::TAG && $tag !== RawContentAttribute::TAG) {
                     $otherTags[] = $tag;
                 }
             }

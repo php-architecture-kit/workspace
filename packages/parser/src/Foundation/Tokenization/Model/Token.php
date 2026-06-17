@@ -32,6 +32,11 @@ final class Token implements Stringable
         public readonly int $endPosition,
     ) {}
 
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
     public static function bof(): self
     {
         return (new self(
@@ -68,16 +73,16 @@ final class Token implements Stringable
 
     public static function unknown(string $character, int $position): self
     {
-        if (strlen($character) !== 1) {
+        if (mb_strlen($character) !== 1) {
             throw new InvalidArgumentException("The unknown token must a representation of exactly one character. " . strlen($character) . " characters long given.");
         }
 
-        return new self(
+        return (new self(
             name: self::TOKEN_UNKNOWN,
             raw: $character,
             startPosition: $position,
             endPosition: $position,
-        );
+        ))->addTag(NodeType::Raw->value);
     }
 
     public function __toString(): string

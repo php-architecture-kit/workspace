@@ -13,6 +13,7 @@ use PhpArchitecture\Parser\Foundation\Grammar\Compiled\Compiler\InRuleDeclaredEv
 use PhpArchitecture\Parser\Foundation\Grammar\Compiled\Compiler\NodeTypeToTagCompiler;
 use PhpArchitecture\Parser\Foundation\Grammar\Compiled\Compiler\PrattEventListenerCompiler;
 use PhpArchitecture\Parser\Foundation\Grammar\Compiled\Compiler\RegionInheritanceCompiler;
+use PhpArchitecture\Parser\Foundation\Grammar\Compiled\Compiler\RuleRefResolutionCompiler;
 use PhpArchitecture\Parser\Foundation\Grammar\Compiled\Compiler\RegionOpenerCloserCompiler;
 use PhpArchitecture\Parser\Foundation\Grammar\Compiled\Compiler\RegionPrecompilerInterface;
 use PhpArchitecture\Parser\Foundation\Grammar\Compiled\Compiler\RuleCompilerInterface;
@@ -52,12 +53,15 @@ class GrammarCompiler
     /** @var RuleCompilerInterface[] */
     private array $ruleCompilers = [];
 
+    private readonly Compiler\RegionConflictResolver $conflictResolver;
+
     public function __construct()
     {
         $regionInheritanceCompiler = new RegionInheritanceCompiler();
 
         $this->grammarPrecompilers = [
             $regionInheritanceCompiler,
+            new RuleRefResolutionCompiler(),
             new DynamicTokenCompiler(),
         ];
 
@@ -65,7 +69,7 @@ class GrammarCompiler
             new NodeTypeToTagCompiler(),
             new InnerGrammarInheritanceCompiler($this),
             new InRuleDeclaredEventSubscribersCompiler(),
-            new InnerGrammarEventListenerCompiler($this),
+            new InnerGrammarEventListenerCompiler(),
         ];
 
         $this->grammarCompilers = [
@@ -80,6 +84,8 @@ class GrammarCompiler
             new RuleToPatternCompiler(),
             new RuleToSequenceCompiler(),
         ];
+
+        $this->conflictResolver = new Compiler\RegionConflictResolver();
     }
 
     public function compile(Grammar $definition): CompiledGrammar
@@ -92,8 +98,11 @@ class GrammarCompiler
 
         $compiledRegions = [];
         foreach ($grammar->getAllRegions() as $region) {
-            $compiledRegions[$region->name] = $this->compileRegion($region);
+            $compiledRegions[$region->name] = $this->compileRegion($definition, $region);
         }
+
+        $nodeClassMap = $grammar->nodeClassMap;
+        $compiledRegions = $this->mergeRetokenizedInnerGrammars($compiledRegions, $nodeClassMap);
 
         return new CompiledGrammar(
             $grammar->name,
@@ -101,7 +110,135 @@ class GrammarCompiler
             $grammar->requireBofEof,
             $grammar->rootRegion->name,
             $compiledRegions,
-            $grammar->nodeClassMap,
+            $grammar->contextDefinition->initializers,
+            $grammar->formatDefinition->formatters,
+            $nodeClassMap,
+            $grammar->global->name,
+        );
+    }
+
+    /**
+     * Folds the matching-relevant content of every retokenize-mode inner grammar (already
+     * independently, fully compiled into "innerGrammar.compiled" region meta by
+     * InnerGrammarInheritanceCompiler) into the host's own compiled regions, now that both
+     * grammars are fully compiled. This must happen post-compile, comparing the already-compiled
+     * `CompiledRegion`s of both sides directly: merging the inner grammar's `Region` *definitions*
+     * into the host's tree before compilation would let the host's own grammar compilers
+     * (RegionOpenerCloserCompiler, TagToChoiceCompiler, ...) incorrectly process content belonging
+     * to a wholly separate grammar — and comparing definitions captured at different pipeline
+     * stages (e.g. one only precompiled, the other fully compiled) would produce false conflicts
+     * for regions synthesized later in the pipeline (RegionOpenerCloserCompiler turning a
+     * tagged-rule region opener into a real region, for instance).
+     *
+     * Conflict detection is progressive across all retokenize-mode regions of this grammar:
+     * $compiledRegions itself is both the comparison set and the target, growing as each inner
+     * grammar's regions are folded in, so a second inner grammar introducing a region with the
+     * same name as one already contributed by a first inner grammar is still caught.
+     *
+     * @param array<string,CompiledRegion> $compiledRegions
+     * @param array<string,class-string> $nodeClassMap
+     * @return array<string,CompiledRegion>
+     */
+    private function mergeRetokenizedInnerGrammars(array $compiledRegions, array &$nodeClassMap): array
+    {
+        foreach ($compiledRegions as $hostRegion) {
+            $innerCompiled = $hostRegion->innerGrammar;
+            if ($innerCompiled === null) {
+                continue;
+            }
+
+            $innerRootName = $innerCompiled->rootRegionName;
+            $innerRoot     = $innerCompiled->regions[$innerRootName];
+
+            $nodeClassMap = array_merge($innerCompiled->nodeClassMap, $nodeClassMap);
+
+            $sequencesByName = $innerRoot->sequenceLibrary->sequences;
+            foreach ($hostRegion->sequenceLibrary->sequences as $name => $sequence) {
+                $sequencesByName[$name] = $sequence;
+            }
+
+            $compiledRegions[$hostRegion->name] = new CompiledRegion(
+                $hostRegion->name,
+                $hostRegion->eventSubscribers + $this->onlyMatchingEventSubscribers($innerRoot->eventSubscribers),
+                $hostRegion->patternLibrary,
+                new SequenceLibrary(
+                    array_values($sequencesByName),
+                    $hostRegion->sequenceLibrary->rootSequence ?? $innerRoot->sequenceLibrary->rootSequence,
+                ),
+                $hostRegion->innerGrammar,
+                $hostRegion->definition,
+                $hostRegion->tags,
+                $hostRegion->getMetaAll(),
+            );
+
+            // The inner grammar's "global" region is a rule-definition container, never
+            // instantiated as its own TokenRegion — RetokenizeRegionEventListener only splices the
+            // root's *stream* into the host region, the root TokenRegion itself is discarded. So
+            // neither the root nor (if different) the literal global wrapper region should ever be
+            // compared/spliced in as a new top-level region: doing so would compare the inner
+            // grammar's global region against the host's own unrelated global region and fail with
+            // a false conflict.
+            $otherInnerRegions = $innerCompiled->regions;
+            unset($otherInnerRegions[$innerRootName], $otherInnerRegions[$innerCompiled->globalRegionName]);
+
+            // Compare (and, if not excluded, insert) only the matching-relevant projection on both
+            // sides — never the raw, full CompiledRegion. patternLibrary (and any tokenization
+            // listener it carries) is irrelevant here: it's never touched by this merge, and two
+            // independently-compiled grammars' pattern/tokenization-listener internals can differ
+            // in incidental ways (e.g. closures bound to distinct Region instances) even when they
+            // were built from the literally identical grammar definition — comparing them would
+            // produce false conflicts for content nobody is actually trying to merge.
+            $candidateProjections = [];
+            foreach ($otherInnerRegions as $name => $innerCompiledRegion) {
+                $candidateProjections[$name] = $this->projectForMatching($innerCompiledRegion);
+            }
+
+            $existingProjections = [];
+            foreach ($compiledRegions as $name => $existingRegion) {
+                $existingProjections[$name] = $this->projectForMatching($existingRegion);
+            }
+
+            $excludeNames = $this->conflictResolver->resolveExclusions(
+                $candidateProjections,
+                $existingProjections,
+                "compiled grammar (via retokenized region '{$hostRegion->name}')",
+            );
+
+            foreach ($candidateProjections as $name => $projection) {
+                if (in_array($name, $excludeNames, true)) {
+                    continue;
+                }
+
+                $compiledRegions[$name] = $projection;
+            }
+        }
+
+        return $compiledRegions;
+    }
+
+    private function projectForMatching(CompiledRegion $region): CompiledRegion
+    {
+        return new CompiledRegion(
+            $region->name,
+            $this->onlyMatchingEventSubscribers($region->eventSubscribers),
+            new PatternLibrary([]),
+            $region->sequenceLibrary,
+            null,
+            $region->definition,
+            $region->tags,
+            $region->getMetaAll(),
+        );
+    }
+
+    /**
+     * @param array<string,CompiledEventSubscriber> $eventSubscribers
+     * @return array<string,CompiledEventSubscriber>
+     */
+    private function onlyMatchingEventSubscribers(array $eventSubscribers): array
+    {
+        return array_filter(
+            $eventSubscribers,
+            static fn(CompiledEventSubscriber $subscriber) => $subscriber->listener instanceof MatchingEventListener,
         );
     }
 
@@ -114,7 +251,7 @@ class GrammarCompiler
         }
 
         foreach ($grammar->getAllRegions() as $region) {
-            $this->precompileRegion($region);
+            $this->precompileRegion($region, $grammar);
         }
 
         return $grammar;
@@ -125,6 +262,8 @@ class GrammarCompiler
         $cloned = new Grammar($grammar->name, $grammar->variant);
         $cloned->requireBofEof = $grammar->requireBofEof;
         $cloned->nodeClassMap  = $grammar->nodeClassMap;
+        $cloned->contextDefinition = clone $grammar->contextDefinition;
+        $cloned->formatDefinition = clone $grammar->formatDefinition;
 
         $this->copyRegionContents($grammar->global, $cloned->global);
 
@@ -171,14 +310,14 @@ class GrammarCompiler
         $target->config->rootSequence = $source->config->rootSequence;
     }
 
-    private function precompileRegion(Region $region): void
+    private function precompileRegion(Region $region, Grammar $grammar): void
     {
         foreach ($this->regionPrecompilers as $precompiler) {
-            $precompiler->precompileRegion($region);
+            $precompiler->precompileRegion($region, $grammar);
         }
     }
 
-    private function compileRegion(Region $region): CompiledRegion
+    private function compileRegion(Grammar $definition, Region $region): CompiledRegion
     {
         $patterns = [];
         $sequences = [];
@@ -213,7 +352,7 @@ class GrammarCompiler
         }
 
         // Enrich sequences with NodeType from Rules/Regions/Tags
-        $enricher = new Compiler\SequenceNodeEnricher();
+        $enricher = new Compiler\SequenceNodeEnricher($definition);
         $sequences = $enricher->enrichSequences($sequences, $region);
         if ($rootSequence !== null) {
             $rootSequence = $enricher->enrichSequence($rootSequence, $region);
@@ -266,6 +405,7 @@ class GrammarCompiler
             $compiledEventSubscribers,
             new PatternLibrary($patterns),
             new SequenceLibrary($sequences, $rootSequence),
+            $region->getMeta("innerGrammar.compiled"),
             $definition,
             $region->getAllTags(),
             $meta,

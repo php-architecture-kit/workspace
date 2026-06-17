@@ -61,7 +61,9 @@ trait RegionConfigApi
             ),
         );
 
-        $this->addRule($closeRule);
+        if (!isset($this->rules[$closeRule->name])) {
+            $this->addRule($closeRule);
+        }
 
         return $this;
     }
@@ -74,7 +76,7 @@ trait RegionConfigApi
         }
 
         if ($applyAddRuleMiddlewares === false) {
-            $this->config->rootSequence = SequenceRule::fromString($sequence, false);
+            $this->config->rootSequence = SequenceRule::fromString($sequence);
             return $this;
         }
 
@@ -86,6 +88,12 @@ trait RegionConfigApi
 
         assert($rule->definition instanceof SequenceRule);
         $this->config->rootSequence = $rule->definition;
+
+        return $this;
+    }
+
+    public function withDefaults(array $defaults): self
+    {
 
         return $this;
     }

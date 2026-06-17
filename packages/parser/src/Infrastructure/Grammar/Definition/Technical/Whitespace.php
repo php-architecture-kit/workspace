@@ -10,6 +10,9 @@ use PhpArchitecture\Parser\Foundation\Grammar\Definition\Grammar;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\GrammarOrigin;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Rule;
 use PhpArchitecture\Parser\Foundation\Grammar\Contract\GrammarDefinitionInterface;
+use PhpArchitecture\Parser\Foundation\Grammar\Definition\Defaults;
+use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeInterface;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Context\ContextStack;
 use PhpArchitecture\Parser\Foundation\Tokenization\Contract\TokenizationContext;
 use PhpArchitecture\Parser\Foundation\Tokenization\Event\TokenRegionEndedEvent;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\NodeType;
@@ -21,11 +24,15 @@ class Whitespace implements GrammarDefinitionInterface
     public const FORMAT = "technical";
     public const VARIANT = "whitespace";
 
+    public const CONTEXT_INDENT_UNIT = 'indentUnit';
+
+    protected Grammar $grammar;
+
     public function grammar(): Grammar
     {
-        $grammar = new Grammar(static::FORMAT, static::VARIANT);
+        $this->grammar = new Grammar(static::FORMAT, static::VARIANT);
 
-        $grammar->global->add(
+        $this->grammar->global->add(
             Rule::technical("bof", ['_ws']),
             Rule::technical("eof", ['_ws']),
             Rule::token("space", " ", ['_ws']),
@@ -71,17 +78,17 @@ class Whitespace implements GrammarDefinitionInterface
 
                             if ($isLastTokenEOL) {
                                 if ($isStartedByNewLine && !$isTriggerTokenIncluded) {
-                                    $event->region->rename('emptyLine');
-                                } elseif ($isStartedByBof) {
-                                    $event->region->rename('emptyLine');
+                                    $event->region->rename('emptyLine')->removeTag('-t');
+                                } elseif ($isStartedByBof || $previousEndedWithNewline) {
+                                    $event->region->rename('emptyLine')->removeTag('-t');
                                 } else {
-                                    $event->region->rename($previousEndedWithNewline ? 'emptyLine' : 'trailingWs');
+                                    $event->region->rename('trailingWs')->removeTag('-l');
                                 }
                             } else {
                                 if ($isStartedByNewLine && !$isTriggerTokenIncluded) {
-                                    $event->region->rename('leadingWs');
+                                    $event->region->rename('leadingWs')->removeTag('-t');
                                 } elseif ($previousEndedWithNewline) {
-                                    $event->region->rename('leadingWs');
+                                    $event->region->rename('leadingWs')->removeTag('-t');
                                 } else {
                                     $event->region->rename('inlineWs');
                                 }
@@ -90,13 +97,83 @@ class Whitespace implements GrammarDefinitionInterface
                     ),
                 )
                 ->closeWith(Rule::taggedWith("_ws"), true, false)
-                ->setNodeType(NodeType::Raw)
-                ->addTag('ws', 'whitespace', '-')
+                ->setNodeType(NodeType::Node)
+                ->addTag('ws', 'whitespace', '-', '-l', '-t')
                 ->withPossibleNames('emptyLine', 'trailingWs', 'leadingWs', 'inlineWs'),
         );
 
-        $grammar->stampOrigin(new GrammarOrigin(self::FORMAT, self::VARIANT));
+        $this->grammar->stampOrigin(new GrammarOrigin(self::FORMAT, self::VARIANT));
 
-        return $grammar;
+        return $this->grammar;
     }
+
+    /**
+     * @param string[] $stylesWithIndentation
+     * @param callable(NodeInterface $rootNode):string $indentUnitResolver
+     */
+    public function withIndentationSupport(
+        array $stylesWithIndentation,
+        callable $indentUnitResolver,
+    ): self {
+        $this->grammar->contextDefinition->addContextInitializer(
+            function (NodeInterface $rootNode) use ($stylesWithIndentation, $indentUnitResolver): void {
+                $style = $rootNode->getContextStack()->treeContext[ContextStack::STYLE] ?? Defaults::DEFAULT_STYLE;
+                if (!in_array($style, $stylesWithIndentation, true)) {
+                    return;
+                }
+
+                $rootNode->getContextStack()->treeContext[self::CONTEXT_INDENT_UNIT] = $indentUnitResolver($rootNode);
+            },
+        );
+
+        return $this;
+    }
+
+    // /**
+    //  * @return callable(ContextStack $parentContext, string $style):string
+    //  */
+    // public function indentationResolver(bool $leadingNewline): callable
+    // {
+    //     return static function (ContextStack $parentContext, string $style): string {
+    //         $indentUnit = $parentContext->treeContext[self::CONTEXT_INDENT_UNIT] ?? null;
+    //         if ($indentUnit === null) {
+    //             throw new \RuntimeException("Indentation unit not set in " . static::FORMAT . " " . static::VARIANT . " context for style '{$style}'");
+    //         }
+
+    //         // TODO
+    //         return '';
+    //     };
+    // }
+
+    // public static function emptyLine(string $content = "\n\n"): NodeInterface
+    // {
+    //     return new Node(
+    //         name: 'emptyLine',
+    //         attributes: [new RawContentAttribute($content)],
+    //     );
+    // }
+
+    // public static function trailingWs(string $content = "\n"): NodeInterface
+    // {
+    //     return new Node(
+    //         name: 'trailingWs',
+    //         attributes: [new RawContentAttribute($content)],
+    //     );
+    // }
+
+    // public static function leadingWs(string $content = ""): NodeInterface
+    // {
+    //     return new Node(
+    //         name: 'leadingWs',
+    //         attributes: [new RawContentAttribute($content)],
+    //     );
+    // }
+
+    // public static function inlineWs(string $content = ""): NodeInterface
+    // {
+    //     return new Node(
+    //         name: 'inlineWs',
+    //         attributes: [new RawContentAttribute($content)],
+    //     );
+    // }
 }

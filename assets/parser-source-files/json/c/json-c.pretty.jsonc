@@ -1,7 +1,9 @@
 // JSONC Example - JSON with Comments
-/* This file demonstrates all JSONC features:
-   single-line and block comments in valid positions.
-   No trailing commas — JSONC inherits JSON's strict separator rules. */
+
+/*  This file demonstrates all JSONC features:
+    single-line and block comments in valid positions.
+    No trailing commas — JSONC inherits JSON's strict separator rules. */
+
 {
     // === STRINGS ===
     "doubleQuoted": "standard JSON string",
@@ -12,21 +14,18 @@
     "$dollarKey": "keys can start with dollar sign",
     "camelCaseKey": "standard camelCase",
     "PascalCaseKey": "PascalCase also works",
-
-    // === NUMBERS ===
+    /* === NUMBERS === */
     "integer": 123,
     "negative": -456,
     "decimal": 123.456,
     "exponent": 1.23e10,
     "exponentNegative": 1.23e-10,
     "exponentPositive": 1.23E+10,
-
-    // === LITERALS ===
+    /** === LITERALS === **/
     "boolTrue": true,
     "boolFalse": false,
     "nullValue": null,
-
-    // === ARRAYS ===
+    /** === ARRAYS === */
     "emptyArray": [],
     "singleElementArray": [
         42
@@ -49,7 +48,6 @@
             "array"
         ]
     ],
-
     // === OBJECTS ===
     "emptyObject": {},
     "singlePropertyObject": {
@@ -62,7 +60,6 @@
             }
         }
     },
-
     /*
      * Deep nesting demonstration
      * Objects can nest arbitrarily deep inside arrays inside objects.
@@ -90,8 +87,22 @@
                                 {
                                     "item": 2,
                                     "matrix": [
-                                        [1, 2, 3],
-                                        [4, 5, [6, 7, [8]]]
+                                        [
+                                            1,
+                                            2,
+                                            3
+                                        ],
+                                        [
+                                            4,
+                                            5,
+                                            [
+                                                6,
+                                                7,
+                                                [
+                                                    8
+                                                ]
+                                            ]
+                                        ]
                                     ]
                                 }
                             ]
@@ -101,7 +112,6 @@
             }
         }
     },
-
     // === COMMENTS IN VARIOUS POSITIONS ===
     "arrayWithComments": [
         // comment before first element
@@ -110,7 +120,6 @@
         /* block comment before element */
         "third"
     ],
-
     "lastProperty": "JSONC does not allow trailing comma"
     // comment after last property, before closing brace
 }

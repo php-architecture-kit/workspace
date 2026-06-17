@@ -22,6 +22,17 @@ class Parser
         $lexer = new Lexer($context->tokenizationContext());
         $tokenizedRootRegion = $lexer->process($stream);
 
-        return $context->nodeFactory()->fromTokenRegion($tokenizedRootRegion, null);
+        $rootNode = $context->nodeFactory()->fromTokenRegion($tokenizedRootRegion, null);
+
+        $this->initializeContext($rootNode, $context);
+
+        return $rootNode;
+    }
+
+    private function initializeContext(NodeInterface $rootNode, ParsingContext $context): void
+    {
+        foreach ($context->grammar()->contextInitializers as $initializer) {
+            $initializer($rootNode);
+        }
     }
 }

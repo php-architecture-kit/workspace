@@ -5,15 +5,21 @@ declare(strict_types=1);
 namespace PhpArchitecture\Parser\Foundation\Grammar\Compiled\Compiler;
 
 use LogicException;
+use PhpArchitecture\Parser\Foundation\Grammar\Definition\Grammar;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Model\Sequence\SequenceRule;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Region;
 use PhpArchitecture\Parser\Foundation\Matching\Model\NestedSequence;
 use PhpArchitecture\Parser\Foundation\Matching\Model\Sequence;
 use PhpArchitecture\Parser\Foundation\Matching\Model\SequenceNode as CompiledSequenceNode;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Raw\RawContentAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\NodeType;
 
 class SequenceNodeEnricher
 {
+    public function __construct(
+        private readonly Grammar $definition,
+    ) {}
+
     /**
      * Enrich all sequences in arrays with NodeType from Rules/Regions/Tags
      * 
@@ -25,7 +31,10 @@ class SequenceNodeEnricher
     {
         $enriched = [];
         foreach ($sequences as $sequence) {
-            $enriched[] = $this->enrichSequence($sequence, $region);
+            $enrichedSequence = $this->enrichSequence($sequence, $region);
+            if (!in_array(NodeType::Tag->value, $enrichedSequence->tags)) {
+                $enriched[] = $enrichedSequence;
+            }
         }
         return $enriched;
     }
@@ -106,26 +115,30 @@ class SequenceNodeEnricher
             }
         }
 
-        if ($this->hasNodeType($node)) {
+        if (!in_array(NodeType::Tag, $nodeTypesMap) && $this->hasNodeType(node: $node, except: [NodeType::Tag->value])) {
             return $node;
         }
 
         if (empty($nodeTypesMap)) {
-            return $node;
+            if (in_array(RawContentAttribute::TAG, $node->tags, true)) {
+                return $node;
+            }
+
+            $nodeName = $node->anchorName ?? implode('|', $node->alternatives);
+            throw new LogicException("Sequence `{$sequenceName}` in `{$region->name}` region has no node type assigned to `{$nodeName}` node. You can add tag `/n`, `/s`, `/r` to sequence node to define is it a node, a structure element or a raw content.");
         }
 
-        // Add NodeType to tags only when all alternatives agree — mixed types are resolved per-item at runtime
         $tags = $node->tags;
-        if (!empty($nodeTypesMap)) {
-            $uniqueNodeTypes = array_unique(array_map(static fn(NodeType $nt) => $nt->value, $nodeTypesMap));
-            if (count($uniqueNodeTypes) === 1) {
-                $nodeType = array_values($nodeTypesMap)[0];
-                if (!in_array($nodeType->value, $tags)) {
-                    $tags[] = $nodeType->value;
-                }
+        $uniqueNodeTypes = array_unique(array_map(static fn(NodeType $nt) => $nt->value, $nodeTypesMap));
+
+        if (count($uniqueNodeTypes) === 1) {
+            $nodeType = array_values($nodeTypesMap)[0];
+            if (!in_array($nodeType->value, $tags)) {
+                $tags[] = $nodeType->value;
             }
         }
 
+        // TODO: This is to naive. What about union of more than one tags?
         if (in_array(NodeType::Tag->value, $tags) && count($node->alternatives) === 1) {
             $tagName = $node->alternatives[0];
             $tagRule = $region->rules[$tagName] ?? null;
@@ -159,11 +172,12 @@ class SequenceNodeEnricher
 
     /**
      * Check if node already has NodeType in tags
+     * @param string[] $except
      */
-    private function hasNodeType(CompiledSequenceNode $node): bool
+    private function hasNodeType(CompiledSequenceNode $node, array $except = []): bool
     {
         foreach ($node->tags as $tag) {
-            if (str_starts_with($tag, 'NodeType.')) {
+            if (str_starts_with($tag, 'NodeType.') && !in_array($tag, $except, true)) {
                 return true;
             }
         }
@@ -180,7 +194,7 @@ class SequenceNodeEnricher
             return $region->rules[$alternative]->nodeType;
         }
 
-        // Try to find as Region
+        // Try to find as nested Region
         if (isset($region->regions[$alternative])) {
             return $region->regions[$alternative]->config->nodeType;
         }
@@ -214,6 +228,12 @@ class SequenceNodeEnricher
             }
 
             return $nodeTypes[0];
+        }
+
+        // TODO: this is a hack. The correct way is to check region inheritance rules as use source of regions from it. It should be fixed in the future
+        // Try to find as global Region
+        if (isset($this->definition->global->regions[$alternative])) {
+            return $this->definition->global->regions[$alternative]->config->nodeType;
         }
 
         // Not found - this will be caught later as missing rule
