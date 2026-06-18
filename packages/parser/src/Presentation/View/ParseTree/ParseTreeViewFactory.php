@@ -16,7 +16,7 @@ use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Raw\RawRegionAttri
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Raw\RawSequenceAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\SequenceAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Structure\StructureAttribute;
-use PhpArchitecture\Parser\Foundation\Parsing\Model\Node;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\AbstractNode;
 use PhpArchitecture\Parser\Presentation\View\ParseTree\DTO\ParseNodeViewData;
 use PhpArchitecture\Parser\Presentation\View\ParseTree\DTO\ParseTreeViewData;
 
@@ -32,7 +32,7 @@ final class ParseTreeViewFactory
 
     private function convert(mixed $node): ParseNodeViewData
     {
-        if ($node instanceof Node) {
+        if ($node instanceof AbstractNode) {
             return new ParseNodeViewData(
                 type: ParseNodeViewData::TYPE_NODE,
                 name: $node->name,

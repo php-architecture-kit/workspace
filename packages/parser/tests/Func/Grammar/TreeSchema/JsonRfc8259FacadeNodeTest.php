@@ -10,6 +10,7 @@ use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\GroupAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\SequenceAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\NodeAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Node;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\SequenceNode;
 use PhpArchitecture\Parser\Infrastructure\Grammar\Definition\Json\JsonRfc8259;
 use PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Technical\Whitespace\EmptyLineNode;
 use PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Technical\Whitespace\InlineWsNode;
@@ -196,7 +197,7 @@ final class JsonRfc8259FacadeNodeTest extends GrammarTestCase
             string: '{"a":1}',
             grammar: $grammar,
             assertParsingResultValid: function (NodeInterface $result, self $test): void {
-                $test->assertSame(Node::class, get_class($result), 'Without nodeClassMap root must be plain Node');
+                $test->assertSame(SequenceNode::class, get_class($result), 'Without nodeClassMap root must be a plain shape node (Sequence origin)');
             },
         );
     }
