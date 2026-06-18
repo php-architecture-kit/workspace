@@ -19,6 +19,13 @@ final class NodeSchema
     /** FQCN for imported nodes (different format) */
     public ?string $importFqcn = null;
 
+    /**
+     * FQCN of the shape base class the facade must extend (LeafNode / GroupNode /
+     * SequenceNode), captured from the materialized parse node. Null falls back to
+     * the generic Node in the renderer.
+     */
+    public ?string $baseClass = null;
+
     public function __construct(
         public readonly string $nodeName,
         public readonly string $className,

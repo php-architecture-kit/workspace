@@ -63,6 +63,9 @@ final class NodeSchemaCollector
         }
 
         $schema = $this->schemas[$name];
+        // The facade extends the same shape the runtime materializes (LeafNode /
+        // GroupNode / SequenceNode).
+        $schema->baseClass = $node::class;
         $attributes = $node->getAttributes();
 
         foreach ($attributes as $index => $attribute) {
@@ -178,13 +181,13 @@ final class NodeSchemaCollector
 
     private function mergeSequenced(AttributeSchema $schema, SequenceAttribute $attr): void
     {
-        $anchorName = $attr->getName();
-
         foreach ($attr->attributes as $child) {
-            $isMeta = ($child instanceof MetaInterface)
-                && $child->getMeta(SequenceAttribute::ANCHOR_NAME_META_KEY) === $anchorName;
+            // Content vs structural is taken from the `/c` marker stamped at compile
+            // time (deterministic), not guessed from a representative sample.
+            $isContent = method_exists($child, 'hasTag')
+                && $child->hasTag(SequenceAttribute::CONTENT_TAG);
 
-            if ($isMeta) {
+            if ($isContent) {
                 if ($child instanceof NodeAttribute && $schema->groupedContentNodeName === null) {
                     $alternatives = $child->getMeta('alternatives');
                     if (is_array($alternatives) && !empty($alternatives)) {
@@ -244,9 +247,9 @@ final class NodeSchemaCollector
     {
         $schema->rawTokenName = $attr->name;
         if ($schema->rawRegionOpenerContent === null && $attr->opener !== null) {
-            $schema->rawRegionOpenerContent = $attr->opener->content;
-            $schema->rawRegionOpenerName    = $attr->opener->name;
-            $schema->rawRegionCloserContent = $attr->closer?->content;
+            // opener/closer are plain strings (?string) on RawRegionAttribute.
+            $schema->rawRegionOpenerContent = $attr->opener;
+            $schema->rawRegionCloserContent = $attr->closer;
         }
 
         $alternatives = $attr->getMeta('alternatives');

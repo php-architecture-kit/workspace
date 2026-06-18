@@ -38,7 +38,8 @@ final class FacadeClassRenderer
         $imports = [];
         $body    = '';
 
-        $imports[] = Node::class;
+        $baseClass = $schema->baseClass ?? Node::class;
+        $imports[] = $baseClass;
 
         $propertyHooks = $this->renderPropertyHooks($schema, $allSchemas, $namespace, $imports);
         $createMethod  = $this->renderCreate($schema, $allSchemas, $namespace, $imports);
@@ -77,7 +78,7 @@ final class FacadeClassRenderer
         $code .= 'namespace ' . $namespace . ';' . PHP_EOL . PHP_EOL;
         $code .= $useLines;
         $code .= PHP_EOL;
-        $code .= 'class ' . $schema->className . ' extends Node' . PHP_EOL;
+        $code .= 'class ' . $schema->className . ' extends ' . $this->shortName($baseClass) . PHP_EOL;
         $code .= '{' . $classBody . '}' . PHP_EOL;
 
         return $code;
@@ -186,10 +187,9 @@ final class FacadeClassRenderer
                 $paramVar = '$' . $attr->propName;
                 $params[] = 'string ' . $paramVar;
                 if ($attr->rawRegionOpenerContent !== null) {
-                    $openerName = $attr->rawRegionOpenerName ?? 'doubleQuote';
-                    $opener = 'new StructureAttribute(true, ' . var_export($openerName, true) . ', ' . var_export($attr->rawRegionOpenerContent, true) . ')';
-                    $closer = 'new StructureAttribute(true, ' . var_export($openerName, true) . ', ' . var_export($attr->rawRegionCloserContent ?? $attr->rawRegionOpenerContent, true) . ')';
-                    $imports[] = StructureAttribute::class;
+                    // RawRegionAttribute opener/closer are plain strings (?string).
+                    $opener = var_export($attr->rawRegionOpenerContent, true);
+                    $closer = var_export($attr->rawRegionCloserContent ?? $attr->rawRegionOpenerContent, true);
                 } else {
                     $opener = 'null';
                     $closer = 'null';
