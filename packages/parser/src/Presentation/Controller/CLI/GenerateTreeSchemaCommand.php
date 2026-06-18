@@ -72,6 +72,10 @@ final class GenerateTreeSchemaCommand extends Command
             $compiledGrammar->requireBofEof,
             $compiledGrammar->rootRegionName,
             $compiledGrammar->regions,
+            $compiledGrammar->contextInitializers,
+            $compiledGrammar->formatters,
+            [], // nodeClassMap stripped — parse with bare shape nodes
+            $compiledGrammar->globalRegionName,
         );
 
         $parser    = new Parser();

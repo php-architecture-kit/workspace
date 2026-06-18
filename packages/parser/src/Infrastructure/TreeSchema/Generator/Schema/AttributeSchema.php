@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace PhpArchitecture\Parser\Infrastructure\TreeSchema\Generator\Schema;
 
-use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\GroupAttribute;
-use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\NodeAttribute;
-use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\OptionalAttribute;
-use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\RawContentAttribute;
-use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\RawRegionAttribute;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Node\GroupAttribute;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Node\NodeAttribute;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Node\OptionalAttribute;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Raw\RawContentAttribute;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Raw\RawRegionAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\SequenceAttribute;
-use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\StructureAttribute;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Structure\StructureAttribute;
 
 /**
  * All data about one attribute needed by the renderer to generate property hook + methods.

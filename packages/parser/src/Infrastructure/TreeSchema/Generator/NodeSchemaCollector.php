@@ -7,13 +7,13 @@ namespace PhpArchitecture\Parser\Infrastructure\TreeSchema\Generator;
 use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeAttributeInterface;
 use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeInterface;
 use PhpArchitecture\Parser\Foundation\Shared\Meta\MetaInterface;
-use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\GroupAttribute;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Node\GroupAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\SequenceAttribute;
-use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\NodeAttribute;
-use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\OptionalAttribute;
-use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\RawContentAttribute;
-use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\RawRegionAttribute;
-use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\StructureAttribute;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Node\NodeAttribute;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Node\OptionalAttribute;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Raw\RawContentAttribute;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Raw\RawRegionAttribute;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Structure\StructureAttribute;
 use PhpArchitecture\Parser\Infrastructure\TreeSchema\Generator\Schema\AttributeSchema;
 use PhpArchitecture\Parser\Infrastructure\TreeSchema\Generator\Schema\NodeSchema;
 use PhpArchitecture\Parser\Infrastructure\TreeSchema\Generator\Schema\RawChoiceInfo;
@@ -152,7 +152,7 @@ final class NodeSchemaCollector
         }
     }
 
-    private function mergeRawChoice(AttributeSchema $schema, RawContentAttribute $raw): void
+    private function mergeRawChoice(AttributeSchema $schema, RawContentAttribute|RawRegionAttribute $raw): void
     {
         $tokenName = $raw->name;
         foreach ($schema->rawChoices as $existing) {

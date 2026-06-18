@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace PhpArchitecture\Parser\Infrastructure\TreeSchema\Generator\Schema;
 
-use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\GroupAttribute;
-use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\StructureAttribute;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Node\GroupAttribute;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Structure\StructureAttribute;
 
 /**
  * Describes one structural attribute that belongs to a GroupedAttribute unit
