@@ -6,6 +6,7 @@ namespace PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute;
 
 use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeAttributeInterface;
 use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeInterface;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Sequence\HoldsAttributes;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Sequence\SequenceCarrier;
 use PhpArchitecture\Parser\Foundation\Shared\Meta\MetaInterface;
 use PhpArchitecture\Parser\Foundation\Shared\Meta\MetaTrait;
@@ -22,6 +23,7 @@ class SequenceAttribute implements NodeAttributeInterface, MetaInterface
 {
     use MetaTrait;
     use TagsTrait;
+    use HoldsAttributes;
     use SequenceCarrier;
 
     public const TAG = 'SequenceAttribute';

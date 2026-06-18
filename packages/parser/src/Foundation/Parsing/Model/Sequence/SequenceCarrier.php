@@ -25,8 +25,6 @@ use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\SequenceValidityCu
  */
 trait SequenceCarrier
 {
-    use HoldsAttributes;
-
     private ?SequenceValidityCursor $validityCursor = null;
     private ?NestedSequence $nestedSequence = null;
 

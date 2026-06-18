@@ -36,7 +36,7 @@ abstract class AbstractNode implements NodeInterface
     public function __construct(
         public readonly string $name,
         public readonly NodeOrigin $origin,
-        public private(set) array $attributes,
+        public protected(set) array $attributes,
         ?NodeInterface $parent = null,
         array $meta = [],
         array $tags = [],
