@@ -33,4 +33,17 @@ class LeafNode extends AbstractNode
         return $this->attributes[0]
             ?? throw new LogicException("LeafNode '{$this->name}' has no attribute.");
     }
+
+    /**
+     * Replaces the single attribute (or sets it when empty). The structural swap
+     * does not need any formatting context — the caller supplies the replacement.
+     */
+    public function replaceAttribute(NodeAttributeInterface $replacement): self
+    {
+        if ($this->attributes !== []) {
+            $this->removeAttributeByOffset(0);
+        }
+
+        return $this->addAttribute($replacement);
+    }
 }

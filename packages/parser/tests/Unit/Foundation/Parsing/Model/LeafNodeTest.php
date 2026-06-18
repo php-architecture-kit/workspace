@@ -56,4 +56,18 @@ final class LeafNodeTest extends TestCase
         $this->expectException(LogicException::class);
         $node->getAttribute();
     }
+
+    #[Test]
+    public function replaceSwapsTheSingleAttribute(): void
+    {
+        $node = new LeafNode('space', NodeOrigin::Token, [], null);
+        $first = self::attr('first');
+        $second = self::attr('second');
+
+        $node->addAttribute($first);
+        $node->replaceAttribute($second);
+
+        $this->assertSame($second, $node->getAttribute());
+        $this->assertCount(1, $node->getAttributes());
+    }
 }
