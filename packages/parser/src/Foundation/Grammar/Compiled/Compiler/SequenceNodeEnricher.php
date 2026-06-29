@@ -106,8 +106,20 @@ class SequenceNodeEnricher
      */
     private function enrichNode(CompiledSequenceNode $node, Region $region, string $sequenceName): CompiledSequenceNode
     {
+        // Spread tag-typed alternatives inline. Each alternative that resolves to a
+        // NodeType::Tag rule (created by TagToChoiceCompiler) is replaced by the
+        // alternatives it covers. This handles a tag appearing as one of many
+        // alternatives (e.g. primitive = false|null|true|number|string where `string`
+        // is a tag covering `doubleQuotedString`), not just the single-alternative case.
+        $extraTags = [];
+        $hadAmbiguousTagAlternative = false;
+        $spread = $this->spreadTagAlternatives($node->alternatives, $region, $extraTags, $hadAmbiguousTagAlternative);
+        $hadTagAlternative = $spread !== $node->alternatives;
+
+        // Resolve types from the final (post-spread) alternatives — what will actually be
+        // matched at runtime.
         $nodeTypesMap = [];
-        foreach ($node->alternatives as $alternative) {
+        foreach ($spread as $alternative) {
             $nodeType = $this->resolveNodeType($alternative, $region);
 
             if ($nodeType !== null) {
@@ -115,7 +127,9 @@ class SequenceNodeEnricher
             }
         }
 
-        if (!in_array(NodeType::Tag, $nodeTypesMap) && $this->hasNodeType(node: $node, except: [NodeType::Tag->value])) {
+        $existingType = $this->existingNodeType($node);
+
+        if (!$hadTagAlternative && $existingType !== null) {
             return $node;
         }
 
@@ -128,42 +142,60 @@ class SequenceNodeEnricher
             throw new LogicException("Sequence `{$sequenceName}` in `{$region->name}` region has no node type assigned to `{$nodeName}` node. You can add tag `/n`, `/s`, `/r` to sequence node to define is it a node, a structure element or a raw content.");
         }
 
-        $tags = $node->tags;
-        $uniqueNodeTypes = array_unique(array_map(static fn(NodeType $nt) => $nt->value, $nodeTypesMap));
+        // Priority for the slot's final type:
+        // 1. An explicit type already stamped at definition time (`/r`/`/s`/`/n`,
+        //    attributeTags, or TriviaSequenceNamingMiddleware) always wins — the grammar
+        //    author's call, e.g. `primitive`'s alternatives are uniformly Raw on their own
+        //    but explicitly forced Raw via attributeTags regardless.
+        // 2. A tag that covers more than one rule (e.g. `Rule::taggedWith('keyword')`
+        //    covering `null`/`true`) is, by long-standing convention, wrapped as Node —
+        //    the choice itself becomes an addressable child Node carrying
+        //    meta['alternatives'], even though every covered rule happens to be Raw.
+        //    A tag covering exactly one rule has nothing to disambiguate, so it does NOT
+        //    qualify here — it falls through to (3) and inherits that rule's own type.
+        // 3. Otherwise, derive from the concrete (non-Tag) post-spread alternatives: a
+        //    single shared type is preserved; heterogeneous types (e.g. a Node region
+        //    alongside a Raw token) can only be told apart once actually matched, so the
+        //    slot must be tagged Node, the generic wrapper capable of holding either. A
+        //    Tag surviving past spreading is a self-referential artifact (e.g. a region
+        //    tagged with its own name, as `whitespace` is in Whitespace.php) carrying no
+        //    type of its own; if that's all there is, it's used as a harmless last resort
+        //    — such nodes exist only for tag lookup and are never actually matched.
+        $concreteTypes = array_values(array_filter($nodeTypesMap, static fn(NodeType $nt) => $nt !== NodeType::Tag));
+        $uniqueConcreteTypes = array_unique(array_map(static fn(NodeType $nt) => $nt->value, $concreteTypes));
 
-        if (count($uniqueNodeTypes) === 1) {
-            $nodeType = array_values($nodeTypesMap)[0];
-            if (!in_array($nodeType->value, $tags)) {
-                $tags[] = $nodeType->value;
+        $resolvedType = match (true) {
+            $existingType !== null => $existingType,
+            $hadAmbiguousTagAlternative => NodeType::Node,
+            count($uniqueConcreteTypes) === 1 => $concreteTypes[0],
+            count($uniqueConcreteTypes) > 1 => NodeType::Node,
+            default => array_values($nodeTypesMap)[0],
+        };
+
+        $tags = $node->tags;
+        $anchorName = $node->anchorName;
+
+        if ($hadTagAlternative) {
+            $tags = array_merge($tags, $extraTags);
+            $tags = array_values(array_filter($tags, static fn(string $tag): bool => $tag !== NodeType::Tag->value));
+
+            if ($anchorName === null && count($node->alternatives) === 1) {
+                // Preserve legacy single-tag anchor naming.
+                $anchorName = $region->rules[$node->alternatives[0]]->name ?? null;
             }
         }
 
-        // TODO: This is to naive. What about union of more than one tags?
-        if (in_array(NodeType::Tag->value, $tags) && count($node->alternatives) === 1) {
-            $tagName = $node->alternatives[0];
-            $tagRule = $region->rules[$tagName] ?? null;
-            if ($tagRule->definition instanceof SequenceRule && isset($tagRule->definition->nodes[0])) {
-                return new CompiledSequenceNode(
-                    $tagRule->definition->nodes[0]->alternatives,
-                    $node->min,
-                    $node->max,
-                    $node->isLookahead,
-                    $node->isLookbehind,
-                    $node->anchorName ?? $tagRule->name,
-                    $node->meta,
-                    array_merge($tags, $tagRule->tags, [NodeType::Node->value]),
-                    $node->isNegation,
-                );
-            }
+        if (!in_array($resolvedType->value, $tags, true)) {
+            $tags[] = $resolvedType->value;
         }
 
         return new CompiledSequenceNode(
-            $node->alternatives,
+            $spread,
             $node->min,
             $node->max,
             $node->isLookahead,
             $node->isLookbehind,
-            $node->anchorName,
+            $anchorName,
             $node->meta,
             $tags,
             $node->isNegation,
@@ -171,17 +203,69 @@ class SequenceNodeEnricher
     }
 
     /**
-     * Check if node already has NodeType in tags
-     * @param string[] $except
+     * Replace each alternative that resolves to a NodeType::Tag rule with the
+     * alternatives that tag covers. Deduplicates while preserving order and expands
+     * nested tags, guarding against cycles.
+     *
+     * @param string[] $alternatives
+     * @param string[] $accumulatedTags out: tags collected from expanded tag-rules
+     * @param bool $hadAmbiguousTagAlternative out: true if any expanded tag covered more
+     *             than one alternative — i.e. there was an actual choice to disambiguate,
+     *             as opposed to a tag that is merely an indirection to a single rule
+     * @return string[]
      */
-    private function hasNodeType(CompiledSequenceNode $node, array $except = []): bool
+    private function spreadTagAlternatives(array $alternatives, Region $region, array &$accumulatedTags, bool &$hadAmbiguousTagAlternative): array
     {
-        foreach ($node->tags as $tag) {
-            if (str_starts_with($tag, 'NodeType.') && !in_array($tag, $except, true)) {
-                return true;
+        $result = [];
+        $expanded = [];
+        $queue = $alternatives;
+        while ($queue) {
+            $alternative = array_shift($queue);
+            $rule = $region->rules[$alternative] ?? null;
+            if (
+                !isset($expanded[$alternative])
+                && $rule !== null
+                && $rule->nodeType === NodeType::Tag
+                && $rule->definition instanceof SequenceRule
+                && isset($rule->definition->nodes[0])
+            ) {
+                $expanded[$alternative] = true;
+                $accumulatedTags = array_merge($accumulatedTags, $rule->tags);
+                $covered = $rule->definition->nodes[0]->alternatives;
+                if (count($covered) > 1) {
+                    $hadAmbiguousTagAlternative = true;
+                }
+                foreach ($covered as $sub) {
+                    $queue[] = $sub; // re-process to handle nested tags
+                }
+                continue;
+            }
+            if (!in_array($alternative, $result, true)) {
+                $result[] = $alternative;
             }
         }
-        return false;
+        return $result;
+    }
+
+    /**
+     * The concrete NodeType already stamped on the node's tags (e.g. by
+     * TriviaSequenceNamingMiddleware, or attributeTags on Rule::choice), ignoring the
+     * NodeType::Tag placeholder which carries no type information of its own.
+     */
+    private function existingNodeType(CompiledSequenceNode $node): ?NodeType
+    {
+        foreach ($node->tags as $tag) {
+            if ($tag === NodeType::Tag->value) {
+                continue;
+            }
+
+            $nodeType = NodeType::tryFrom($tag);
+            if ($nodeType !== null) {
+                return $nodeType;
+            }
+        }
+
+        return null;
     }
 
     /**

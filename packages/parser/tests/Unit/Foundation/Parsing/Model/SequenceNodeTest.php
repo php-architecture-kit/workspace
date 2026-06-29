@@ -7,8 +7,9 @@ namespace PhpArchitecture\Parser\Tests\Unit\Foundation\Parsing\Model;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use PhpArchitecture\Parser\Foundation\Matching\Model\NestedSequence;
-use PhpArchitecture\Parser\Foundation\Matching\Model\SequenceNode as GrammarSequenceNode;
+use PhpArchitecture\Parser\Foundation\Grammar\Definition\Model\Cardinality;
+use PhpArchitecture\Parser\Foundation\Grammar\Definition\Model\Sequence\NestedSequence;
+use PhpArchitecture\Parser\Foundation\Grammar\Definition\Model\Sequence\SequenceNode as GrammarSequenceNode;
 use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeAttributeInterface;
 use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeInterface;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\NodeOrigin;
@@ -31,10 +32,10 @@ final class SequenceNodeTest extends TestCase
     private static function memberCommaMember(): NestedSequence
     {
         return new NestedSequence([[
-            new GrammarSequenceNode(['member'], 1, 1),
-            new GrammarSequenceNode(['comma'], 1, 1),
-            new GrammarSequenceNode(['member'], 1, 1),
-        ]], 1, 1);
+            new GrammarSequenceNode(['member'], Cardinality::ExactlyOne),
+            new GrammarSequenceNode(['comma'], Cardinality::ExactlyOne),
+            new GrammarSequenceNode(['member'], Cardinality::ExactlyOne),
+        ]], Cardinality::ExactlyOne);
     }
 
     #[Test]

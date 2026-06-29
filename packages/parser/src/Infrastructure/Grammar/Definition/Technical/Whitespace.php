@@ -97,12 +97,19 @@ class Whitespace implements GrammarDefinitionInterface
                     ),
                 )
                 ->closeWith(Rule::taggedWith("_ws"), true, false)
-                ->setNodeType(NodeType::Node)
+                ->setNodeType(NodeType::Raw)
                 ->addTag('ws', 'whitespace', '-', '-l', '-t')
                 ->withPossibleNames('emptyLine', 'trailingWs', 'leadingWs', 'inlineWs'),
         );
 
         $this->grammar->stampOrigin(new GrammarOrigin(self::FORMAT, self::VARIANT));
+
+        $this->grammar->nodeClassMap = array_merge($this->grammar->nodeClassMap, [
+            'emptyLine' => \PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Technical\Whitespace\EmptyLineNode::class,
+            'trailingWs' => \PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Technical\Whitespace\TrailingWsNode::class,
+            'inlineWs' => \PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Technical\Whitespace\InlineWsNode::class,
+            'leadingWs' => \PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Technical\Whitespace\LeadingWsNode::class,
+        ]);
 
         return $this->grammar;
     }
@@ -128,52 +135,4 @@ class Whitespace implements GrammarDefinitionInterface
 
         return $this;
     }
-
-    // /**
-    //  * @return callable(ContextStack $parentContext, string $style):string
-    //  */
-    // public function indentationResolver(bool $leadingNewline): callable
-    // {
-    //     return static function (ContextStack $parentContext, string $style): string {
-    //         $indentUnit = $parentContext->treeContext[self::CONTEXT_INDENT_UNIT] ?? null;
-    //         if ($indentUnit === null) {
-    //             throw new \RuntimeException("Indentation unit not set in " . static::FORMAT . " " . static::VARIANT . " context for style '{$style}'");
-    //         }
-
-    //         // TODO
-    //         return '';
-    //     };
-    // }
-
-    // public static function emptyLine(string $content = "\n\n"): NodeInterface
-    // {
-    //     return new Node(
-    //         name: 'emptyLine',
-    //         attributes: [new RawContentAttribute($content)],
-    //     );
-    // }
-
-    // public static function trailingWs(string $content = "\n"): NodeInterface
-    // {
-    //     return new Node(
-    //         name: 'trailingWs',
-    //         attributes: [new RawContentAttribute($content)],
-    //     );
-    // }
-
-    // public static function leadingWs(string $content = ""): NodeInterface
-    // {
-    //     return new Node(
-    //         name: 'leadingWs',
-    //         attributes: [new RawContentAttribute($content)],
-    //     );
-    // }
-
-    // public static function inlineWs(string $content = ""): NodeInterface
-    // {
-    //     return new Node(
-    //         name: 'inlineWs',
-    //         attributes: [new RawContentAttribute($content)],
-    //     );
-    // }
 }

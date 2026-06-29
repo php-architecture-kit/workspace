@@ -14,6 +14,7 @@ use PhpArchitecture\Parser\Foundation\Grammar\Definition\Model\Regex\RegexRule;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Model\RuleDefinition;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Model\RuleType;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Model\Sequence\SequenceRule;
+use PhpArchitecture\Parser\Foundation\Grammar\Definition\Service\StructuralDefaultsBinder;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Model\Technical\TaggedRule;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Model\Technical\TechnicalTokenRule;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Pratt\PrattRoleDefinition;
@@ -200,6 +201,7 @@ class Rule
         array $options,
         Cardinality $cardinality = Cardinality::ExactlyOne,
         array $tags = [],
+        array $attributeTags = [],
         NodeType $type = NodeType::Node,
     ): self {
         if (in_array($name, $tags, true)) {
@@ -224,7 +226,7 @@ class Rule
             RuleType::Choice,
             new SequenceRule(
                 [
-                    new Model\Sequence\SequenceNode($rulesNames, $cardinality, anchorName: $name)
+                    new Model\Sequence\SequenceNode($rulesNames, $cardinality, tags: $attributeTags, anchorName: $name)
                 ],
             ),
             $type,
@@ -324,9 +326,30 @@ class Rule
         return $this;
     }
 
+    /**
+     * Attaches structural Defaults to nodes of this rule's sequence.
+     *
+     * Keys are slot selectors: a structural node's anchor name, or one of its
+     * alternative names (e.g. `comma`, or the raw trivia token `-l`/`-t`/`-`,
+     * matched before TriviaSequenceNamingMiddleware renames it). For a token /
+     * keyword (RegexRule) rule, a single Defaults keyed by the rule name (or the
+     * sole entry) is attached to the rule itself.
+     *
+     * @param array<string, Defaults> $defaults
+     */
     public function withDefaults(array $defaults): self
     {
-        
+        if ($this->definition instanceof SequenceRule) {
+            foreach ($defaults as $selector => $def) {
+                StructuralDefaultsBinder::bind($this->definition->nodes, (string) $selector, $def);
+            }
+        } elseif ($this->definition instanceof RegexRule) {
+            $only = $defaults[$this->name] ?? (count($defaults) === 1 ? reset($defaults) : null);
+            if ($only instanceof Defaults) {
+                $this->definition->defaults = $only;
+            }
+        }
+
         return $this;
     }
 }

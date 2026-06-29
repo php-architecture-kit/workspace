@@ -9,6 +9,7 @@ use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Node\NodeAttribute
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Node\OptionalAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Raw\RawContentAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Raw\RawRegionAttribute;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Raw\RawSequenceAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\SequenceAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Structure\StructureAttribute;
 
@@ -28,6 +29,13 @@ final class AttributeSchema
 
     /** @var StructuralFactoryInfo[] for GroupedAttribute */
     public array $structuralFactories = [];
+
+    /**
+     * For SequenceAttribute: the validity FSM (NestedSequence) serialized to its compact
+     * DSL string, baked into the facade so create() can self-validate without compiling
+     * the grammar at runtime.
+     */
+    public ?string $validityDescriptor = null;
 
     /** content node name for GroupedAttribute (e.g. "member") */
     public ?string $groupedContentNodeName = null;
@@ -51,9 +59,6 @@ final class AttributeSchema
 
     /** for RawContentAttribute/RawRegionAttribute: the raw name (not anchorName) */
     public ?string $rawTokenName = null;
-
-    /** for RawContentAttribute top-level: default content from parse output */
-    public ?string $rawDefaultContent = null;
 
     public function __construct(
         public readonly string $propName,
@@ -96,9 +101,18 @@ final class AttributeSchema
         return $this->attrClass === RawRegionAttribute::class;
     }
 
+    public function isRawSequenceAttribute(): bool
+    {
+        return $this->attrClass === RawSequenceAttribute::class;
+    }
+
+    /**
+     * choicesList (from meta['alternatives'], a compile-time grammar fact) decides this
+     * — not rawChoices, which augmentation derives afterward and is empty beforehand.
+     */
     public function isChoiceRaw(): bool
     {
-        return ($this->isRawContentAttribute() || $this->isRawRegionAttribute()) && count($this->rawChoices) > 1;
+        return ($this->isRawContentAttribute() || $this->isRawRegionAttribute()) && count($this->choicesList) > 1;
     }
 
     public function isChoiceNodes(): bool

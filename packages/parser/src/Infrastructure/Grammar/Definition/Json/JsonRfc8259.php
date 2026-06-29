@@ -36,7 +36,7 @@ class JsonRfc8259 extends Whitespace
                 ->add(
                     Rule::token("comma", ",", type: NodeType::Structure),
                 )
-                ->withRootSequence("beginArray -t* ?(-l* value[item] (-* comma -t* -l* value[item])* -t*)[items]/g -l* endArray")
+                ->withRootSequence("beginArray -t* ?(-l* value[item]/c (-* comma -t* -l* value[item]/c)* -t*)[items]/g -l* endArray")
                 ->closeWith(
                     Rule::token("endArray", "]", type: NodeType::Structure),
                 )
@@ -56,7 +56,7 @@ class JsonRfc8259 extends Whitespace
                     //     ]
                     // ]),
                 )
-                ->withRootSequence("beginObject -t* ?(-l* member (-* comma -t* -l* member)* -t*)[members]/g -l* endObject")
+                ->withRootSequence("beginObject -t* ?(-l* member/c (-* comma -t* -l* member/c)* -t*)[members]/g -l* endObject")
                 // ->withDefaults([
                 //     '-t.0' => [
                 //         self::STYLE_MINIFIED => static fn() => '',
@@ -76,21 +76,22 @@ class JsonRfc8259 extends Whitespace
                     Rule::token("endObject", "}", type: NodeType::Structure),
                 )
                 ->addTag("value"),
-            Rule::choice("primitive", ["false", "null", "true", "number", "string"], tags: ["value"]),
+            Rule::choice("primitive", ["false", "null", "true", "number", "string"], tags: ["value"], attributeTags: ['r']),
             Rule::keyword("null"),
             Rule::keyword("false"),
             Rule::keyword("true"),
 
             // string
             Rule::token("doubleQuote", "\"", type: NodeType::Structure)
-                ->startRegion("string", true)
+                ->startRegion('doubleQuotedString', true)
                 ->add(
                     Rule::expr("escapeChar", "\\\\[bfnrt\\\\\\\"]")->priority(1),
                     Rule::expr("unescaped", "[^\\x00-\\x1F\\x22\\x5C]+"),
                     Rule::expr("escapeUnicode", "\\\\u[0-9a-fA-F]{4}"),
                 )
                 ->setNodeType(NodeType::Raw)
-                ->closeWith(Rule::token("doubleQuote", "\"", type: NodeType::Structure)),
+                ->closeWith(Rule::token("doubleQuote", "\"", type: NodeType::Structure))
+                ->addTag("string"),
 
             // number
             Rule::token("decimalPoint", ".", tags: ["_number_part"]),
@@ -114,7 +115,7 @@ class JsonRfc8259 extends Whitespace
                     Rule::seq("integer", "zero|digit19Seq", type: NodeType::Raw),
                     Rule::seq("frac", "decimalPoint digit+", type: NodeType::Raw),
                 )
-                ->withRootSequence("?minus integer ?frac ?exp")
+                ->withRootSequence("?minus[operator] integer ?frac ?exp")
                 ->setNodeType(NodeType::Raw)
                 ->closeWith(Rule::taggedWith("_number_part"), true, false),
         );
@@ -133,6 +134,14 @@ class JsonRfc8259 extends Whitespace
                 return self::STYLE_PRETTY;
             },
         );
+
+        $this->grammar->nodeClassMap = array_merge($this->grammar->nodeClassMap, [
+            'json' => \PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Json\Rfc8259\JsonNode::class,
+            'object' => \PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Json\Rfc8259\ObjectNode::class,
+            'member' => \PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Json\Rfc8259\MemberNode::class,
+            'primitive' => \PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Json\Rfc8259\PrimitiveNode::class,
+            'array' => \PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Json\Rfc8259\ArrayNode::class,
+        ]);
 
         return $this->grammar;
     }

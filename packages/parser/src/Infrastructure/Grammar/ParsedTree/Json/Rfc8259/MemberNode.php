@@ -4,17 +4,18 @@ declare(strict_types=1);
 
 namespace PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Json\Rfc8259;
 
-use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\GroupAttribute;
-use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\NodeAttribute;
-use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\RawRegionAttribute;
-use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\StructureAttribute;
-use PhpArchitecture\Parser\Foundation\Parsing\Model\Node;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Node\GroupAttribute;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Node\NodeAttribute;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Raw\RawRegionAttribute;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Structure\StructureAttribute;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\NodeOrigin;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\SequenceNode;
 use PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Technical\Whitespace\EmptyLineNode;
 use PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Technical\Whitespace\InlineWsNode;
 use PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Technical\Whitespace\LeadingWsNode;
 use PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Technical\Whitespace\TrailingWsNode;
 
-class MemberNode extends Node
+class MemberNode extends SequenceNode
 {
     public RawRegionAttribute $identifier { get => $this->attributes[0]; }
 
@@ -29,25 +30,29 @@ class MemberNode extends Node
     /** @var NodeAttribute<PrimitiveNode|ArrayNode|ObjectNode> */
     public NodeAttribute $value { get => $this->attributes[4]; }
 
-    public static function create(string $identifier, PrimitiveNode $primitiveNode): self
+    public static function create(string $identifier, PrimitiveNode|ArrayNode|ObjectNode $value): self
     {
-        return new self(
+        $node = new self(
             name: 'member',
+            origin: NodeOrigin::Sequence,
             attributes: [
-            new RawRegionAttribute(
-                opener: new StructureAttribute(true, 'doubleQuote', '"'),
-                closer: new StructureAttribute(true, 'doubleQuote', '"'),
-                content: $identifier,
-                name: 'string',
-                anchorName: 'identifier',
-            ),
-            new GroupAttribute('trivia0', []),
-            new StructureAttribute(true, 'colon', ':'),
-            new GroupAttribute('trivia1', []),
-            NodeAttribute::fromNode($primitiveNode),
+                new RawRegionAttribute(
+                    opener: '"',
+                    closer: '"',
+                    content: $identifier,
+                    name: 'doubleQuotedString',
+                    anchorName: 'identifier',
+                ),
+                new GroupAttribute('trivia0', []),
+                new StructureAttribute(true, 'colon', ':'),
+                new GroupAttribute('trivia1', []),
+                NodeAttribute::fromNode($value),
             ],
             parent: null,
         );
+        $value->setParent($node);
+
+        return $node;
     }
 
     public function getRawIdentifier(): string
@@ -63,14 +68,14 @@ class MemberNode extends Node
 
     public function getNodeValue(): PrimitiveNode|ArrayNode|ObjectNode
     {
-        /** @var NodeAttribute $attribute */
-        $attribute = $this->value;
-        return $attribute->node;
+        /** @var PrimitiveNode|ArrayNode|ObjectNode $node */
+        $node = $this->value->node;
+        return $node;
     }
 
     public function setNodeValue(PrimitiveNode|ArrayNode|ObjectNode $value): self
     {
-        $this->value = NodeAttribute::fromNode($value->setParent($this));
+        $this->attributes[4] = NodeAttribute::fromNode($value->setParent($this));
         return $this;
     }
 }

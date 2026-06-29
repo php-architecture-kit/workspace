@@ -85,11 +85,14 @@ final class SequenceAttributeGetUnitTest extends GrammarTestCase
     // -------------------------------------------------------------------------
 
     /**
-     * For a single-member object, getUnit(0) must return exactly the one member
-     * attribute — the entire attributes array.
+     * For a single-member object, getUnit(0) must return the entire attributes array:
+     * the member's content flanked by its leading/trailing `-l*`/`-t*` trivia slots.
+     * Those slots are zero-or-more, so even with no actual whitespace matched they still
+     * materialize as (empty) GroupAttribute placeholders — they are the anchor a later
+     * re-format pass upserts indentation into, not absent attributes to skip.
      */
     #[Test]
-    public function getUnitWithSingleMemberReturnsMemberAttributeOnly(): void
+    public function getUnitWithSingleMemberReturnsTriviaFlankedMember(): void
     {
         $objectSequence = null;
 
@@ -110,8 +113,10 @@ final class SequenceAttributeGetUnitTest extends GrammarTestCase
                 $attrs = $membersAttr->attributes;
                 $unit0 = $membersAttr->getUnit(0);
 
-                $test->assertCount(1, $unit0, 'Single-member object: unit must contain exactly 1 attribute');
-                $test->assertSame($attrs[0], $unit0[0], 'The sole attribute must be the member NodeAttribute');
+                $test->assertCount(3, $unit0, 'unit must be [leading trivia placeholder, member, trailing trivia placeholder]');
+                $test->assertInstanceOf(GroupAttribute::class, $unit0[0], 'leading `-l*` trivia is an empty GroupAttribute, not absent');
+                $test->assertSame($attrs[1], $unit0[1], 'the member content sits between the two trivia placeholders');
+                $test->assertInstanceOf(GroupAttribute::class, $unit0[2], 'trailing `-t*` trivia is an empty GroupAttribute, not absent');
                 $test->assertSame(
                     array_values($attrs),
                     array_values($unit0),
@@ -169,9 +174,12 @@ final class SequenceAttributeGetUnitTest extends GrammarTestCase
                     'unit1 must be the slice from after the first member to the end',
                 );
 
-                // Member position within each unit
-                $test->assertSame($attrs[$pos1], $unit0[0], 'member1 must be the FIRST element of unit0');
-                $test->assertSame($attrs[$pos2], $unit1[count($unit1) - 1], 'member2 must be the LAST element of unit1');
+                // Member position within each unit: unit0 owns a leading trivia placeholder
+                // before member1, unit1 owns a trailing one after member2.
+                $test->assertInstanceOf(GroupAttribute::class, $unit0[0], 'unit0 starts with the leading trivia placeholder');
+                $test->assertSame($attrs[$pos1], $unit0[1], 'member1 must immediately follow the leading trivia placeholder in unit0');
+                $test->assertSame($attrs[$pos2], $unit1[count($unit1) - 2], 'member2 must immediately precede the trailing trivia placeholder in unit1');
+                $test->assertInstanceOf(GroupAttribute::class, $unit1[count($unit1) - 1], 'unit1 ends with the trailing trivia placeholder');
 
                 // At least 3 elements per unit (content + structural attributes)
                 $test->assertGreaterThanOrEqual(3, count($unit0), 'unit0 must have at least 3 elements');
@@ -234,10 +242,13 @@ final class SequenceAttributeGetUnitTest extends GrammarTestCase
                     'unit2 must be the slice from after member2 to the end',
                 );
 
-                // Member position within each unit
-                $test->assertSame($attrs[$pos1], $unit0[0], 'member1 must be the FIRST element of unit0');
+                // Member position within each unit: the boundary units own a trivia
+                // placeholder on their outward-facing side (before member1, after member3).
+                $test->assertInstanceOf(GroupAttribute::class, $unit0[0], 'unit0 starts with the leading trivia placeholder');
+                $test->assertSame($attrs[$pos1], $unit0[1], 'member1 must immediately follow the leading trivia placeholder in unit0');
                 $test->assertSame($attrs[$pos2], $unit1[$pos2 - $pos1 - 1], 'member2 must be in the middle of unit1');
-                $test->assertSame($attrs[$pos3], $unit2[count($unit2) - 1], 'member3 must be the LAST element of unit2');
+                $test->assertSame($attrs[$pos3], $unit2[count($unit2) - 2], 'member3 must immediately precede the trailing trivia placeholder in unit2');
+                $test->assertInstanceOf(GroupAttribute::class, $unit2[count($unit2) - 1], 'unit2 ends with the trailing trivia placeholder');
 
                 // Size assertions: first and last are shorter than middle
                 $test->assertLessThan(

@@ -104,6 +104,8 @@ class GrammarCompiler
         $nodeClassMap = $grammar->nodeClassMap;
         $compiledRegions = $this->mergeRetokenizedInnerGrammars($compiledRegions, $nodeClassMap);
 
+        [$nodeOrigins, $insertedNodeNames] = $this->buildNodeOriginIndex($compiledRegions);
+
         return new CompiledGrammar(
             $grammar->name,
             $grammar->variant,
@@ -114,7 +116,67 @@ class GrammarCompiler
             $grammar->formatDefinition->formatters,
             $nodeClassMap,
             $grammar->global->name,
+            $nodeOrigins,
+            $insertedNodeNames,
         );
+    }
+
+    /**
+     * Builds the definitive node-name → origin index from the propagated compile-time stamps
+     * (Sequence/Pattern origin meta, region {@see Region::META_ORIGIN} as fallback), plus the
+     * set of node names contributed by an inserted retokenize inner grammar. The generator
+     * routes namespaces off this index instead of re-deriving origin from region structure.
+     *
+     * @param array<string,CompiledRegion> $compiledRegions
+     * @return array{0: array<string,\PhpArchitecture\Parser\Foundation\Grammar\Definition\GrammarOrigin>, 1: array<string,true>}
+     */
+    private function buildNodeOriginIndex(array $compiledRegions): array
+    {
+        $nodeOrigins = [];
+        $insertedNodeNames = [];
+
+        foreach ($compiledRegions as $region) {
+            $regionOrigin = $region->getMeta(Region::META_ORIGIN);
+
+            if ($regionOrigin !== null) {
+                $nodeOrigins[$region->name] = $regionOrigin;
+            }
+
+            foreach ($region->sequenceLibrary->sequences as $sequence) {
+                $origin = $sequence->getMeta(Sequence::META_ORIGIN) ?? $regionOrigin;
+                if ($origin !== null) {
+                    $nodeOrigins[$sequence->name] = $origin;
+                }
+                if ($sequence->getMeta(Sequence::META_INSERTED) === true) {
+                    $insertedNodeNames[$sequence->name] = true;
+                }
+            }
+
+            foreach ($region->patternLibrary->patterns as $pattern) {
+                $origin = $pattern->origin ?? $regionOrigin;
+                if ($origin !== null) {
+                    $nodeOrigins[$pattern->name] = $origin;
+                }
+            }
+        }
+
+        // Inner-grammar tokens (e.g. comment `asterisk`) are reachable only through the host
+        // region's preserved inner grammar — its index already carries their propagated origin.
+        // Adopt any node name the host has not itself defined, flagged as inserted.
+        foreach ($compiledRegions as $region) {
+            $inner = $region->innerGrammar;
+            if ($inner === null) {
+                continue;
+            }
+            foreach ($inner->nodeOrigins as $name => $origin) {
+                if (!isset($nodeOrigins[$name])) {
+                    $nodeOrigins[$name] = $origin;
+                    $insertedNodeNames[$name] = true;
+                }
+            }
+        }
+
+        return [$nodeOrigins, $insertedNodeNames];
     }
 
     /**
@@ -152,7 +214,16 @@ class GrammarCompiler
 
             $nodeClassMap = array_merge($innerCompiled->nodeClassMap, $nodeClassMap);
 
-            $sequencesByName = $innerRoot->sequenceLibrary->sequences;
+            // Inner-grammar sequences spliced into the host region are content of a wholly
+            // separate, explicitly inserted grammar — mark them so the tree generator carves
+            // them out to the inner grammar's own namespace instead of folding them into the
+            // host's (shared-format) namespace. The host's own sequences (added next) win by
+            // name and stay unmarked.
+            $sequencesByName = [];
+            foreach ($innerRoot->sequenceLibrary->sequences as $name => $sequence) {
+                $sequence->setMeta(Sequence::META_INSERTED, true);
+                $sequencesByName[$name] = $sequence;
+            }
             foreach ($hostRegion->sequenceLibrary->sequences as $name => $sequence) {
                 $sequencesByName[$name] = $sequence;
             }

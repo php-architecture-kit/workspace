@@ -10,8 +10,10 @@ use PhpArchitecture\Parser\Foundation\Grammar\Definition\EventListener\Tokenizat
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\EventListener\Tokenization\StartRegionEventListener;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\EventSubscriber;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Grammar;
+use PhpArchitecture\Parser\Foundation\Grammar\Definition\Defaults;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Middleware\GrammarMiddleware;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Model\Sequence\SequenceRule;
+use PhpArchitecture\Parser\Foundation\Grammar\Definition\Service\StructuralDefaultsBinder;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Region;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Rule;
 use PhpArchitecture\Parser\Foundation\Tokenization\Event\TokenAddedEvent;
@@ -92,8 +94,24 @@ trait RegionConfigApi
         return $this;
     }
 
+    /**
+     * Attaches structural Defaults to the region's root sequence nodes. Requires
+     * withRootSequence() to have been called first.
+     *
+     * @param array<string, Defaults> $defaults
+     */
     public function withDefaults(array $defaults): self
     {
+        $rootSequence = $this->config->rootSequence;
+        if (!$rootSequence instanceof SequenceRule) {
+            throw new LogicException(
+                "withDefaults() requires a root sequence. Call withRootSequence() before withDefaults() on region '{$this->name}'.",
+            );
+        }
+
+        foreach ($defaults as $selector => $def) {
+            StructuralDefaultsBinder::bind($rootSequence->nodes, (string) $selector, $def);
+        }
 
         return $this;
     }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace PhpArchitecture\Parser\Foundation\Grammar\Compiled\Model;
 
 use Closure;
+use PhpArchitecture\Parser\Foundation\Grammar\Definition\GrammarOrigin;
 use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeInterface;
 
 final readonly class CompiledGrammar
@@ -14,6 +15,8 @@ final readonly class CompiledGrammar
      * @param array<Closure(NodeInterface $rootNode):void> $contextInitializers
      * @param array<Closure(NodeInterface $node, string $style):void> $formatters
      * @param array<string,class-string> $nodeClassMap
+     * @param array<string,GrammarOrigin> $nodeOrigins        node name => defining grammar origin
+     * @param array<string,true> $insertedNodeNames           node names contributed by an inserted retokenize inner grammar
      */
     public function __construct(
         public string $name,
@@ -25,5 +28,7 @@ final readonly class CompiledGrammar
         public array $formatters,
         public array $nodeClassMap = [],
         public string $globalRegionName = 'global',
+        public array $nodeOrigins = [],
+        public array $insertedNodeNames = [],
     ) {}
 }

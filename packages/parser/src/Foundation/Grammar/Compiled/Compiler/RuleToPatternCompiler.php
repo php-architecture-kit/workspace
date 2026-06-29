@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace PhpArchitecture\Parser\Foundation\Grammar\Compiled\Compiler;
 
 use LogicException;
+use PhpArchitecture\Parser\Foundation\Grammar\Definition\GrammarOrigin;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Model\Regex\RegexRule;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Rule;
 use PhpArchitecture\Parser\Foundation\Tokenization\Model\Pattern;
@@ -27,11 +28,14 @@ class RuleToPatternCompiler implements RuleCompilerInterface
             throw new LogicException("Unsupported definition type. Compiler require RegexRule definition.");
         }
 
+        $origin = $rule->getMeta(Rule::META_ORIGIN);
+
         return new Pattern(
             $rule->name,
             $regexRule->regex,
             $rule->priority,
             $rule->getAllTags(),
+            $origin instanceof GrammarOrigin ? $origin : null,
         );
     }
 }

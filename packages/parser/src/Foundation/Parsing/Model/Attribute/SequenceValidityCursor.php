@@ -5,9 +5,12 @@ declare(strict_types=1);
 namespace PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute;
 
 use InvalidArgumentException;
-use PhpArchitecture\Parser\Foundation\Matching\Model\NestedSequence;
-use PhpArchitecture\Parser\Foundation\Matching\Model\Sequence;
-use PhpArchitecture\Parser\Foundation\Matching\Model\SequenceNode;
+use PhpArchitecture\Parser\Foundation\Grammar\Definition\Model\Cardinality;
+use PhpArchitecture\Parser\Foundation\Grammar\Definition\Model\Sequence\NestedSequence;
+use PhpArchitecture\Parser\Foundation\Grammar\Definition\Model\Sequence\SequenceNode;
+use PhpArchitecture\Parser\Foundation\Matching\Model\NestedSequence as CompiledNestedSequence;
+use PhpArchitecture\Parser\Foundation\Matching\Model\Sequence as CompiledSequence;
+use PhpArchitecture\Parser\Foundation\Matching\Model\SequenceNode as CompiledSequenceNode;
 
 final class SequenceValidityCursor
 {
@@ -61,9 +64,9 @@ final class SequenceValidityCursor
      * Finds the NestedSequence with the given anchorName within a compiled Sequence
      * and returns a cursor positioned at its start.
      */
-    public static function fromSequence(Sequence $sequence, string $anchorName): self
+    public static function fromSequence(CompiledSequence $sequence, string $anchorName): self
     {
-        $nested = self::findNestedByAnchor($sequence->nodes, $anchorName);
+        $nested = self::nestedByAnchor($sequence, $anchorName);
 
         if ($nested === null) {
             throw new InvalidArgumentException(
@@ -72,6 +75,57 @@ final class SequenceValidityCursor
         }
 
         return new self($nested);
+    }
+
+    /**
+     * Locates the NestedSequence with the given anchorName within a compiled Sequence and
+     * returns it as a Definition NestedSequence (the cursor's authored representation,
+     * which also serializes to the compact DSL via toString()). The compiled (Matching)
+     * nested sequence is already a valid definition — we copy it over, never recompile.
+     * Returns null when no such anchor exists. Exposed so the schema generator can capture
+     * the validity structure for baking.
+     */
+    public static function nestedByAnchor(CompiledSequence $sequence, string $anchorName): ?NestedSequence
+    {
+        $found = self::findNestedByAnchor($sequence->nodes, $anchorName);
+
+        return $found !== null ? self::toDefinitionNested($found) : null;
+    }
+
+    /** Copies a compiled (Matching) nested sequence into the Definition model verbatim. */
+    private static function toDefinitionNested(CompiledNestedSequence $nested): NestedSequence
+    {
+        $alternativeSequences = array_map(
+            static fn(array $alternative): array => array_map(
+                static fn(CompiledNestedSequence|CompiledSequenceNode $node): NestedSequence|SequenceNode => $node instanceof CompiledNestedSequence
+                    ? self::toDefinitionNested($node)
+                    : self::toDefinitionNode($node),
+                $alternative,
+            ),
+            $nested->alternativeSequences,
+        );
+
+        return new NestedSequence(
+            $alternativeSequences,
+            Cardinality::fromBounds($nested->min, $nested->max),
+            $nested->isLookahead,
+            $nested->isLookbehind,
+            [],
+            $nested->anchorName,
+        );
+    }
+
+    private static function toDefinitionNode(CompiledSequenceNode $node): SequenceNode
+    {
+        return new SequenceNode(
+            $node->alternatives,
+            Cardinality::fromBounds($node->min, $node->max),
+            $node->isLookahead,
+            $node->isLookbehind,
+            $node->anchorName,
+            $node->isContent ? ['c'] : [],
+            $node->isNegation,
+        );
     }
 
     /**
@@ -149,7 +203,7 @@ final class SequenceValidityCursor
                     return $newStack;
                 }
 
-                if ($node->min >= 1) {
+                if ($node->cardinality->min() >= 1) {
                     return null;
                 }
 
@@ -174,7 +228,7 @@ final class SequenceValidityCursor
                     return $result;
                 }
 
-                if ($node->min >= 1) {
+                if ($node->cardinality->min() >= 1) {
                     return null;
                 }
 
@@ -189,7 +243,7 @@ final class SequenceValidityCursor
         $seq = $stack[$topIdx]->nestedSequence;
         $newCompletedIterations = $completedIterations + 1;
 
-        if ($newCompletedIterations < $seq->max) {
+        if ($newCompletedIterations < $seq->cardinality->max()) {
             $restartedLevel = new CursorLevel($seq, null, 0, $newCompletedIterations);
             $restartStack = array_slice($stack, 0, $topIdx);
             $restartStack[] = $restartedLevel;
@@ -295,7 +349,7 @@ final class SequenceValidityCursor
                     $names,
                     $node->anchorName !== null ? [$node->anchorName] : $node->alternatives,
                 );
-                if ($node->min >= 1) {
+                if ($node->cardinality->min() >= 1) {
                     return $names;
                 }
                 $i++;
@@ -304,7 +358,7 @@ final class SequenceValidityCursor
 
             if ($node instanceof NestedSequence && !$node->isLookahead && !$node->isLookbehind) {
                 $names = array_merge($names, $node->getFirstValidAnchoredNodeNames());
-                if ($node->min >= 1) {
+                if ($node->cardinality->min() >= 1) {
                     return $names;
                 }
                 $i++;
@@ -319,7 +373,7 @@ final class SequenceValidityCursor
         $seq = $stack[$topIdx]->nestedSequence;
         $newCompletedIterations = $completedIterations + 1;
 
-        if ($newCompletedIterations < $seq->max) {
+        if ($newCompletedIterations < $seq->cardinality->max()) {
             $names = array_merge($names, $seq->getFirstValidAnchoredNodeNames());
         }
 
@@ -344,7 +398,7 @@ final class SequenceValidityCursor
         $seq = $level->nestedSequence;
 
         // No iteration in progress: we can stop if completed iterations satisfy min
-        if ($level->activeAlternative === null && $level->completedIterations >= $seq->min) {
+        if ($level->activeAlternative === null && $level->completedIterations >= $seq->cardinality->min()) {
             return $topIdx === 0 || $this->checkCompletable(array_slice($stack, 0, $topIdx));
         }
 
@@ -368,7 +422,7 @@ final class SequenceValidityCursor
     private function isAlternativeCompletable(array $alternative, int $startPos): bool
     {
         for ($i = $startPos; $i < count($alternative); $i++) {
-            if ($alternative[$i]->min >= 1) {
+            if ($alternative[$i]->cardinality->min() >= 1) {
                 return false;
             }
         }
@@ -376,12 +430,12 @@ final class SequenceValidityCursor
     }
 
     /**
-     * @param (NestedSequence|SequenceNode)[] $nodes
+     * @param (CompiledNestedSequence|CompiledSequenceNode)[] $nodes
      */
-    private static function findNestedByAnchor(array $nodes, string $anchorName): ?NestedSequence
+    private static function findNestedByAnchor(array $nodes, string $anchorName): ?CompiledNestedSequence
     {
         foreach ($nodes as $node) {
-            if (!$node instanceof NestedSequence) {
+            if (!$node instanceof CompiledNestedSequence) {
                 continue;
             }
 

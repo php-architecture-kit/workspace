@@ -4,19 +4,21 @@ declare(strict_types=1);
 
 namespace PhpArchitecture\Parser\Infrastructure\TreeSchema\Generator;
 
-use PhpArchitecture\Parser\Foundation\Matching\Model\NestedSequence;
+use PhpArchitecture\Parser\Foundation\Grammar\Definition\Model\Sequence\NestedSequence;
 use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeAttributeInterface;
 use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeInterface;
 use PhpArchitecture\Parser\Foundation\Parsing\Contract\Placement;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Node\GroupAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Node\NodeAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Node\OptionalAttribute;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Raw\RawAttributeInterface;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Raw\RawContentAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Raw\RawRegionAttribute;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Raw\RawSequenceAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\SequenceAttribute;
-use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\SequenceValidityCursor;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Structure\StructureAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Node;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\NodeOrigin;
 use PhpArchitecture\Parser\Infrastructure\TreeSchema\Generator\Schema\AttributeSchema;
 use PhpArchitecture\Parser\Infrastructure\TreeSchema\Generator\Schema\NodeSchema;
 use PhpArchitecture\Parser\Infrastructure\TreeSchema\Generator\Schema\RawChoiceInfo;
@@ -91,8 +93,15 @@ final class FacadeClassRenderer
     {
         $lines = '';
         foreach ($schema->attributes as $attr) {
-            $attrShort = $this->shortName($attr->attrClass);
-            $imports[] = $attr->attrClass;
+            if ($attr->isChoiceRaw()) {
+                // A raw-choice slot may hold RawRegionAttribute or RawContentAttribute
+                // depending on the matched variant; type it by the shared interface.
+                $attrShort = 'RawAttributeInterface';
+                $imports[] = RawAttributeInterface::class;
+            } else {
+                $attrShort = $this->shortName($attr->attrClass);
+                $imports[] = $attr->attrClass;
+            }
 
             $docblock = $this->buildDocblock($attr, $allSchemas, $namespace, $imports);
             if ($docblock !== '') {
@@ -135,13 +144,9 @@ final class FacadeClassRenderer
                 }
             }
 
-            if (!empty($attr->unionNodeNames)) {
-                foreach ($this->resolveUnionTypes($attr->unionNodeNames, $allSchemas, $namespace, $imports) as $t) {
-                    if (!in_array($t, $all, true)) {
-                        $all[] = $t;
-                    }
-                }
-            }
+            // The content node types are already expressed inside NodeAttribute<…>
+            // (choice) or via groupedContentNodeName (single) above — re-appending the
+            // bare union here would duplicate them in the docblock.
 
             if (!empty($all)) {
                 return '/** @var ' . $this->shortName($attr->attrClass) . '<' . implode('|', $all) . '> */';
@@ -170,19 +175,50 @@ final class FacadeClassRenderer
         $postLines = [];
         $hasGrouped = false;
 
+        // A choice-raw param can only default to its keyword literal (via the factory's
+        // own `?? literal` fallback) when no required param follows it — PHP forbids a
+        // required param after one with a default. Find the last param-contributing
+        // attribute so only a trailing choice-raw slot is offered that convenience.
+        $paramContributing = static fn(AttributeSchema $a): bool => $a->isChoiceRaw()
+            || $a->isRawRegionAttribute() || $a->isRawContentAttribute()
+            || $a->isRawSequenceAttribute() || $a->isNodeAttribute();
+        $lastParamAttr = null;
         foreach ($schema->attributes as $attr) {
-            if ($attr->isStructureAttribute()) {
+            if ($paramContributing($attr)) {
+                $lastParamAttr = $attr;
+            }
+        }
+
+        foreach ($schema->attributes as $attr) {
+            if ($attr->isChoiceRaw()) {
+                // Raw-choice slot: create() picks the variant via the backed enum and
+                // builds the right attribute through the shared factory. A keyword
+                // variant's content is fixed by the grammar's own Defaults, so when this
+                // is the trailing param it may be omitted; any other variant (or a
+                // non-trailing position, where PHP forbids a default) still requires it.
+                $enumClass = ucfirst($attr->propName) . 'Type';
+                $typeVar = '$' . $attr->propName . 'Type';
+                $contentVar = '$' . $attr->propName;
+                $contentParam = $attr === $lastParamAttr ? '?string ' . $contentVar . ' = null' : 'string ' . $contentVar;
+                $params[] = $enumClass . ' ' . $typeVar . ', ' . $contentParam;
+                $attrInits[] = self::I . self::I . self::I . self::I . 'self::' . $this->choiceRawFactoryName($attr) . '(' . $typeVar . ', ' . $contentVar . '),';
+            } elseif ($attr->isStructureAttribute()) {
                 $content = var_export($attr->structureContent ?? '', true);
-                $attrInits[] = self::I . self::I . self::I . 'new StructureAttribute(true, ' . var_export($attr->propName, true) . ', ' . $content . '),';
+                $attrInits[] = self::I . self::I . self::I . self::I . 'new StructureAttribute(true, ' . var_export($attr->propName, true) . ', ' . $content . '),';
                 $imports[] = StructureAttribute::class;
             } elseif ($attr->isGroupAttribute()) {
-                $attrInits[] = self::I . self::I . self::I . 'new GroupAttribute(' . var_export($attr->propName, true) . ', []),';
+                $attrInits[] = self::I . self::I . self::I . self::I . 'new GroupAttribute(' . var_export($attr->propName, true) . ', []),';
                 $imports[] = GroupAttribute::class;
             } elseif ($attr->isSequenceAttribute()) {
-                $attrInits[] = self::I . self::I . self::I . 'new SequenceAttribute(' . var_export($attr->propName, true) . ', null, []),';
+                $attrInits[] = self::I . self::I . self::I . self::I . 'new SequenceAttribute(' . var_export($attr->propName, true) . ', null, []),';
                 $imports[] = SequenceAttribute::class;
                 $hasGrouped = true;
                 $postLines[] = self::I . self::I . '$node->' . $attr->propName . '->withParent($node);';
+                if ($attr->validityDescriptor !== null) {
+                    // create() bakes in self-validation via the self-sufficient validation
+                    // method so the sequence is consistent on build.
+                    $postLines[] = self::I . self::I . '$node->with' . ucfirst($attr->propName) . 'Validation();';
+                }
             } elseif ($attr->isRawRegionAttribute()) {
                 $paramVar = '$' . $attr->propName;
                 $params[] = 'string ' . $paramVar;
@@ -198,29 +234,42 @@ final class FacadeClassRenderer
                 $anchorName = ($attr->rawTokenName !== null && $attr->rawTokenName !== $attr->propName)
                     ? ', ' . var_export($attr->propName, true)
                     : ', null';
-                $attrInits[] = self::I . self::I . self::I . 'new RawRegionAttribute(';
-                $attrInits[] = self::I . self::I . self::I . self::I . 'opener: ' . $opener . ',';
-                $attrInits[] = self::I . self::I . self::I . self::I . 'closer: ' . $closer . ',';
-                $attrInits[] = self::I . self::I . self::I . self::I . 'content: ' . $paramVar . ',';
-                $attrInits[] = self::I . self::I . self::I . self::I . 'name: ' . var_export($rawTokenName, true) . ',';
-                $attrInits[] = self::I . self::I . self::I . self::I . 'anchorName: ' . ($anchorName === ', null' ? 'null' : ltrim($anchorName, ', ')) . ',';
-                $attrInits[] = self::I . self::I . self::I . '),';
+                $attrInits[] = self::I . self::I . self::I . self::I . 'new RawRegionAttribute(';
+                $attrInits[] = self::I . self::I . self::I . self::I . self::I . 'opener: ' . $opener . ',';
+                $attrInits[] = self::I . self::I . self::I . self::I . self::I . 'closer: ' . $closer . ',';
+                $attrInits[] = self::I . self::I . self::I . self::I . self::I . 'content: ' . $paramVar . ',';
+                $attrInits[] = self::I . self::I . self::I . self::I . self::I . 'name: ' . var_export($rawTokenName, true) . ',';
+                $attrInits[] = self::I . self::I . self::I . self::I . self::I . 'anchorName: ' . ($anchorName === ', null' ? 'null' : ltrim($anchorName, ', ')) . ',';
+                $attrInits[] = self::I . self::I . self::I . self::I . '),';
                 $imports[] = RawRegionAttribute::class;
             } elseif ($attr->isRawContentAttribute()) {
-                $default = var_export($attr->rawDefaultContent ?? '', true);
+                // No default: nothing here tells us whether this token's content is
+                // ever fixed (a real keyword) or always variable — defaulting to
+                // whatever the first parsed sample happened to contain would bake an
+                // arbitrary, misleading literal into the public API.
                 $paramVar = '$' . $attr->propName;
-                $params[] = 'string ' . $paramVar . ' = ' . $default;
-                $attrInits[] = self::I . self::I . self::I . 'new RawContentAttribute(' . $paramVar . '),';
+                $params[] = 'string ' . $paramVar;
+                $attrInits[] = self::I . self::I . self::I . self::I . 'new RawContentAttribute(' . $paramVar . '),';
                 $imports[] = RawContentAttribute::class;
+            } elseif ($attr->isRawSequenceAttribute()) {
+                $paramVar = '$' . $attr->propName;
+                $params[] = 'string ' . $paramVar;
+                $attrInits[] = self::I . self::I . self::I . self::I . $this->rawSequenceCtor($attr, $paramVar) . ',';
+                $imports[] = RawSequenceAttribute::class;
             } elseif ($attr->isNodeAttribute()) {
-                $nodeClass = $attr->unionNodeNames[0] ?? 'Node';
-                $cn = $this->resolveClassName($nodeClass, $allSchemas, $namespace, $imports);
-                $paramVar = '$' . lcfirst($cn);
-                $params[] = $cn . ' ' . $paramVar;
-                $attrInits[] = self::I . self::I . self::I . 'NodeAttribute::fromNode(' . $paramVar . '),';
+                $types = $this->resolveUnionTypes($attr->unionNodeNames, $allSchemas, $namespace, $imports);
+                $union = !empty($types)
+                    ? implode('|', $types)
+                    : $this->resolveClassName('Node', $allSchemas, $namespace, $imports);
+                $paramVar = '$' . $attr->propName;
+                $params[] = $union . ' ' . $paramVar;
+                $attrInits[] = self::I . self::I . self::I . self::I . 'NodeAttribute::fromNode(' . $paramVar . '),';
+                // The child node's parent must point at the node we are building; do it
+                // after construction (the attribute holds the same object reference).
+                $postLines[] = self::I . self::I . $paramVar . '->setParent($node);';
                 $imports[] = NodeAttribute::class;
             } elseif ($attr->isOptionalAttribute()) {
-                $attrInits[] = self::I . self::I . self::I . 'new OptionalAttribute(' . var_export($attr->propName, true) . ', null),';
+                $attrInits[] = self::I . self::I . self::I . self::I . 'new OptionalAttribute(' . var_export($attr->propName, true) . ', null),';
                 $imports[] = OptionalAttribute::class;
             }
         }
@@ -228,12 +277,18 @@ final class FacadeClassRenderer
         $paramList = implode(', ', $params);
         $attrsBlock = implode(PHP_EOL, $attrInits);
 
+        // AbstractNode's constructor requires the NodeOrigin; reuse the one captured
+        // from the live parse node (Token/Region/Sequence).
+        $imports[] = NodeOrigin::class;
+        $originLine = self::I . self::I . self::I . 'origin: NodeOrigin::' . ($schema->nodeOrigin?->name ?? 'Sequence') . ',' . PHP_EOL;
+
         $body  = self::I . 'public static function create(' . $paramList . '): self' . PHP_EOL;
         $body .= self::I . '{' . PHP_EOL;
 
         if ($hasGrouped || !empty($postLines)) {
             $body .= self::I . self::I . '$node = new self(' . PHP_EOL;
             $body .= self::I . self::I . self::I . 'name: ' . var_export($schema->nodeName, true) . ',' . PHP_EOL;
+            $body .= $originLine;
             $body .= self::I . self::I . self::I . 'attributes: [' . PHP_EOL;
             $body .= $attrsBlock . PHP_EOL;
             $body .= self::I . self::I . self::I . '],' . PHP_EOL;
@@ -247,6 +302,7 @@ final class FacadeClassRenderer
         } else {
             $body .= self::I . self::I . 'return new self(' . PHP_EOL;
             $body .= self::I . self::I . self::I . 'name: ' . var_export($schema->nodeName, true) . ',' . PHP_EOL;
+            $body .= $originLine;
             $body .= self::I . self::I . self::I . 'attributes: [' . PHP_EOL;
             $body .= $attrsBlock . PHP_EOL;
             $body .= self::I . self::I . self::I . '],' . PHP_EOL;
@@ -265,7 +321,6 @@ final class FacadeClassRenderer
     private function renderMethods(NodeSchema $schema, array $allSchemas, string $namespace, array &$imports, string $rootNodeName): string
     {
         $methods = '';
-        $isRoot = $schema->nodeName === $rootNodeName;
 
         foreach ($schema->attributes as $attr) {
             $m = '';
@@ -274,7 +329,8 @@ final class FacadeClassRenderer
             } elseif ($attr->isOptionalAttribute()) {
                 $m = $this->renderOptionalAttributeMethods($attr, $allSchemas, $namespace, $imports);
             } elseif ($attr->isGroupAttribute()) {
-                if ($isRoot || !$this->isTriviaName($attr->propName)) {
+                // Trivia (whitespace) slots get no public accessors on any node.
+                if (!$this->isTriviaName($attr->propName)) {
                     $m = $this->renderGroupAttributeMethods($attr, $allSchemas, $namespace, $imports);
                 }
             } elseif ($attr->isChoiceRaw()) {
@@ -285,6 +341,8 @@ final class FacadeClassRenderer
                 $m = $this->renderRawContentMethods($attr, $imports);
             } elseif ($attr->isRawRegionAttribute()) {
                 $m = $this->renderRawRegionMethods($attr, $imports);
+            } elseif ($attr->isRawSequenceAttribute()) {
+                $m = $this->renderRawSequenceMethods($attr, $imports);
             }
 
             if ($m !== '') {
@@ -304,14 +362,14 @@ final class FacadeClassRenderer
 
         $m  = self::I . 'public function getNode' . $propU . '(): ' . $union . PHP_EOL;
         $m .= self::I . '{' . PHP_EOL;
-        $m .= self::I . self::I . '/** @var NodeAttribute $attribute */' . PHP_EOL;
-        $m .= self::I . self::I . '$attribute = $this->' . $prop . ';' . PHP_EOL;
-        $m .= self::I . self::I . 'return $attribute->node;' . PHP_EOL;
+        $m .= self::I . self::I . '/** @var ' . $union . ' $node */' . PHP_EOL;
+        $m .= self::I . self::I . '$node = $this->' . $prop . '->node;' . PHP_EOL;
+        $m .= self::I . self::I . 'return $node;' . PHP_EOL;
         $m .= self::I . '}' . PHP_EOL;
         $m .= PHP_EOL;
         $m .= self::I . 'public function setNode' . $propU . '(' . $union . ' $value): self' . PHP_EOL;
         $m .= self::I . '{' . PHP_EOL;
-        $m .= self::I . self::I . '$this->' . $prop . ' = NodeAttribute::fromNode($value->setParent($this));' . PHP_EOL;
+        $m .= self::I . self::I . '$this->attributes[' . $attr->index . '] = NodeAttribute::fromNode($value->setParent($this));' . PHP_EOL;
         $m .= self::I . self::I . 'return $this;' . PHP_EOL;
         $m .= self::I . '}' . PHP_EOL;
 
@@ -390,54 +448,93 @@ final class FacadeClassRenderer
         $prop = $attr->propName;
         $propU = ucfirst($prop);
         $enumClass = ucfirst($prop) . 'Type';
+        $typeVar = '$' . $prop . 'Type';
+        $contentVar = '$' . $prop;
 
-        $imports[] = RawContentAttribute::class;
-        $imports[] = RawRegionAttribute::class;
-        $imports[] = StructureAttribute::class;
         $imports[] = InvalidArgumentException::class;
 
-        $m  = self::I . 'public function set' . $propU . '(' . $enumClass . ' $type, ?string $content = null): self' . PHP_EOL;
+        // Per-variant attribute builder, shared by set{Prop}() and create().
+        $m  = $this->renderChoiceRawFactory($attr, $imports);
+        $m .= PHP_EOL;
+
+        $m .= self::I . 'public function set' . $propU . '(' . $enumClass . ' ' . $typeVar . ', ?string ' . $contentVar . ' = null): self' . PHP_EOL;
         $m .= self::I . '{' . PHP_EOL;
-
-        foreach ($attr->rawChoices as $choice) {
-            $m .= self::I . self::I . 'if ($type === ' . $enumClass . '::' . $choice->caseName . ') {' . PHP_EOL;
-            if ($choice->isKeyword) {
-                $val = var_export($choice->keywordContent ?? $choice->tokenName, true);
-                $m .= self::I . self::I . self::I . '$this->' . $prop . ' = new RawContentAttribute(' . $val . ', ' . var_export($choice->tokenName, true) . ', null);' . PHP_EOL;
-            } elseif ($choice->hasOpener) {
-                $m .= self::I . self::I . self::I . 'if ($content === null) {' . PHP_EOL;
-                $m .= self::I . self::I . self::I . self::I . 'throw new InvalidArgumentException(\'Content required for ' . $choice->tokenName . '.\');' . PHP_EOL;
-                $m .= self::I . self::I . self::I . '}' . PHP_EOL;
-                $openerName = 'doubleQuote';
-                $openerVal  = var_export($choice->openerContent ?? '"', true);
-                $closerVal  = var_export($choice->closerContent ?? $choice->openerContent ?? '"', true);
-                $m .= self::I . self::I . self::I . '$this->' . $prop . ' = new RawRegionAttribute(' . PHP_EOL;
-                $m .= self::I . self::I . self::I . self::I . 'new StructureAttribute(true, ' . var_export($openerName, true) . ', ' . $openerVal . '),' . PHP_EOL;
-                $m .= self::I . self::I . self::I . self::I . 'new StructureAttribute(true, ' . var_export($openerName, true) . ', ' . $closerVal . '),' . PHP_EOL;
-                $m .= self::I . self::I . self::I . self::I . '$content, ' . var_export($choice->tokenName, true) . ', null,' . PHP_EOL;
-                $m .= self::I . self::I . self::I . ');' . PHP_EOL;
-            } else {
-                $m .= self::I . self::I . self::I . 'if ($content === null) {' . PHP_EOL;
-                $m .= self::I . self::I . self::I . self::I . 'throw new InvalidArgumentException(\'Content required for ' . $choice->tokenName . '.\');' . PHP_EOL;
-                $m .= self::I . self::I . self::I . '}' . PHP_EOL;
-                $m .= self::I . self::I . self::I . '$this->' . $prop . ' = new RawRegionAttribute(null, null, $content, ' . var_export($choice->tokenName, true) . ', null);' . PHP_EOL;
-            }
-            $m .= self::I . self::I . self::I . 'return $this;' . PHP_EOL;
-            $m .= self::I . self::I . '}' . PHP_EOL;
-            $m .= PHP_EOL;
-        }
-
-        $m .= self::I . self::I . 'throw new InvalidArgumentException(\'Unsupported type: \' . $type->value);' . PHP_EOL;
+        $m .= self::I . self::I . '$this->attributes[' . $attr->index . '] = self::' . $this->choiceRawFactoryName($attr) . '(' . $typeVar . ', ' . $contentVar . ');' . PHP_EOL;
+        $m .= self::I . self::I . 'return $this;' . PHP_EOL;
         $m .= self::I . '}' . PHP_EOL;
         $m .= PHP_EOL;
         $m .= self::I . 'public function get' . $propU . 'Type(): ' . $enumClass . '|null' . PHP_EOL;
         $m .= self::I . '{' . PHP_EOL;
-        $m .= self::I . self::I . 'return ' . $enumClass . '::from($this->' . $prop . '->name);' . PHP_EOL;
+        // Region variants carry the variant in `name` (e.g. "number"); keyword variants
+        // carry the choice anchor in `name` and the literal in `content` — try both.
+        $m .= self::I . self::I . 'return ' . $enumClass . '::tryFrom($this->' . $prop . '->name)' . PHP_EOL;
+        $m .= self::I . self::I . self::I . '?? ' . $enumClass . '::tryFrom((string) ($this->' . $prop . '->content ?? \'\'));' . PHP_EOL;
         $m .= self::I . '}' . PHP_EOL;
         $m .= PHP_EOL;
         $m .= self::I . 'public function get' . $propU . 'Content(): string|null' . PHP_EOL;
         $m .= self::I . '{' . PHP_EOL;
         $m .= self::I . self::I . 'return $this->' . $prop . '->content;' . PHP_EOL;
+        $m .= self::I . '}' . PHP_EOL;
+
+        return $m;
+    }
+
+    private function choiceRawFactoryName(AttributeSchema $attr): string
+    {
+        return 'make' . ucfirst($attr->propName);
+    }
+
+    /**
+     * Per-variant attribute builder. A keyword variant's content never actually
+     * varies (Rule::keyword()/Rule::token() fix it via Defaults), so when none is
+     * passed it falls back to that literal. A variable-content variant (e.g. number,
+     * doubleQuotedString) has no such Defaults and must reject a missing content —
+     * the generator must never invent a value for it.
+     *
+     * @param string[] &$imports
+     */
+    private function renderChoiceRawFactory(AttributeSchema $attr, array &$imports): string
+    {
+        $enumClass = ucfirst($attr->propName) . 'Type';
+        $fn = $this->choiceRawFactoryName($attr);
+        $typeVar = '$' . $attr->propName . 'Type';
+        $contentVar = '$' . $attr->propName;
+
+        $imports[] = RawContentAttribute::class;
+        $imports[] = RawRegionAttribute::class;
+        $imports[] = RawAttributeInterface::class;
+        $imports[] = InvalidArgumentException::class;
+
+        $m  = self::I . 'private static function ' . $fn . '(' . $enumClass . ' ' . $typeVar . ', ?string ' . $contentVar . ' = null): RawAttributeInterface' . PHP_EOL;
+        $m .= self::I . '{' . PHP_EOL;
+
+        foreach ($attr->rawChoices as $choice) {
+            $m .= self::I . self::I . 'if (' . $typeVar . ' === ' . $enumClass . '::' . $choice->caseName . ') {' . PHP_EOL;
+            if ($choice->isKeyword && $choice->literalContent !== null) {
+                $fallback = $contentVar . ' ?? ' . var_export($choice->literalContent, true);
+                $m .= self::I . self::I . self::I . 'return new RawContentAttribute(' . $fallback . ', ' . var_export($choice->tokenName, true) . ', null);' . PHP_EOL;
+            } elseif ($choice->isKeyword) {
+                $m .= self::I . self::I . self::I . 'if (' . $contentVar . ' === null) {' . PHP_EOL;
+                $m .= self::I . self::I . self::I . self::I . 'throw new InvalidArgumentException(\'Content is required for type: \' . ' . $typeVar . '->value);' . PHP_EOL;
+                $m .= self::I . self::I . self::I . '}' . PHP_EOL;
+                $m .= self::I . self::I . self::I . 'return new RawContentAttribute(' . $contentVar . ', ' . var_export($choice->tokenName, true) . ', null);' . PHP_EOL;
+            } else {
+                $m .= self::I . self::I . self::I . 'if (' . $contentVar . ' === null) {' . PHP_EOL;
+                $m .= self::I . self::I . self::I . self::I . 'throw new InvalidArgumentException(\'Content is required for type: \' . ' . $typeVar . '->value);' . PHP_EOL;
+                $m .= self::I . self::I . self::I . '}' . PHP_EOL;
+                if ($choice->hasOpener) {
+                    $openerVal = var_export($choice->openerContent, true);
+                    $closerVal = var_export($choice->closerContent, true);
+                    $m .= self::I . self::I . self::I . 'return new RawRegionAttribute(opener: ' . $openerVal . ', content: ' . $contentVar . ', closer: ' . $closerVal . ', name: ' . var_export($choice->tokenName, true) . ', anchorName: null);' . PHP_EOL;
+                } else {
+                    $m .= self::I . self::I . self::I . 'return new RawRegionAttribute(opener: null, content: ' . $contentVar . ', closer: null, name: ' . var_export($choice->tokenName, true) . ', anchorName: null);' . PHP_EOL;
+                }
+            }
+            $m .= self::I . self::I . '}' . PHP_EOL;
+            $m .= PHP_EOL;
+        }
+
+        $m .= self::I . self::I . 'throw new InvalidArgumentException(\'Unsupported type: \' . ' . $typeVar . '->value);' . PHP_EOL;
         $m .= self::I . '}' . PHP_EOL;
 
         return $m;
@@ -449,7 +546,6 @@ final class FacadeClassRenderer
         $propU = ucfirst($prop);
 
         $imports[] = NestedSequence::class;
-        $imports[] = SequenceValidityCursor::class;
         $imports[] = NodeAttributeInterface::class;
 
         $contentClassName = '';
@@ -476,34 +572,39 @@ final class FacadeClassRenderer
         $toSuffix   = $dropPropSuffix ? '' : 'To' . $propU;
         $fromSuffix = $dropPropSuffix ? '' : 'From' . $propU;
 
-        // withValidation (always keeps prop name)
-        $m  = self::I . 'public function with' . $propU . 'Validation(NestedSequence|SequenceValidityCursor $sequence): self' . PHP_EOL;
-        $m .= self::I . '{' . PHP_EOL;
-        $m .= self::I . self::I . '$this->' . $prop . '->withValidSequence($sequence, [' . PHP_EOL;
-        foreach ($attr->structuralFactories as $sf) {
-            if ($sf->isGroupAttribute()) {
-                $imports[] = GroupAttribute::class;
-                $m .= self::I . self::I . self::I . var_export($sf->name, true) . ' => static fn() => new GroupAttribute(' . var_export($sf->name, true) . ', []),' . PHP_EOL;
-            } elseif ($sf->isStructureAttribute()) {
-                $imports[] = StructureAttribute::class;
-                $m .= self::I . self::I . self::I . var_export($sf->name, true) . ' => static fn() => new StructureAttribute(true, ' . var_export($sf->name, true) . ', ' . var_export($sf->content, true) . '),' . PHP_EOL;
-            }
-        }
-        $m .= self::I . self::I . ']);' . PHP_EOL;
-        $m .= self::I . self::I . 'return $this;' . PHP_EOL;
-        $m .= self::I . '}' . PHP_EOL;
-        $m .= PHP_EOL;
+        $m = '';
 
-        // add
+        // with{Prop}Validation — self-sufficient: builds the cursor from the baked
+        // validity descriptor and the structural auto-factories. create() calls it too.
+        // Only emitted when a descriptor was captured (it references {prop}Validity()).
+        if ($attr->validityDescriptor !== null) {
+            $factories = $this->renderAutoFactoriesLiteral($attr, self::I . self::I . self::I, $imports);
+            $m .= self::I . 'public function with' . $propU . 'Validation(): self' . PHP_EOL;
+            $m .= self::I . '{' . PHP_EOL;
+            // Pass the NestedSequence (not a pre-built cursor) so the carrier keeps it as
+            // the replay source — addUnit/removeUnit can rebuild the cursor after mutations.
+            $m .= self::I . self::I . '$this->' . $prop . '->withValidSequence(' . PHP_EOL;
+            $m .= self::I . self::I . self::I . 'self::' . $prop . 'Validity(),' . PHP_EOL;
+            $m .= self::I . self::I . self::I . $factories . ',' . PHP_EOL;
+            $m .= self::I . self::I . ');' . PHP_EOL;
+            $m .= self::I . self::I . 'return $this;' . PHP_EOL;
+            $m .= self::I . '}' . PHP_EOL;
+            $m .= PHP_EOL;
+        }
+
+        // add — the content NodeAttribute must carry the slot's content anchor name
+        // (e.g. 'item'), which the validity cursor and get{Plural}() filter match on —
+        // not the node's own name (they coincide only when anchor == node name).
         $imports[] = NodeAttribute::class;
+        $contentName = var_export($contentAttrName, true);
         if ($attr->groupedContentIsChoice) {
             $m .= self::I . 'public function add' . $contentU . $toSuffix . '(' . $addMethodType . ' $node): self' . PHP_EOL;
             $m .= self::I . '{' . PHP_EOL;
-            $m .= self::I . self::I . '$this->' . $prop . '->addUnit(NodeAttribute::fromNode($node->setParent($this)));' . PHP_EOL;
+            $m .= self::I . self::I . '$this->' . $prop . '->addUnit(new NodeAttribute(' . $contentName . ', $node->setParent($this)));' . PHP_EOL;
         } else {
             $m .= self::I . 'public function add' . $contentU . $toSuffix . '(' . $addMethodType . ' $' . lcfirst($addMethodType) . '): self' . PHP_EOL;
             $m .= self::I . '{' . PHP_EOL;
-            $m .= self::I . self::I . '$this->' . $prop . '->addUnit(NodeAttribute::fromNode($' . lcfirst($addMethodType) . '->setParent($this)));' . PHP_EOL;
+            $m .= self::I . self::I . '$this->' . $prop . '->addUnit(new NodeAttribute(' . $contentName . ', $' . lcfirst($addMethodType) . '->setParent($this)));' . PHP_EOL;
         }
         $m .= self::I . self::I . 'return $this;' . PHP_EOL;
         $m .= self::I . '}' . PHP_EOL;
@@ -560,7 +661,53 @@ final class FacadeClassRenderer
             $imports[] = NodeAttribute::class;
         }
 
+        if ($attr->validityDescriptor !== null) {
+            $m .= PHP_EOL . $this->renderValidityMethod($attr, $imports);
+        }
+
         return $m;
+    }
+
+    /**
+     * Emits the baked validity FSM as a private static factory the create() auto-validation
+     * consumes — self-sufficient, no grammar compiled at runtime.
+     *
+     * @param string[] &$imports
+     */
+    private function renderValidityMethod(AttributeSchema $attr, array &$imports): string
+    {
+        $imports[] = NestedSequence::class;
+        $literal = var_export($attr->validityDescriptor, true);
+
+        $m  = self::I . 'private static function ' . $attr->propName . 'Validity(): NestedSequence' . PHP_EOL;
+        $m .= self::I . '{' . PHP_EOL;
+        $m .= self::I . self::I . 'return NestedSequence::fromString(' . $literal . ');' . PHP_EOL;
+        $m .= self::I . '}' . PHP_EOL;
+
+        return $m;
+    }
+
+    /**
+     * Renders the structural auto-factory map literal (`[name => fn() => new …, …]`) used
+     * by withValidSequence, indented from $indent. Shared by with{Prop}Validation and create().
+     *
+     * @param string[] &$imports
+     */
+    private function renderAutoFactoriesLiteral(AttributeSchema $attr, string $indent, array &$imports): string
+    {
+        $lines = ['['];
+        foreach ($attr->structuralFactories as $sf) {
+            if ($sf->isGroupAttribute()) {
+                $imports[] = GroupAttribute::class;
+                $lines[] = $indent . self::I . var_export($sf->name, true) . ' => static fn() => new GroupAttribute(' . var_export($sf->name, true) . ', []),';
+            } elseif ($sf->isStructureAttribute()) {
+                $imports[] = StructureAttribute::class;
+                $lines[] = $indent . self::I . var_export($sf->name, true) . ' => static fn() => new StructureAttribute(true, ' . var_export($sf->name, true) . ', ' . var_export($sf->content, true) . '),';
+            }
+        }
+        $lines[] = $indent . ']';
+
+        return implode(PHP_EOL, $lines);
     }
 
     private function renderRawContentMethods(AttributeSchema $attr, array &$imports): string
@@ -601,6 +748,44 @@ final class FacadeClassRenderer
         return $m;
     }
 
+    /**
+     * A Raw-typed region/choice collapses to one RawSequenceAttribute (parts joined).
+     * Exposed as a single string: read via __toString, write by replacing the attribute.
+     *
+     * @param string[] &$imports
+     */
+    private function renderRawSequenceMethods(AttributeSchema $attr, array &$imports): string
+    {
+        $imports[] = RawSequenceAttribute::class;
+        $prop = $attr->propName;
+        $propU = ucfirst($prop);
+        $var = '$' . lcfirst($propU);
+
+        $m  = self::I . 'public function getRaw' . $propU . '(): string' . PHP_EOL;
+        $m .= self::I . '{' . PHP_EOL;
+        $m .= self::I . self::I . 'return (string) $this->' . $prop . ';' . PHP_EOL;
+        $m .= self::I . '}' . PHP_EOL;
+        $m .= PHP_EOL;
+        $m .= self::I . 'public function setRaw' . $propU . '(string ' . $var . '): self' . PHP_EOL;
+        $m .= self::I . '{' . PHP_EOL;
+        $m .= self::I . self::I . '$this->attributes[' . $attr->index . '] = ' . $this->rawSequenceCtor($attr, $var) . ';' . PHP_EOL;
+        $m .= self::I . self::I . 'return $this;' . PHP_EOL;
+        $m .= self::I . '}' . PHP_EOL;
+
+        return $m;
+    }
+
+    /** Builds a `new RawSequenceAttribute([<content>], name, anchorName)` literal. */
+    private function rawSequenceCtor(AttributeSchema $attr, string $contentExpr): string
+    {
+        $name   = var_export($attr->rawTokenName ?? $attr->propName, true);
+        $anchor = ($attr->rawTokenName !== null && $attr->rawTokenName !== $attr->propName)
+            ? var_export($attr->propName, true)
+            : 'null';
+
+        return 'new RawSequenceAttribute([' . $contentExpr . '], ' . $name . ', ' . $anchor . ')';
+    }
+
     // --- helpers ---
 
     /**
@@ -622,17 +807,18 @@ final class FacadeClassRenderer
     {
         $nodeSchema = $allSchemas[$nodeName] ?? null;
 
-        if ($nodeSchema !== null && !$nodeSchema->shouldGenerate && $nodeSchema->importFqcn !== null) {
-            $imports[] = $nodeSchema->importFqcn;
-            return $this->shortName($nodeSchema->importFqcn);
+        if ($nodeSchema === null) {
+            $collector = new NodeSchemaCollector();
+            return $collector->toClassName($nodeName);
         }
 
-        if ($nodeSchema !== null) {
-            return $nodeSchema->className;
+        // A reference whose target namespace differs from the class being rendered is
+        // imported by FQCN; same-namespace references stay local.
+        if ($nodeSchema->targetNamespace !== null && $nodeSchema->targetNamespace !== $namespace) {
+            $imports[] = $nodeSchema->targetNamespace . '\\' . $nodeSchema->className;
         }
 
-        $collector = new NodeSchemaCollector();
-        return $collector->toClassName($nodeName);
+        return $nodeSchema->className;
     }
 
     private function shortName(string $fqcn): string

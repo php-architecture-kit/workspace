@@ -13,10 +13,12 @@ use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Node\NodeAttribute
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Node\OptionalAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Raw\RawContentAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Raw\RawRegionAttribute;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Raw\RawSequenceAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Structure\StructureAttribute;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\AbstractNode;
+use PhpArchitecture\Parser\Infrastructure\TreeSchema\Generator\Exception\AmbiguousAttributeNameException;
 use PhpArchitecture\Parser\Infrastructure\TreeSchema\Generator\Schema\AttributeSchema;
 use PhpArchitecture\Parser\Infrastructure\TreeSchema\Generator\Schema\NodeSchema;
-use PhpArchitecture\Parser\Infrastructure\TreeSchema\Generator\Schema\RawChoiceInfo;
 use PhpArchitecture\Parser\Infrastructure\TreeSchema\Generator\Schema\StructuralFactoryInfo;
 
 /**
@@ -64,15 +66,28 @@ final class NodeSchemaCollector
 
         $schema = $this->schemas[$name];
         // The facade extends the same shape the runtime materializes (LeafNode /
-        // GroupNode / SequenceNode).
+        // GroupNode / SequenceNode), and reuses its NodeOrigin in create().
         $schema->baseClass = $node::class;
+        if ($node instanceof AbstractNode) {
+            $schema->nodeOrigin = $node->origin;
+        }
         $attributes = $node->getAttributes();
+
+        // Property names must be unique within one node — the facade exposes each attribute
+        // by name at a fixed index. Two attributes resolving to the same name (e.g. two bare
+        // `?asterisk/s` slots) would silently collapse and drop an index; fail loudly instead.
+        $seenPropNames = [];
 
         foreach ($attributes as $index => $attribute) {
             $propName = $this->getPropName($attribute);
             if ($this->isReservedName($propName)) {
                 continue;
             }
+
+            if (isset($seenPropNames[$propName])) {
+                throw AmbiguousAttributeNameException::forNode($name, $propName, $seenPropNames[$propName], $index);
+            }
+            $seenPropNames[$propName] = $index;
 
             if (!isset($schema->attributes[$propName])) {
                 $schema->attributes[$propName] = new AttributeSchema($propName, $attribute::class, $index);
@@ -107,7 +122,10 @@ final class NodeSchemaCollector
             $attribute instanceof OptionalAttribute  => $this->mergeOptional($schema, $attribute),
             $attribute instanceof RawRegionAttribute => $this->mergeRawRegion($schema, $attribute),
             $attribute instanceof RawContentAttribute => $this->mergeRawContent($schema, $attribute),
-            $attribute instanceof StructureAttribute  => $this->mergeStructure($schema, $attribute),
+            $attribute instanceof RawSequenceAttribute => $this->mergeRawSequence($schema, $attribute),
+            // StructureAttribute carries no topology to discover here — its fixed
+            // literal content is resolved later by GrammarAugmentor from the grammar's
+            // own Defaults, never from a parsed sample (see GrammarLiteralResolver).
             default => null,
         };
     }
@@ -153,30 +171,6 @@ final class NodeSchemaCollector
         if (is_array($alternatives) && !empty($alternatives) && empty($schema->choicesList)) {
             $schema->choicesList = $alternatives;
         }
-    }
-
-    private function mergeRawChoice(AttributeSchema $schema, RawContentAttribute|RawRegionAttribute $raw): void
-    {
-        $tokenName = $raw->name;
-        foreach ($schema->rawChoices as $existing) {
-            if ($existing->tokenName === $tokenName) {
-                return;
-            }
-        }
-
-        $isKeyword = !($raw instanceof RawRegionAttribute) && ($raw->content === $raw->name);
-        $keywordContent = $isKeyword ? $raw->content : null;
-        $hasOpener = $raw instanceof RawRegionAttribute && $raw->opener !== null;
-
-        $schema->rawChoices[] = new RawChoiceInfo(
-            caseName: $this->toCaseName($tokenName),
-            tokenName: $tokenName,
-            isKeyword: $isKeyword,
-            keywordContent: $keywordContent,
-            hasOpener: $hasOpener,
-            openerContent: $hasOpener ? ($raw instanceof RawRegionAttribute ? $raw->opener?->content : null) : null,
-            closerContent: ($raw instanceof RawRegionAttribute && $raw->closer !== null) ? $raw->closer->content : null,
-        );
     }
 
     private function mergeSequenced(AttributeSchema $schema, SequenceAttribute $attr): void
@@ -236,42 +230,32 @@ final class NodeSchemaCollector
         }
     }
 
-    private function mergeStructure(AttributeSchema $schema, StructureAttribute $attr): void
+    private function mergeRawRegion(AttributeSchema $schema, RawRegionAttribute $attr): void
     {
-        if ($schema->structureContent === null) {
-            $schema->structureContent = $attr->content;
+        // opener/closer content is resolved later by GrammarAugmentor from the
+        // grammar's own Defaults, not from this sample's matched text.
+        $schema->rawTokenName = $attr->name;
+
+        $alternatives = $attr->getMeta('alternatives');
+        if (is_array($alternatives) && !empty($alternatives) && empty($schema->choicesList)) {
+            $schema->choicesList = $alternatives;
         }
     }
 
-    private function mergeRawRegion(AttributeSchema $schema, RawRegionAttribute $attr): void
+    private function mergeRawSequence(AttributeSchema $schema, RawSequenceAttribute $attr): void
     {
+        // A Raw-typed region/choice collapses to one RawSequenceAttribute (parts joined).
+        // Exposed in the facade as a single string, like RawContentAttribute.
         $schema->rawTokenName = $attr->name;
-        if ($schema->rawRegionOpenerContent === null && $attr->opener !== null) {
-            // opener/closer are plain strings (?string) on RawRegionAttribute.
-            $schema->rawRegionOpenerContent = $attr->opener;
-            $schema->rawRegionCloserContent = $attr->closer;
-        }
-
-        $alternatives = $attr->getMeta('alternatives');
-        if (is_array($alternatives) && !empty($alternatives)) {
-            if (empty($schema->choicesList)) {
-                $schema->choicesList = $alternatives;
-            }
-            $this->mergeRawChoice($schema, $attr);
-        }
     }
 
     private function mergeRawContent(AttributeSchema $schema, RawContentAttribute $attr): void
     {
-        $schema->rawTokenName     = $attr->name;
-        $schema->rawDefaultContent ??= $attr->content;
+        $schema->rawTokenName = $attr->name;
 
         $alternatives = $attr->getMeta('alternatives');
-        if (is_array($alternatives) && !empty($alternatives)) {
-            if (empty($schema->choicesList)) {
-                $schema->choicesList = $alternatives;
-            }
-            $this->mergeRawChoice($schema, $attr);
+        if (is_array($alternatives) && !empty($alternatives) && empty($schema->choicesList)) {
+            $schema->choicesList = $alternatives;
         }
     }
 
@@ -359,11 +343,5 @@ final class NodeSchemaCollector
             $result = 'Ver' . $result;
         }
         return $result . 'Node';
-    }
-
-    private function toCaseName(string $tokenName): string
-    {
-        $parts = preg_split('/[-_\s]+/', $tokenName) ?: [$tokenName];
-        return implode('', array_map('ucfirst', $parts));
     }
 }

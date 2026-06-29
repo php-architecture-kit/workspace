@@ -7,7 +7,7 @@ namespace PhpArchitecture\Parser\Foundation\Parsing\Model\Sequence;
 use InvalidArgumentException;
 use LogicException;
 use OutOfRangeException;
-use PhpArchitecture\Parser\Foundation\Matching\Model\NestedSequence;
+use PhpArchitecture\Parser\Foundation\Grammar\Definition\Model\Sequence\NestedSequence;
 use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeAttributeInterface;
 use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeInterface;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\SequenceAttribute;

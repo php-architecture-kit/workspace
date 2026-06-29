@@ -15,6 +15,12 @@ final class SequenceNode
     public ?Defaults $defaults = null;
 
     /**
+     * Marks this node as the repeating *content* unit of an enclosing `/g` group
+     * (declared via the `/c` tag). Everything else in the group is structural.
+     */
+    public bool $isContent = false;
+
+    /**
      * @param string[] $alternatives
      * @param string[] $tags
      */
@@ -33,6 +39,10 @@ final class SequenceNode
             $this->nodeType = NodeType::Structure;
         } elseif (in_array('r', $tags)) {
             $this->nodeType = NodeType::Raw;
+        }
+
+        if (in_array('c', $tags, true)) {
+            $this->isContent = true;
         }
     }
 

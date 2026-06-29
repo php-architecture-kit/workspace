@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute;
 
-use PhpArchitecture\Parser\Foundation\Matching\Model\NestedSequence;
+use PhpArchitecture\Parser\Foundation\Grammar\Definition\Model\Sequence\NestedSequence;
 
 final class CursorLevel
 {

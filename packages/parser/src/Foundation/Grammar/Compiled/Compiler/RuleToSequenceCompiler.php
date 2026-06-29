@@ -12,6 +12,7 @@ use PhpArchitecture\Parser\Foundation\Grammar\Definition\Rule;
 use PhpArchitecture\Parser\Foundation\Matching\Model\NestedSequence as CompiledNestedSequence;
 use PhpArchitecture\Parser\Foundation\Matching\Model\SequenceNode as CompiledSequenceNode;
 use PhpArchitecture\Parser\Foundation\Matching\Model\Sequence as CompiledSequence;
+use PhpArchitecture\Parser\Foundation\Grammar\Definition\GrammarOrigin;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Raw\RawContentAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\SequenceAttribute;
 
@@ -36,6 +37,10 @@ class RuleToSequenceCompiler implements RuleCompilerInterface
         $meta = [];
         if ($rule->nodeType !== null) {
             $meta['nodeType'] = $rule->nodeType;
+        }
+        $origin = $rule->getMeta(Rule::META_ORIGIN);
+        if ($origin instanceof GrammarOrigin) {
+            $meta[CompiledSequence::META_ORIGIN] = $origin;
         }
 
         return $this->compileSequence(
@@ -107,6 +112,9 @@ class RuleToSequenceCompiler implements RuleCompilerInterface
         } elseif ($inGroup) {
             $tags[] = SequenceAttribute::TAG;
         }
+        if ($definition->isContent) {
+            $tags[] = SequenceAttribute::CONTENT_TAG;
+        }
 
         return new CompiledSequenceNode(
             $definition->alternatives,
@@ -118,6 +126,7 @@ class RuleToSequenceCompiler implements RuleCompilerInterface
             [],
             $tags,
             $definition->isNegation,
+            $definition->isContent,
         );
     }
 }

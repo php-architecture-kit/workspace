@@ -42,6 +42,16 @@ class JsonC extends JsonRfc8259
 
         $this->grammar->stampOrigin(new GrammarOrigin(self::FORMAT, self::VARIANT));
 
+        $this->grammar->nodeClassMap = array_merge($this->grammar->nodeClassMap, [
+            'json' => \PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Json\C\JsonNode::class,
+            'blockComment' => \PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Json\C\BlockCommentNode::class,
+            'lineComment' => \PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Json\C\LineCommentNode::class,
+            'object' => \PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Json\C\ObjectNode::class,
+            'member' => \PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Json\C\MemberNode::class,
+            'primitive' => \PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Json\C\PrimitiveNode::class,
+            'array' => \PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Json\C\ArrayNode::class,
+        ]);
+
         return $this->grammar;
     }
 }

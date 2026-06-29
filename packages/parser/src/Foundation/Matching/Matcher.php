@@ -80,9 +80,9 @@ class Matcher
         $errorMsg .= implode("\n", $nodeDescriptions) . "\n\n";
 
         // Show available tokens at start
-        $errorMsg .= "Available tokens in region (first 10):\n";
+        $errorMsg .= "Available tokens in region:\n";
         $tokenCount = 0;
-        $tokenOffset = 0;
+        $tokenOffset = max($region->stream->topAskOffset - 5, 0);
         while ($region->stream->has($tokenOffset) && $tokenCount < 10) {
             $token = $region->stream->peek($tokenOffset);
             if ($token instanceof Token) {
