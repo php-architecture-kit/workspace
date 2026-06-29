@@ -16,6 +16,7 @@ use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Raw\RawRegionAttri
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Raw\RawSequenceAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Structure\StructureAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\AbstractNode;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\GroupNode;
 use PhpArchitecture\Parser\Infrastructure\TreeSchema\Generator\Exception\AmbiguousAttributeNameException;
 use PhpArchitecture\Parser\Infrastructure\TreeSchema\Generator\Schema\AttributeSchema;
 use PhpArchitecture\Parser\Infrastructure\TreeSchema\Generator\Schema\NodeSchema;
@@ -73,9 +74,13 @@ final class NodeSchemaCollector
         }
         $attributes = $node->getAttributes();
 
-        // Property names must be unique within one node — the facade exposes each attribute
-        // by name at a fixed index. Two attributes resolving to the same name (e.g. two bare
-        // `?asterisk/s` slots) would silently collapse and drop an index; fail loudly instead.
+        // A GroupNode (Region|Node, no root sequence — Table 2) has no fixed slots: the
+        // same name can legitimately repeat any number of times (e.g. two `emptyLine`
+        // siblings under `global`). Only a SequenceNode's fixed, positionally-addressed
+        // slots must be unique — the facade exposes those by name at a fixed index, so two
+        // attributes resolving to the same name there (e.g. two bare `?asterisk/s` slots)
+        // would silently collapse and drop an index; fail loudly instead.
+        $isGroupShape = $node instanceof GroupNode;
         $seenPropNames = [];
 
         foreach ($attributes as $index => $attribute) {
@@ -84,10 +89,12 @@ final class NodeSchemaCollector
                 continue;
             }
 
-            if (isset($seenPropNames[$propName])) {
-                throw AmbiguousAttributeNameException::forNode($name, $propName, $seenPropNames[$propName], $index);
+            if (!$isGroupShape) {
+                if (isset($seenPropNames[$propName])) {
+                    throw AmbiguousAttributeNameException::forNode($name, $propName, $seenPropNames[$propName], $index);
+                }
+                $seenPropNames[$propName] = $index;
             }
-            $seenPropNames[$propName] = $index;
 
             if (!isset($schema->attributes[$propName])) {
                 $schema->attributes[$propName] = new AttributeSchema($propName, $attribute::class, $index);

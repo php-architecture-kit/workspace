@@ -134,22 +134,6 @@ final class EnvDotenvTest extends GrammarTestCase
     }
 
     #[Test]
-    public function testBlockCommentDotenv(): void
-    {
-        $this->assertGrammarParsing(
-            string: self::dataFile('dotenv', 'block_comment_dotenv.env'),
-            grammar: (new EnvDotenv())->grammar(),
-            assertTokenizationResultValid: function (TokenRegion $tokenRegion, self $test): void {
-                $blockComments = self::collectRegionsByName($tokenRegion, 'blockComment');
-                $test->assertCount(2, $blockComments, 'Expected 2 consecutive comment lines as blockComment');
-
-                $lineComments = self::collectRegionsByName($tokenRegion, 'lineComment');
-                $test->assertCount(0, $lineComments, 'Expected no isolated lineComment regions');
-            },
-        );
-    }
-
-    #[Test]
     public function testMixedDotenv(): void
     {
         $this->assertGrammarParsing(

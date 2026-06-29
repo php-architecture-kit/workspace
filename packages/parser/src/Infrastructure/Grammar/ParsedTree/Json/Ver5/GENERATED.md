@@ -13,5 +13,5 @@ bin/console parser:tree:generate 'assets/parser-source-files/json/5/json-5.messy
 
 | Field     | Value |
 |-----------|-------|
-| Generated | 2026-06-29 11:00:31 UTC |
+| Generated | 2026-06-29 20:10:45 UTC |
 

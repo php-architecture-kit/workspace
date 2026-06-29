@@ -4,14 +4,11 @@ declare(strict_types=1);
 
 namespace PhpArchitecture\Parser\Infrastructure\Grammar\Definition\Env;
 
-use PhpArchitecture\Parser\Foundation\Grammar\Definition\EventSubscriber;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Grammar;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\GrammarOrigin;
+use PhpArchitecture\Parser\Foundation\Grammar\Definition\Region;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Rule;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\NodeType;
-use PhpArchitecture\Parser\Foundation\Tokenization\Contract\TokenizationContext;
-use PhpArchitecture\Parser\Foundation\Tokenization\Event\TokenRegionEndedEvent;
-use PhpArchitecture\Parser\Foundation\Tokenization\Model\TokenRegion;
 use PhpArchitecture\Parser\Infrastructure\Grammar\Definition\Technical\Whitespace;
 
 class EnvEnvironment extends Whitespace
@@ -23,87 +20,74 @@ class EnvEnvironment extends Whitespace
     {
         $grammar = parent::grammar();
 
-        $simpleExpansion = Rule::token("dollar", "$")
-            ->startRegion("simpleExpansion", true)
-            ->add(
-                Rule::expr("string", "[a-zA-Z_][a-zA-Z0-9_]*")->closeRegion(true, true, false),
-            )
-            ->withRootSequence("dollar string[varRef]")
-            ->addTag("value")
-            ->setNodeType(NodeType::Node)
-            ->prattAtom();
-
-        $bracedExpansion = Rule::token("dollarBrace", "\${", type: NodeType::Structure)
-            ->priority(1)
-            ->startRegion("bracedExpansion", true)
-            ->reParsedByPratt("envExpression")
-            ->prattAtom()
-            ->add(
-                Rule::expr("string", "[a-zA-Z_][a-zA-Z0-9_]*")->prattAtom(),
-                Rule::expr("unquotedText", "[^\n\$\t }:#=]+")->prattAtom()->addTag("value"),
-                Rule::token("space", " "),
-                Rule::token("tab", "\t"),
-                Rule::token("colonMinus", ":-", type: NodeType::Structure)->prattInfix(10),
-                Rule::token("colonPlus", ":+", type: NodeType::Structure)->prattInfix(10),
-                Rule::token("colonQuestion", ":?", type: NodeType::Structure)->prattInfix(10),
-                Rule::token("colonAssign", ":=", type: NodeType::Structure)->prattInfix(10),
-                Rule::token("closeBrace", "}", type: NodeType::Structure)->closeRegion(true, true, false),
-            )
-            ->addTag("value")
-            ->setNodeType(NodeType::Node);
-
         $grammar->global->add(
-            Rule::token("hash", "#", type: NodeType::Structure)
+            Rule::expr("lineComment", "#[^\n]*")
+                ->priority(-1)
                 ->startRegion('lineComment', true)
                 ->add(
-                    Rule::expr("commentContent", "[^\r\n]+"),
-                    Rule::token("newline", "\n")->closeRegion(true, true, false),
-                    Rule::technical("eof")->closeRegion(true, true, false),
-                    EventSubscriber::on(
-                        TokenRegionEndedEvent::class,
-                        static function (TokenRegionEndedEvent $event, TokenizationContext $context): void {
-                            $placement = $context->getCurrentRegion()
-                                ->getMeta(TokenRegion::KEY_PARENT)
-                                ?->stream->lastOffset();
-                            if ($placement === null || $placement < 1) {
-                                return;
-                            }
-                            $previous = $context->getCurrentRegion()
-                                ->getMeta(TokenRegion::KEY_PARENT)
-                                ?->stream->get($placement - 1);
-                            if (
-                                $previous instanceof TokenRegion &&
-                                in_array($previous->name, ['lineComment', 'blockComment'], true)
-                            ) {
-                                $event->region->rename('blockComment');
-                                if ($previous->name === 'lineComment') {
-                                    $previous->rename('blockComment');
-                                }
-                            }
-                        },
-                    ),
+                    Rule::token("newline", "\n", ["trailingWs"])->closeRegion(true, true, false),
+                    Rule::technical("eof", ["trailingWs"])->closeRegion(true, true, false),
                 )
-                ->withRootSequence("hash (space|tab)* ?commentContent ?cr newline|eof")
+                ->retokenizedByInnerGrammar((new EnvComment())->grammar())
                 ->setNodeType(NodeType::Node)
-                ->addTag("comment", "-")
-                ->withPossibleNames('lineComment', 'blockComment'),
-            Rule::expr("string", "[a-zA-Z_][a-zA-Z0-9_]*")
+                ->addTag("comment", "-"),
+
+            Rule::expr("identifier", "[a-zA-Z_][a-zA-Z0-9_]*")
                 ->startRegion('assignment', true)
                 ->add(
-                    $simpleExpansion,
-                    $bracedExpansion,
-                    Rule::token("space", " "),
-                    Rule::token("tab", "\t"),
                     Rule::token("assign", "=", type: NodeType::Structure),
-                    Rule::expr("unquotedText", "[^\n\$\t =#]+")->addTag("value"),
-                    Rule::token("newline", "\n")->closeRegion(true, true, false),
-                    Rule::technical("eof")->closeRegion(true, true, false),
+                    (new Region("value"))
+                        ->openWith(Rule::ref("assign"), false)
+                        ->add(
+                            Rule::token("dollar", "$")
+                                ->startRegion("simpleExpansion", true)
+                                ->add(
+                                    Rule::expr("string", "[a-zA-Z_][a-zA-Z0-9_]*")->closeRegion(true, true, false),
+                                )
+                                ->withRootSequence("dollar string[varRef]/r")
+                                ->setNodeType(NodeType::Node),
+                            Rule::token("dollarBrace", "\${", type: NodeType::Structure)
+                                ->priority(1)
+                                ->startRegion("bracedExpansion", true)
+                                ->reParsedByPratt("envExpression")
+                                ->add(
+                                    Rule::expr("string", "[a-zA-Z_][a-zA-Z0-9_]*")->prattAtom(),
+                                    Rule::expr("unquotedText", "[^\n\$\t }:#=]+")->prattAtom(),
+                                    Rule::token("space", " "),
+                                    Rule::token("tab", "\t"),
+                                    Rule::token("colonMinus", ":-", type: NodeType::Structure)->prattInfix(10),
+                                    Rule::token("colonPlus", ":+", type: NodeType::Structure)->prattInfix(10),
+                                    Rule::token("colonQuestion", ":?", type: NodeType::Structure)->prattInfix(10),
+                                    Rule::token("colonAssign", ":=", type: NodeType::Structure)->prattInfix(10),
+                                    Rule::token("closeBrace", "}", type: NodeType::Structure)->closeRegion(true, true, false),
+                                )
+                                ->setNodeType(NodeType::Node),
+                            Rule::token("space", " ", ["inlineWs"]),
+                            Rule::token("tab", "\t", ["inlineWs"]),
+                            Rule::expr("unquotedText", "[^\n\$\t =#]+"),
+                            Rule::token("newline", "\n", ["trailingWs"])->closeRegion(true, true, true),
+                            Rule::technical("eof", ["trailingWs"])->closeRegion(true, true, true),
+                        )
+                        ->setNodeType(NodeType::Node),
+                    Rule::token("space", " ", ["inlineWs"]),
+                    Rule::token("tab", "\t", ["inlineWs"]),
+                    Rule::token("newline", "\n", ["trailingWs"])->closeRegion(true, true, false),
+                    Rule::technical("eof", ["trailingWs"])->closeRegion(true, true, false),
                 )
-                ->withRootSequence("string[identifier] (space|tab)* assign (space|tab)* (simpleExpansion|bracedExpansion|unquotedText|string|space|tab)* newline|eof")
+                ->withRootSequence("identifier inlineWs*[trivia0]/r assign inlineWs*[trivia1]/r value trailingWs*[trivia2]/r")
                 ->setNodeType(NodeType::Node),
         );
 
         $grammar->stampOrigin(new GrammarOrigin(self::FORMAT, self::VARIANT), false);
+
+        $grammar->nodeClassMap = array_merge($grammar->nodeClassMap, [
+            'lineComment' => \PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Env\Environment\LineCommentNode::class,
+            'assignment' => \PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Env\Environment\AssignmentNode::class,
+            'value' => \PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Env\Environment\ValueNode::class,
+            'simpleExpansion' => \PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Env\Environment\SimpleExpansionNode::class,
+            'bracedExpansion' => \PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Env\Environment\BracedExpansionNode::class,
+            'envExpression' => \PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Env\Environment\EnvExpressionNode::class,
+        ]);
 
         return $grammar;
     }

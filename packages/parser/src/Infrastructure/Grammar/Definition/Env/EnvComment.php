@@ -29,7 +29,7 @@ class EnvComment extends Whitespace
                 Rule::expr("word", "\S+")
                     ->priority(-1),
             )
-            ->withRootSequence("hash ?inlineWs[leadingWs]/r ?(word (inlineWs/r word)*)[content]/r ?inlineWs[trailingWs]/r");
+            ->withRootSequence("hash ?inlineWs[leadingWs]/r ?(word (inlineWs/r word)*)[content]/r -t*/r");
 
         $this->grammar->global->add($region);
         $this->grammar->setRootRegion($region);

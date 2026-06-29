@@ -125,38 +125,6 @@ final class EnvEnvironmentTest extends GrammarTestCase
     }
 
     #[Test]
-    public function testBlockComment(): void
-    {
-        $this->assertGrammarParsing(
-            string: self::dataFile('block_comment.env'),
-            grammar: (new EnvEnvironment())->grammar(),
-            assertTokenizationResultValid: function (TokenRegion $tokenRegion, self $test): void {
-                $blockComments = self::collectRegionsByName($tokenRegion, 'blockComment');
-                $test->assertCount(3, $blockComments, 'Expected all 3 consecutive comment lines to be blockComment');
-
-                $lineComments = self::collectRegionsByName($tokenRegion, 'lineComment');
-                $test->assertCount(0, $lineComments, 'Expected no isolated lineComment regions');
-            },
-        );
-    }
-
-    #[Test]
-    public function testMixedComments(): void
-    {
-        $this->assertGrammarParsing(
-            string: self::dataFile('mixed_comments.env'),
-            grammar: (new EnvEnvironment())->grammar(),
-            assertTokenizationResultValid: function (TokenRegion $tokenRegion, self $test): void {
-                $lineComments = self::collectRegionsByName($tokenRegion, 'lineComment');
-                $test->assertCount(2, $lineComments, 'Expected 2 isolated lineComment regions');
-
-                $blockComments = self::collectRegionsByName($tokenRegion, 'blockComment');
-                $test->assertCount(2, $blockComments, 'Expected 2 consecutive blockComment regions');
-            },
-        );
-    }
-
-    #[Test]
     public function testEmptyLines(): void
     {
         $this->assertGrammarParsing(

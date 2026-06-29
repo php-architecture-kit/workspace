@@ -17,6 +17,7 @@ use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Raw\RawRegionAttri
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Raw\RawSequenceAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\SequenceAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Structure\StructureAttribute;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\GroupNode;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Node;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\NodeOrigin;
 use PhpArchitecture\Parser\Infrastructure\TreeSchema\Generator\Schema\AttributeSchema;
@@ -43,9 +44,20 @@ final class FacadeClassRenderer
         $baseClass = $schema->baseClass ?? Node::class;
         $imports[] = $baseClass;
 
-        $propertyHooks = $this->renderPropertyHooks($schema, $allSchemas, $namespace, $imports);
-        $createMethod  = $this->renderCreate($schema, $allSchemas, $namespace, $imports);
-        $methods       = $this->renderMethods($schema, $allSchemas, $namespace, $imports, $rootNodeName);
+        // A GroupNode (Region|Node, no root sequence) has no fixed slots — per
+        // docs/node-type-origin-cardinality.md ("Facade form"), children aren't typed
+        // properties at a fixed index. Instead, each distinct child name gets its own
+        // add{Name}()/get{Name}s()/remove{Name}() trio (a GroupAttribute-style API, but
+        // on the node itself, since the node IS the group).
+        if ($baseClass === GroupNode::class) {
+            $propertyHooks = '';
+            $createMethod  = $this->renderGroupCreate($schema, $imports);
+            $methods       = $this->renderGroupNodeMethods($schema, $allSchemas, $namespace, $imports);
+        } else {
+            $propertyHooks = $this->renderPropertyHooks($schema, $allSchemas, $namespace, $imports);
+            $createMethod  = $this->renderCreate($schema, $allSchemas, $namespace, $imports);
+            $methods       = $this->renderMethods($schema, $allSchemas, $namespace, $imports, $rootNodeName);
+        }
 
         $hasGroupedWithParent = $this->nodeHasSequenceAttribute($schema);
 
@@ -163,6 +175,225 @@ final class FacadeClassRenderer
         }
 
         return '';
+    }
+
+    /**
+     * Minimal create() for a GroupNode-shaped node: cardinality is 0..∞ with no fixed
+     * named slots, so there is nothing to type per-attribute — the caller populates
+     * children via the inherited addAttribute()/getByName() API after construction.
+     *
+     * @param string[] &$imports
+     */
+    private function renderGroupCreate(NodeSchema $schema, array &$imports): string
+    {
+        $imports[] = NodeAttributeInterface::class;
+        $imports[] = NodeOrigin::class;
+
+        $body  = self::I . '/** @param NodeAttributeInterface[] $attributes */' . PHP_EOL;
+        $body .= self::I . 'public static function create(array $attributes = []): self' . PHP_EOL;
+        $body .= self::I . '{' . PHP_EOL;
+        $body .= self::I . self::I . 'return new self(' . PHP_EOL;
+        $body .= self::I . self::I . self::I . 'name: ' . var_export($schema->nodeName, true) . ',' . PHP_EOL;
+        $body .= self::I . self::I . self::I . 'origin: NodeOrigin::' . ($schema->nodeOrigin?->name ?? 'Region') . ',' . PHP_EOL;
+        $body .= self::I . self::I . self::I . 'attributes: $attributes,' . PHP_EOL;
+        $body .= self::I . self::I . self::I . 'parent: null,' . PHP_EOL;
+        $body .= self::I . self::I . ');' . PHP_EOL;
+        $body .= self::I . '}' . PHP_EOL;
+
+        return $body;
+    }
+
+    /**
+     * Per-child-name add{Name}()/get{Name}s()/remove{Name}(...) trio for a GroupNode's
+     * dynamic children. Table 2 (Region|Node) allows NodeAttribute, StructureAttribute,
+     * RawContentAttribute, RawRegionAttribute, RawSequenceAttribute — Structure is a
+     * fixed literal delimiter and gets no accessor here either, same as the
+     * single-attribute case below. A raw choice (multiple alternatives sharing one
+     * child name) isn't handled yet — no current grammar produces one inside a
+     * GroupNode; falls through to no accessor rather than guessing its shape.
+     *
+     * @param array<string, NodeSchema> $allSchemas
+     * @param string[] &$imports
+     */
+    private function renderGroupNodeMethods(NodeSchema $schema, array $allSchemas, string $namespace, array &$imports): string
+    {
+        $methods = '';
+
+        foreach ($schema->attributes as $attr) {
+            $m = match (true) {
+                $attr->isChoiceRaw() => '',
+                $attr->isNodeAttribute() => $this->renderGroupNodeAttributeMethods($attr, $allSchemas, $namespace, $imports),
+                $attr->isRawContentAttribute() => $this->renderGroupRawContentMethods($attr, $imports),
+                $attr->isRawRegionAttribute() => $this->renderGroupRawRegionMethods($attr, $imports),
+                $attr->isRawSequenceAttribute() => $this->renderGroupRawSequenceMethods($attr, $imports),
+                default => '',
+            };
+
+            if ($m !== '') {
+                $methods .= $m . PHP_EOL;
+            }
+        }
+
+        return rtrim($methods, PHP_EOL) . ($methods !== '' ? PHP_EOL : '');
+    }
+
+    /**
+     * @param array<string, NodeSchema> $allSchemas
+     * @param string[] &$imports
+     */
+    private function renderGroupNodeAttributeMethods(AttributeSchema $attr, array $allSchemas, string $namespace, array &$imports): string
+    {
+        $prop = $attr->propName;
+        $propU = ucfirst($prop);
+        $types = $this->resolveUnionTypes($attr->unionNodeNames, $allSchemas, $namespace, $imports);
+        $union = !empty($types) ? implode('|', $types) : $this->resolveClassName($prop, $allSchemas, $namespace, $imports);
+
+        $imports[] = NodeAttribute::class;
+
+        $m  = self::I . 'public function add' . $propU . '(' . $union . ' $' . $prop . '): self' . PHP_EOL;
+        $m .= self::I . '{' . PHP_EOL;
+        $m .= self::I . self::I . '$this->addAttribute(NodeAttribute::fromNode($' . $prop . '->setParent($this)));' . PHP_EOL;
+        $m .= self::I . self::I . 'return $this;' . PHP_EOL;
+        $m .= self::I . '}' . PHP_EOL;
+        $m .= PHP_EOL;
+        $m .= self::I . '/** @return ' . $union . '[] */' . PHP_EOL;
+        $m .= self::I . 'public function get' . $propU . 's(): array' . PHP_EOL;
+        $m .= self::I . '{' . PHP_EOL;
+        $m .= self::I . self::I . '$result = [];' . PHP_EOL;
+        $m .= self::I . self::I . 'foreach ($this->getByName(' . var_export($prop, true) . ') as $attr) {' . PHP_EOL;
+        $m .= self::I . self::I . self::I . 'if ($attr instanceof NodeAttribute) {' . PHP_EOL;
+        $m .= self::I . self::I . self::I . self::I . '/** @var ' . $union . ' $node */' . PHP_EOL;
+        $m .= self::I . self::I . self::I . self::I . '$node = $attr->node;' . PHP_EOL;
+        $m .= self::I . self::I . self::I . self::I . '$result[] = $node;' . PHP_EOL;
+        $m .= self::I . self::I . self::I . '}' . PHP_EOL;
+        $m .= self::I . self::I . '}' . PHP_EOL;
+        $m .= self::I . self::I . 'return $result;' . PHP_EOL;
+        $m .= self::I . '}' . PHP_EOL;
+        $m .= PHP_EOL;
+        $m .= self::I . 'public function remove' . $propU . '(' . $union . ' $' . $prop . '): self' . PHP_EOL;
+        $m .= self::I . '{' . PHP_EOL;
+        $m .= self::I . self::I . 'foreach ($this->getByName(' . var_export($prop, true) . ') as $attr) {' . PHP_EOL;
+        $m .= self::I . self::I . self::I . 'if ($attr instanceof NodeAttribute && $attr->node === $' . $prop . ') {' . PHP_EOL;
+        $m .= self::I . self::I . self::I . self::I . '$this->removeAttribute($attr);' . PHP_EOL;
+        $m .= self::I . self::I . self::I . self::I . 'break;' . PHP_EOL;
+        $m .= self::I . self::I . self::I . '}' . PHP_EOL;
+        $m .= self::I . self::I . '}' . PHP_EOL;
+        $m .= self::I . self::I . 'return $this;' . PHP_EOL;
+        $m .= self::I . '}' . PHP_EOL;
+
+        return $m;
+    }
+
+    /** @param string[] &$imports */
+    private function renderGroupRawContentMethods(AttributeSchema $attr, array &$imports): string
+    {
+        $prop = $attr->propName;
+        $propU = ucfirst($prop);
+        $imports[] = RawContentAttribute::class;
+        $rawName = var_export($attr->rawTokenName ?? $prop, true);
+
+        $m  = self::I . 'public function add' . $propU . '(string $content): self' . PHP_EOL;
+        $m .= self::I . '{' . PHP_EOL;
+        $m .= self::I . self::I . '$this->addAttribute(new RawContentAttribute($content, ' . $rawName . '));' . PHP_EOL;
+        $m .= self::I . self::I . 'return $this;' . PHP_EOL;
+        $m .= self::I . '}' . PHP_EOL;
+        $m .= PHP_EOL;
+        $m .= self::I . '/** @return string[] */' . PHP_EOL;
+        $m .= self::I . 'public function get' . $propU . 's(): array' . PHP_EOL;
+        $m .= self::I . '{' . PHP_EOL;
+        $m .= self::I . self::I . '$result = [];' . PHP_EOL;
+        $m .= self::I . self::I . 'foreach ($this->getByName(' . var_export($prop, true) . ') as $attr) {' . PHP_EOL;
+        $m .= self::I . self::I . self::I . 'if ($attr instanceof RawContentAttribute) {' . PHP_EOL;
+        $m .= self::I . self::I . self::I . self::I . '$result[] = $attr->content;' . PHP_EOL;
+        $m .= self::I . self::I . self::I . '}' . PHP_EOL;
+        $m .= self::I . self::I . '}' . PHP_EOL;
+        $m .= self::I . self::I . 'return $result;' . PHP_EOL;
+        $m .= self::I . '}' . PHP_EOL;
+        $m .= PHP_EOL;
+        $m .= $this->renderGroupRemoveByIndex($propU, $prop);
+
+        return $m;
+    }
+
+    /** @param string[] &$imports */
+    private function renderGroupRawRegionMethods(AttributeSchema $attr, array &$imports): string
+    {
+        $prop = $attr->propName;
+        $propU = ucfirst($prop);
+        $imports[] = RawRegionAttribute::class;
+
+        $opener = $attr->rawRegionOpenerContent !== null ? var_export($attr->rawRegionOpenerContent, true) : 'null';
+        $closer = $attr->rawRegionOpenerContent !== null
+            ? var_export($attr->rawRegionCloserContent ?? $attr->rawRegionOpenerContent, true)
+            : 'null';
+        $rawName = var_export($attr->rawTokenName ?? $prop, true);
+
+        $m  = self::I . 'public function add' . $propU . '(string $content): self' . PHP_EOL;
+        $m .= self::I . '{' . PHP_EOL;
+        $m .= self::I . self::I . '$this->addAttribute(new RawRegionAttribute(opener: ' . $opener . ', content: $content, closer: ' . $closer . ', name: ' . $rawName . ', anchorName: null));' . PHP_EOL;
+        $m .= self::I . self::I . 'return $this;' . PHP_EOL;
+        $m .= self::I . '}' . PHP_EOL;
+        $m .= PHP_EOL;
+        $m .= self::I . '/** @return string[] */' . PHP_EOL;
+        $m .= self::I . 'public function get' . $propU . 's(): array' . PHP_EOL;
+        $m .= self::I . '{' . PHP_EOL;
+        $m .= self::I . self::I . '$result = [];' . PHP_EOL;
+        $m .= self::I . self::I . 'foreach ($this->getByName(' . var_export($prop, true) . ') as $attr) {' . PHP_EOL;
+        $m .= self::I . self::I . self::I . 'if ($attr instanceof RawRegionAttribute) {' . PHP_EOL;
+        $m .= self::I . self::I . self::I . self::I . '$result[] = $attr->content;' . PHP_EOL;
+        $m .= self::I . self::I . self::I . '}' . PHP_EOL;
+        $m .= self::I . self::I . '}' . PHP_EOL;
+        $m .= self::I . self::I . 'return $result;' . PHP_EOL;
+        $m .= self::I . '}' . PHP_EOL;
+        $m .= PHP_EOL;
+        $m .= $this->renderGroupRemoveByIndex($propU, $prop);
+
+        return $m;
+    }
+
+    /** @param string[] &$imports */
+    private function renderGroupRawSequenceMethods(AttributeSchema $attr, array &$imports): string
+    {
+        $prop = $attr->propName;
+        $propU = ucfirst($prop);
+        $imports[] = RawSequenceAttribute::class;
+
+        $m  = self::I . 'public function add' . $propU . '(string $content): self' . PHP_EOL;
+        $m .= self::I . '{' . PHP_EOL;
+        $m .= self::I . self::I . '$this->addAttribute(' . $this->rawSequenceCtor($attr, '$content') . ');' . PHP_EOL;
+        $m .= self::I . self::I . 'return $this;' . PHP_EOL;
+        $m .= self::I . '}' . PHP_EOL;
+        $m .= PHP_EOL;
+        $m .= self::I . '/** @return string[] */' . PHP_EOL;
+        $m .= self::I . 'public function get' . $propU . 's(): array' . PHP_EOL;
+        $m .= self::I . '{' . PHP_EOL;
+        $m .= self::I . self::I . '$result = [];' . PHP_EOL;
+        $m .= self::I . self::I . 'foreach ($this->getByName(' . var_export($prop, true) . ') as $attr) {' . PHP_EOL;
+        $m .= self::I . self::I . self::I . 'if ($attr instanceof RawSequenceAttribute) {' . PHP_EOL;
+        $m .= self::I . self::I . self::I . self::I . '$result[] = (string) $attr;' . PHP_EOL;
+        $m .= self::I . self::I . self::I . '}' . PHP_EOL;
+        $m .= self::I . self::I . '}' . PHP_EOL;
+        $m .= self::I . self::I . 'return $result;' . PHP_EOL;
+        $m .= self::I . '}' . PHP_EOL;
+        $m .= PHP_EOL;
+        $m .= $this->renderGroupRemoveByIndex($propU, $prop);
+
+        return $m;
+    }
+
+    /** Shared by all three raw-kind renderers — removal addresses the Nth match by name, since names repeat. */
+    private function renderGroupRemoveByIndex(string $propU, string $prop): string
+    {
+        $m  = self::I . 'public function remove' . $propU . 'ByIndex(int $index): self' . PHP_EOL;
+        $m .= self::I . '{' . PHP_EOL;
+        $m .= self::I . self::I . '$matches = $this->getByName(' . var_export($prop, true) . ');' . PHP_EOL;
+        $m .= self::I . self::I . 'if (isset($matches[$index])) {' . PHP_EOL;
+        $m .= self::I . self::I . self::I . '$this->removeAttribute($matches[$index]);' . PHP_EOL;
+        $m .= self::I . self::I . '}' . PHP_EOL;
+        $m .= self::I . self::I . 'return $this;' . PHP_EOL;
+        $m .= self::I . '}' . PHP_EOL;
+
+        return $m;
     }
 
     /**

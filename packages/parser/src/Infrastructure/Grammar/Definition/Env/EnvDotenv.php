@@ -19,7 +19,7 @@ class EnvDotenv extends EnvEnvironment
         $grammar = parent::grammar();
         $regions = $grammar->getAllRegions();
 
-        $regions['assignment']->add(
+        $regions['value']->add(
             Rule::token("singleQuote", "'", type: NodeType::Structure)
                 ->priority(1)
                 ->startRegion('singleQuotedValue', true)
@@ -28,7 +28,6 @@ class EnvDotenv extends EnvEnvironment
                     Rule::token("singleQuote", "'", type: NodeType::Structure)->priority(1)->closeRegion(true, false, false),
                 )
                 ->withRootSequence("singleQuote ?singleQuotedContent singleQuote")
-                ->addTag("value")
                 ->setNodeType(NodeType::Raw),
             Rule::token("doubleQuote", '"', type: NodeType::Structure)
                 ->priority(1)
@@ -41,14 +40,20 @@ class EnvDotenv extends EnvEnvironment
                     Rule::expr("doubleQuotedContent", "[^\"\\\\$\n]+")->priority(0),
                     Rule::token("doubleQuote", '"', type: NodeType::Structure)->priority(1)->closeRegion(true, false, false),
                 )
-                ->withRootSequence('doubleQuote (escapeChar|lineContinuation|simpleExpansion|bracedExpansion|doubleQuotedContent)* doubleQuote')
-                ->addTag("value")
                 ->setNodeType(NodeType::Node),
         );
 
-        $regions['assignment']->withRootSequence("string[identifier] (space|tab)* assign (space|tab)* (singleQuotedValue|doubleQuotedValue|simpleExpansion|bracedExpansion|unquotedText|string|space|tab)* newline|eof");
+        $grammar->stampOrigin(new GrammarOrigin(self::FORMAT, self::VARIANT), false, ['value']);
 
-        $grammar->stampOrigin(new GrammarOrigin(self::FORMAT, self::VARIANT), false, ['assignment']);
+        $grammar->nodeClassMap = array_merge($grammar->nodeClassMap, [
+            'lineComment' => \PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Env\Dotenv\LineCommentNode::class,
+            'assignment' => \PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Env\Dotenv\AssignmentNode::class,
+            'value' => \PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Env\Dotenv\ValueNode::class,
+            'doubleQuotedValue' => \PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Env\Dotenv\DoubleQuotedValueNode::class,
+            'simpleExpansion' => \PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Env\Dotenv\SimpleExpansionNode::class,
+            'bracedExpansion' => \PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Env\Dotenv\BracedExpansionNode::class,
+            'envExpression' => \PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Env\Dotenv\EnvExpressionNode::class,
+        ]);
 
         return $grammar;
     }
