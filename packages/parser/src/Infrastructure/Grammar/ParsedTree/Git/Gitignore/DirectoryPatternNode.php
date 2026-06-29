@@ -2,21 +2,20 @@
 
 declare(strict_types=1);
 
-namespace PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Env\Environment;
+namespace PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Git\Gitignore;
 
 use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeAttributeInterface;
-use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Node\NodeAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Raw\RawContentAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\GroupNode;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\NodeOrigin;
 
-class BracedExpansionNode extends GroupNode
+class DirectoryPatternNode extends GroupNode
 {
     /** @param NodeAttributeInterface[] $attributes */
     public static function create(array $attributes = []): self
     {
         return new self(
-            name: 'bracedExpansion',
+            name: 'directoryPattern',
             origin: NodeOrigin::Region,
             attributes: $attributes,
             parent: null,
@@ -41,30 +40,6 @@ class BracedExpansionNode extends GroupNode
                 continue;
             }
             $result[] = $attr->content;
-        }
-        return $result;
-    }
-
-    public function addNode(EnvExpressionNode $node): self
-    {
-        $this->addAttribute(NodeAttribute::fromNode($node->setParent($this)));
-        return $this;
-    }
-
-    /**
-     * @param (callable(NodeAttribute):bool)|null $filter
-     * @return array<EnvExpressionNode>
-     */
-    public function getNodes(?callable $filter = null): array
-    {
-        $result = [];
-        foreach ($this->getAttributes() as $attr) {
-            if (!$attr instanceof NodeAttribute || ($filter !== null && !$filter($attr))) {
-                continue;
-            }
-            /** @var EnvExpressionNode $node */
-            $node = $attr->node;
-            $result[] = $node;
         }
         return $result;
     }

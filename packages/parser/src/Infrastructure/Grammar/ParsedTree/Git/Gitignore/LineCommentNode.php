@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Env\Environment;
+namespace PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Git\Gitignore;
 
 use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeInterface;
 use PhpArchitecture\Parser\Foundation\Parsing\Contract\Placement;

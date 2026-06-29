@@ -1,0 +1,68 @@
+# Operating System Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+Thumbs.db
+
+# Editor and IDE Files
+.vscode/
+.idea/
+*.swp
+*~
+.project
+
+# Build Output
+build/
+dist/
+target/
+*.class
+*.jar
+
+# Dependencies
+node_modules/
+vendor/
+bower_components/
+
+# Logs
+*.log
+logs/
+npm-debug.log*
+
+# Environment and Configuration
+.env
+.env.local
+.env.*.local
+
+# Root-Relative Pattern
+/build-config.json
+
+# Wildcard Patterns
+**/*.backup
+src/**/*.min.js
+**/temp-*
+
+# Character Classes
+[Bb]uild/
+*.[oa]
+file[0-9].txt
+[!a]*.log
+
+# Single Character Wildcard
+file?.txt
+
+# Negation Examples
+*.log
+!important.log
+vendor/
+!vendor/my-package/
+
+# Escaped Special Characters
+\#not-a-comment.txt
+\!important
+
+# Directory-only Pattern
+cache/
+
+# Multi-level Path
+config/local/settings.json

@@ -14,16 +14,12 @@ use PhpArchitecture\Parser\Foundation\Parsing\Model\SequenceNode;
 class AssignmentNode extends SequenceNode
 {
     public RawContentAttribute $identifier { get => $this->attributes[0]; }
-
     public RawGroupAttribute $trivia0 { get => $this->attributes[1]; }
-
     public StructureAttribute $assign { get => $this->attributes[2]; }
-
     public RawGroupAttribute $trivia1 { get => $this->attributes[3]; }
 
     /** @var NodeAttribute<ValueNode> */
     public NodeAttribute $value { get => $this->attributes[4]; }
-
     public RawGroupAttribute $trivia2 { get => $this->attributes[5]; }
 
     public static function create(string $identifier, ValueNode $value): self

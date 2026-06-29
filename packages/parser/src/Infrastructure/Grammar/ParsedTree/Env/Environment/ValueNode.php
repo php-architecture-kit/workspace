@@ -23,119 +23,49 @@ class ValueNode extends GroupNode
         );
     }
 
-    public function addSpace(string $content): self
+    public function addRawContent(string $content, string $name): self
     {
-        $this->addAttribute(new RawContentAttribute($content, 'space'));
+        $this->addAttribute(new RawContentAttribute($content, $name));
         return $this;
     }
 
-    /** @return string[] */
-    public function getSpaces(): array
+    /**
+     * @param (callable(RawContentAttribute):bool)|null $filter
+     * @return string[]
+     */
+    public function getRawContents(?callable $filter = null): array
     {
         $result = [];
-        foreach ($this->getByName('space') as $attr) {
-            if ($attr instanceof RawContentAttribute) {
-                $result[] = $attr->content;
+        foreach ($this->getAttributes() as $attr) {
+            if (!$attr instanceof RawContentAttribute || ($filter !== null && !$filter($attr))) {
+                continue;
             }
+            $result[] = $attr->content;
         }
         return $result;
     }
 
-    public function removeSpaceByIndex(int $index): self
+    public function addNode(SimpleExpansionNode|BracedExpansionNode $node): self
     {
-        $matches = $this->getByName('space');
-        if (isset($matches[$index])) {
-            $this->removeAttribute($matches[$index]);
-        }
+        $this->addAttribute(NodeAttribute::fromNode($node->setParent($this)));
         return $this;
     }
 
-    public function addSimpleExpansion(SimpleExpansionNode $simpleExpansion): self
-    {
-        $this->addAttribute(NodeAttribute::fromNode($simpleExpansion->setParent($this)));
-        return $this;
-    }
-
-    /** @return SimpleExpansionNode[] */
-    public function getSimpleExpansions(): array
+    /**
+     * @param (callable(NodeAttribute):bool)|null $filter
+     * @return array<SimpleExpansionNode|BracedExpansionNode>
+     */
+    public function getNodes(?callable $filter = null): array
     {
         $result = [];
-        foreach ($this->getByName('simpleExpansion') as $attr) {
-            if ($attr instanceof NodeAttribute) {
-                /** @var SimpleExpansionNode $node */
-                $node = $attr->node;
-                $result[] = $node;
+        foreach ($this->getAttributes() as $attr) {
+            if (!$attr instanceof NodeAttribute || ($filter !== null && !$filter($attr))) {
+                continue;
             }
+            /** @var SimpleExpansionNode|BracedExpansionNode $node */
+            $node = $attr->node;
+            $result[] = $node;
         }
         return $result;
-    }
-
-    public function removeSimpleExpansion(SimpleExpansionNode $simpleExpansion): self
-    {
-        foreach ($this->getByName('simpleExpansion') as $attr) {
-            if ($attr instanceof NodeAttribute && $attr->node === $simpleExpansion) {
-                $this->removeAttribute($attr);
-                break;
-            }
-        }
-        return $this;
-    }
-
-    public function addUnquotedText(string $content): self
-    {
-        $this->addAttribute(new RawContentAttribute($content, 'unquotedText'));
-        return $this;
-    }
-
-    /** @return string[] */
-    public function getUnquotedTexts(): array
-    {
-        $result = [];
-        foreach ($this->getByName('unquotedText') as $attr) {
-            if ($attr instanceof RawContentAttribute) {
-                $result[] = $attr->content;
-            }
-        }
-        return $result;
-    }
-
-    public function removeUnquotedTextByIndex(int $index): self
-    {
-        $matches = $this->getByName('unquotedText');
-        if (isset($matches[$index])) {
-            $this->removeAttribute($matches[$index]);
-        }
-        return $this;
-    }
-
-    public function addBracedExpansion(BracedExpansionNode $bracedExpansion): self
-    {
-        $this->addAttribute(NodeAttribute::fromNode($bracedExpansion->setParent($this)));
-        return $this;
-    }
-
-    /** @return BracedExpansionNode[] */
-    public function getBracedExpansions(): array
-    {
-        $result = [];
-        foreach ($this->getByName('bracedExpansion') as $attr) {
-            if ($attr instanceof NodeAttribute) {
-                /** @var BracedExpansionNode $node */
-                $node = $attr->node;
-                $result[] = $node;
-            }
-        }
-        return $result;
-    }
-
-    public function removeBracedExpansion(BracedExpansionNode $bracedExpansion): self
-    {
-        foreach ($this->getByName('bracedExpansion') as $attr) {
-            if ($attr instanceof NodeAttribute && $attr->node === $bracedExpansion) {
-                $this->removeAttribute($attr);
-                break;
-            }
-        }
-        return $this;
     }
 }

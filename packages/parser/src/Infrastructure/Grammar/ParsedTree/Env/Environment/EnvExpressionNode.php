@@ -22,84 +22,25 @@ class EnvExpressionNode extends GroupNode
         );
     }
 
-    public function addUnquotedText(string $content): self
+    public function addRawContent(string $content, string $name): self
     {
-        $this->addAttribute(new RawContentAttribute($content, 'unquotedText'));
+        $this->addAttribute(new RawContentAttribute($content, $name));
         return $this;
     }
 
-    /** @return string[] */
-    public function getUnquotedTexts(): array
+    /**
+     * @param (callable(RawContentAttribute):bool)|null $filter
+     * @return string[]
+     */
+    public function getRawContents(?callable $filter = null): array
     {
         $result = [];
-        foreach ($this->getByName('unquotedText') as $attr) {
-            if ($attr instanceof RawContentAttribute) {
-                $result[] = $attr->content;
+        foreach ($this->getAttributes() as $attr) {
+            if (!$attr instanceof RawContentAttribute || ($filter !== null && !$filter($attr))) {
+                continue;
             }
+            $result[] = $attr->content;
         }
         return $result;
-    }
-
-    public function removeUnquotedTextByIndex(int $index): self
-    {
-        $matches = $this->getByName('unquotedText');
-        if (isset($matches[$index])) {
-            $this->removeAttribute($matches[$index]);
-        }
-        return $this;
-    }
-
-    public function addUnknown(string $content): self
-    {
-        $this->addAttribute(new RawContentAttribute($content, 'unknown'));
-        return $this;
-    }
-
-    /** @return string[] */
-    public function getUnknowns(): array
-    {
-        $result = [];
-        foreach ($this->getByName('unknown') as $attr) {
-            if ($attr instanceof RawContentAttribute) {
-                $result[] = $attr->content;
-            }
-        }
-        return $result;
-    }
-
-    public function removeUnknownByIndex(int $index): self
-    {
-        $matches = $this->getByName('unknown');
-        if (isset($matches[$index])) {
-            $this->removeAttribute($matches[$index]);
-        }
-        return $this;
-    }
-
-    public function addString(string $content): self
-    {
-        $this->addAttribute(new RawContentAttribute($content, 'string'));
-        return $this;
-    }
-
-    /** @return string[] */
-    public function getStrings(): array
-    {
-        $result = [];
-        foreach ($this->getByName('string') as $attr) {
-            if ($attr instanceof RawContentAttribute) {
-                $result[] = $attr->content;
-            }
-        }
-        return $result;
-    }
-
-    public function removeStringByIndex(int $index): self
-    {
-        $matches = $this->getByName('string');
-        if (isset($matches[$index])) {
-            $this->removeAttribute($matches[$index]);
-        }
-        return $this;
     }
 }
