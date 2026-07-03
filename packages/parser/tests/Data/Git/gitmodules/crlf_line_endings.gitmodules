@@ -1,0 +1,3 @@
+[submodule "crlf"]
+	path = crlf-example
+	url = https://example.com/crlf.git

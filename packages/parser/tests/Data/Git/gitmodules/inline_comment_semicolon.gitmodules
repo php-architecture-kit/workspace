@@ -1,0 +1,2 @@
+[submodule "tools/linters"]
+	ignore = all                    ; inline trailing comment

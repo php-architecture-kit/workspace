@@ -1,0 +1,20 @@
+[submodule "vendor/symfony-flex"]
+path=vendor/symfony-flex
+url=https://github.com/symfony/flex.git
+branch=main
+update=checkout
+[submodule "themes/corporate"]
+path=themes/corporate
+url=git@github.com:example-org/corporate-theme.git
+ignore=dirty
+fetchRecurseSubmodules=true
+[submodule "docs"]
+path=docs
+url=../shared-docs.git
+branch=.
+update=rebase
+[submodule "tools/linters"]
+path=tools/linters
+url=https://example.com/tools/linters.git
+shallow=true
+ignore=all

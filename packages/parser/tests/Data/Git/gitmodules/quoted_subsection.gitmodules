@@ -1,0 +1,3 @@
+[submodule "vendor/symfony-flex"]
+	path = vendor/symfony-flex
+	url = https://github.com/symfony/flex.git

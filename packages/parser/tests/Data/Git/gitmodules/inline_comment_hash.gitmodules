@@ -1,0 +1,2 @@
+[submodule "themes/corporate"]
+	ignore = dirty                  # inline trailing comment after a value

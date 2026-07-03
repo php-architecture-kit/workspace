@@ -1,0 +1,5 @@
+[submodule "a"]
+	path = a
+
+[submodule "b"]
+	path = b

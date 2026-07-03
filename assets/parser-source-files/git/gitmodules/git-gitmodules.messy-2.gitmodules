@@ -1,0 +1,38 @@
+
+
+
+
+# messy-2: extreme indentation, tabs, dense comment blocks
+# --- gitmodules format ---
+#
+
+[submodule "vendor/symfony-flex"]
+                 path = vendor/symfony-flex
+	url = https://github.com/symfony/flex.git
+branch = main
+	update = checkout
+
+
+	[submodule "themes/corporate"]
+	path = themes/corporate
+		url = git@github.com:example-org/corporate-theme.git
+	branch = release
+ignore = dirty
+	fetchRecurseSubmodules = true
+# comment mid-section
+[submodule "docs"]
+	path = docs
+                          url = ../shared-docs.git
+	branch = .
+	update = rebase
+
+	[submodule "tools/linters"]
+	path = tools/linters
+	url = https://example.com/tools/linters.git
+	shallow = true
+		ignore = all
+
+
+# trailing trivia — end of messy-2 file
+
+

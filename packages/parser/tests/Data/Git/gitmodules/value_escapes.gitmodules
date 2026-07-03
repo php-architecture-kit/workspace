@@ -1,0 +1,2 @@
+[submodule "scripts"]
+	url = "C:\\repos\\scripts.git \"mirror\" line1\nline2\tindented\bbackspace"

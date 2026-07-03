@@ -1,0 +1,47 @@
+# leading comment trivia
+; semicolon comment too
+
+[submodule "vendor/symfony-flex"]
+	path = vendor/symfony-flex
+	url = https://github.com/symfony/flex.git
+	branch = main
+	update = checkout
+
+[submodule "themes/corporate"]
+	path = themes/corporate
+	url = git@github.com:example-org/corporate-theme.git
+	ignore = dirty                  # inline trailing comment
+	fetchRecurseSubmodules = true
+	fetchRecurseSubmodules = on-demand
+
+[submodule "docs"]
+	path = docs
+	url = ../shared-docs.git
+	branch = .
+	update = re\
+base
+	ignore = untracked              ; another inline comment
+
+[submodule "tools/linters \"strict\""]
+	path = "tools/linters"
+	shallow
+
+[submodule "ui/legacy widgets"] path = "ui/legacy widgets"
+	url = git@github.com:example-org/legacy-widgets.git
+
+[submodule.deprecated]
+	path = libs/deprecated
+	url = ../deprecated.git
+
+[submodule "weird\name"]
+	path = libs/weird-name
+
+[submodule "placeholder"]
+
+[submodule "scripts"]
+	path = scripts
+	url = "C:\\repos\\scripts.git \"mirror\" line1\nline2\tindented\bbackspace"
+	ignore = prefix"-mid-"suffix\tend
+
+[submodule]
+	unrecognizedKey = some-value

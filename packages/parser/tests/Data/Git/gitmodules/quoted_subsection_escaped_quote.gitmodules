@@ -1,0 +1,2 @@
+[submodule "tools/linters \"strict\""]
+	path = tools/linters

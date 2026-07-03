@@ -1,0 +1,32 @@
+[submodule "vendor/symfony-flex"]
+	path = vendor/symfony-flex
+	url = https://github.com/symfony/flex.git
+	branch = main
+	update = checkout
+
+[submodule "themes/corporate"]
+	path = themes/corporate
+	url = git@github.com:example-org/corporate-theme.git
+	branch = release
+	ignore = dirty
+	fetchRecurseSubmodules = true
+
+[submodule "docs"]
+	path = docs
+	url = ../shared-docs.git
+	branch = .
+	update = rebase
+	ignore = untracked
+
+[submodule "tools/linters"]
+	path = tools/linters
+	url = https://example.com/tools/linters.git
+	shallow = true
+	ignore = all
+	fetchRecurseSubmodules = on-demand
+
+[submodule "libs/legacy-widget"]
+	path = libs/legacy-widget
+	url = ./legacy-widget.git
+	update = none
+	shallow = false

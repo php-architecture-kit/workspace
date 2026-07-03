@@ -1,0 +1,3 @@
+[submodule "libs/legacy-widget"]
+	Path=libs/legacy-widget
+	URL    =    ./legacy-widget.git

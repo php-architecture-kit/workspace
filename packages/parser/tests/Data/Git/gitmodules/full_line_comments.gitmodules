@@ -1,0 +1,5 @@
+; leading comment trivia (semicolon style)
+# leading comment trivia (hash style)
+
+[submodule "vendor/symfony-flex"]
+	path = vendor/symfony-flex

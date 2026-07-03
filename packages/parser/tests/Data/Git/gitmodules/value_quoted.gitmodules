@@ -1,0 +1,2 @@
+[submodule "tools/linters"]
+	path = "tools/linters"

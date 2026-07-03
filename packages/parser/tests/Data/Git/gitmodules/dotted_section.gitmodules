@@ -1,0 +1,3 @@
+[submodule.deprecated]
+	path = libs/deprecated
+	url = ../deprecated.git

@@ -1,0 +1,2 @@
+[submodule "ui/legacy widgets"] path = "ui/legacy widgets"
+	url = git@github.com:example-org/legacy-widgets.git

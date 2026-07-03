@@ -1,0 +1,34 @@
+
+# leading comment trivia — gitmodules messy variant
+
+[submodule "vendor/symfony-flex"]
+    Path=vendor/symfony-flex
+	url    =    https://github.com/symfony/flex.git
+	branch=main   ; inline comment after branch
+	update = checkout
+
+; semicolon comment between sections
+
+[submodule "ui/legacy widgets"]
+	path = "ui/legacy widgets"
+	url = "git@github.com:example-org/legacy-widgets.git"
+	ignore = dirty
+	# fetchRecurseSubmodules disabled on purpose
+	fetchRecurseSubmodules = false
+
+[submodule "docs"]
+	path = docs
+	url = ../shared-docs.git
+	branch = .
+	# long description continued on next physical line
+	update = re\
+base
+
+[submodule "tools/linters \"strict\""]
+	path = tools/linters
+	url = "https://example.com/tools/linters.git"
+	shallow=true
+	ignore=all       # trailing comment, not part of value
+	fetchRecurseSubmodules = on-demand
+
+# trailing comment trivia
