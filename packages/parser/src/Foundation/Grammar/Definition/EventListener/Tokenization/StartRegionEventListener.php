@@ -47,7 +47,8 @@ final class StartRegionEventListener implements TokenizationEventListener, RuleM
 
     public function priority(): int
     {
-        return -9999;
+        // Runs first among all listeners for the same event (higher = earlier).
+        return 9999;
     }
 
     public function rule(): ?string

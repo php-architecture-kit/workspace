@@ -89,10 +89,13 @@ class MatchingEventDispatcher
     }
 
     /**
+     * Higher priority runs first (descending sort), consistent with pattern/
+     * sequence matching priority elsewhere in the grammar.
+     *
      * @param MatchingEventListener[] $listeners
      */
     private function sortListenersByPriority(array &$listeners): void
     {
-        usort($listeners, static fn($a, $b) => $a->priority() <=> $b->priority());
+        usort($listeners, static fn($a, $b) => $b->priority() <=> $a->priority());
     }
 }
