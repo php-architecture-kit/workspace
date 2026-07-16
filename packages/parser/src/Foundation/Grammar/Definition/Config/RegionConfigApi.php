@@ -10,7 +10,7 @@ use PhpArchitecture\Parser\Foundation\Grammar\Definition\EventListener\Tokenizat
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\EventListener\Tokenization\StartRegionEventListener;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\EventSubscriber;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Grammar;
-use PhpArchitecture\Parser\Foundation\Grammar\Definition\Defaults;
+use PhpArchitecture\Parser\Foundation\Grammar\Definition\Creation\DefaultsDefinition;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Middleware\GrammarMiddleware;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Model\Sequence\SequenceRule;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Service\StructuralDefaultsBinder;
@@ -98,7 +98,7 @@ trait RegionConfigApi
      * Attaches structural Defaults to the region's root sequence nodes. Requires
      * withRootSequence() to have been called first.
      *
-     * @param array<string, Defaults> $defaults
+     * @param array<string, DefaultsDefinition> $defaults
      */
     public function withDefaults(array $defaults): self
     {
@@ -208,6 +208,18 @@ trait RegionConfigApi
     public function withPossibleNames(string ...$names): self
     {
         $this->config->possibleNames = $names;
+        return $this;
+    }
+
+    /**
+     * Restricts what a $tag on this region resolves to (via TagToChoiceCompiler)
+     * to the given subset of withPossibleNames() — instead of the default of
+     * resolving to this region's own name (i.e. "any possible name"). Call once
+     * per tag that needs to pick out a subset. See RegionConfig::$possibleNamesByTag.
+     */
+    public function withPossibleNamesForTag(string $tag, string ...$names): self
+    {
+        $this->config->possibleNamesByTag[$tag] = $names;
         return $this;
     }
 

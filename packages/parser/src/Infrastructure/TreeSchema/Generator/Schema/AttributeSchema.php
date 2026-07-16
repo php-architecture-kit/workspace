@@ -7,6 +7,7 @@ namespace PhpArchitecture\Parser\Infrastructure\TreeSchema\Generator\Schema;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Node\GroupAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Node\NodeAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Node\OptionalAttribute;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Raw\OptionalRawAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Raw\RawContentAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Raw\RawRegionAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Raw\RawSequenceAttribute;
@@ -94,6 +95,16 @@ final class AttributeSchema
     public function isRawContentAttribute(): bool
     {
         return $this->attrClass === RawContentAttribute::class;
+    }
+
+    /**
+     * OptionalRawAttribute wraps a possibly-absent raw fragment (e.g. a comment's
+     * own `leadingWs`/`trailingWs`) — distinct from OptionalAttribute, which wraps
+     * a possibly-absent *node*.
+     */
+    public function isOptionalRawAttribute(): bool
+    {
+        return $this->attrClass === OptionalRawAttribute::class;
     }
 
     public function isRawRegionAttribute(): bool

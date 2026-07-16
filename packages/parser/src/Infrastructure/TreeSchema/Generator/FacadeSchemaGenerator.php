@@ -42,7 +42,7 @@ final class FacadeSchemaGenerator
      * @param NodeInterface[] $parsedTrees   one per input file, already parsed
      * @param Grammar         $definition    the pre-compile grammar Definition — the only
      *                                        place fixed literals (Rule::token/keyword
-     *                                        Defaults) can legitimately be read from
+     *                                        DefaultsDefinition) can legitimately be read from
      * @param string[]        $emitTargets   carve-out grammars to generate, as
      *                                        "format/variant" (e.g. "technical/whitespace")
      * @return array<string, array<string, string>>  targetNamespace => (filename => PHP code)

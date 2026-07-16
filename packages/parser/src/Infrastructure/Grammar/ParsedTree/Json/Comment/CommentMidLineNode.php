@@ -7,6 +7,7 @@ namespace PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Json\Comment;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Node\GroupAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Raw\OptionalRawAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Raw\RawContentAttribute;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Raw\RawRegionAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Structure\StructureAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\NodeOrigin;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\SequenceNode;
@@ -17,6 +18,7 @@ use PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Technical\Whitespac
 
 class CommentMidLineNode extends SequenceNode
 {
+    /** @var GroupAttribute<LeadingWsNode|EmptyLineNode|TrailingWsNode|InlineWsNode> */
     public GroupAttribute $trivia0 { get => $this->attributes[0]; }
 
     public StructureAttribute $asterisk { get => $this->attributes[1]; }
@@ -25,10 +27,10 @@ class CommentMidLineNode extends SequenceNode
 
     public RawContentAttribute $content { get => $this->attributes[3]; }
 
-    /** @var GroupAttribute<InlineWsNode|TrailingWsNode|LeadingWsNode|EmptyLineNode> */
+    /** @var GroupAttribute<InlineWsNode|TrailingWsNode|EmptyLineNode|LeadingWsNode> */
     public GroupAttribute $trivia1 { get => $this->attributes[4]; }
 
-    public static function create(string $content): self
+    public static function create(?string $leadingWs, string $content): self
     {
         return new self(
             name: 'commentMidLine',
@@ -36,11 +38,35 @@ class CommentMidLineNode extends SequenceNode
             attributes: [
                 new GroupAttribute('trivia0', []),
                 new StructureAttribute(true, 'asterisk', '*'),
+                new OptionalRawAttribute(
+                    $leadingWs !== null
+                        ? new RawRegionAttribute(opener: null, content: $leadingWs, closer: null, name: 'leadingWs', anchorName: 'leadingWs')
+                        : null,
+                    name: 'leadingWs',
+                    anchorName: 'leadingWs',
+                ),
                 new RawContentAttribute($content),
                 new GroupAttribute('trivia1', []),
             ],
             parent: null,
         );
+    }
+
+    public function getRawLeadingWs(): ?string
+    {
+        return $this->leadingWs->raw?->content;
+    }
+
+    public function setRawLeadingWs(?string $value): self
+    {
+        if ($value === null) {
+            $this->leadingWs->raw = null;
+        } elseif ($this->leadingWs->raw instanceof RawRegionAttribute) {
+            $this->leadingWs->raw->content = $value;
+        } else {
+            $this->leadingWs->raw = new RawRegionAttribute(opener: null, content: $value, closer: null, name: 'leadingWs', anchorName: 'leadingWs');
+        }
+        return $this;
     }
 
     public function getRawContent(): string

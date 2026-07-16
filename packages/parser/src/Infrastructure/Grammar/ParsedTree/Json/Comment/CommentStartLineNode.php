@@ -9,6 +9,7 @@ use PhpArchitecture\Parser\Foundation\Parsing\Contract\Placement;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Node\GroupAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Raw\OptionalRawAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Raw\RawContentAttribute;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Raw\RawRegionAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Structure\StructureAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\NodeOrigin;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\SequenceNode;
@@ -27,10 +28,10 @@ class CommentStartLineNode extends SequenceNode
 
     public RawContentAttribute $content { get => $this->attributes[3]; }
 
-    /** @var GroupAttribute<TrailingWsNode|LeadingWsNode|EmptyLineNode|InlineWsNode> */
+    /** @var GroupAttribute<TrailingWsNode|EmptyLineNode|LeadingWsNode|InlineWsNode> */
     public GroupAttribute $trivia { get => $this->attributes[4]; }
 
-    public static function create(string $content): self
+    public static function create(?string $leadingWs, string $content): self
     {
         return new self(
             name: 'commentStartLine',
@@ -38,11 +39,35 @@ class CommentStartLineNode extends SequenceNode
             attributes: [
                 new StructureAttribute(true, 'blockCommentStart', '/*'),
                 new StructureAttribute(true, 'openingAsterisk', '*'),
+                new OptionalRawAttribute(
+                    $leadingWs !== null
+                        ? new RawRegionAttribute(opener: null, content: $leadingWs, closer: null, name: 'inlineWs', anchorName: 'leadingWs')
+                        : null,
+                    name: 'leadingWs',
+                    anchorName: 'leadingWs',
+                ),
                 new RawContentAttribute($content),
                 new GroupAttribute('trivia', []),
             ],
             parent: null,
         );
+    }
+
+    public function getRawLeadingWs(): ?string
+    {
+        return $this->leadingWs->raw?->content;
+    }
+
+    public function setRawLeadingWs(?string $value): self
+    {
+        if ($value === null) {
+            $this->leadingWs->raw = null;
+        } elseif ($this->leadingWs->raw instanceof RawRegionAttribute) {
+            $this->leadingWs->raw->content = $value;
+        } else {
+            $this->leadingWs->raw = new RawRegionAttribute(opener: null, content: $value, closer: null, name: 'inlineWs', anchorName: 'leadingWs');
+        }
+        return $this;
     }
 
     public function getRawContent(): string
@@ -56,13 +81,13 @@ class CommentStartLineNode extends SequenceNode
         return $this;
     }
 
-    public function addNodeToTrivia(TrailingWsNode|LeadingWsNode|EmptyLineNode|InlineWsNode $node, Placement $placement = Placement::After, int $offset = -1): self
+    public function addNodeToTrivia(TrailingWsNode|EmptyLineNode|LeadingWsNode|InlineWsNode $node, Placement $placement = Placement::After, int $offset = -1): self
     {
         $this->trivia->addNode($node->setParent($this), $placement, $offset);
         return $this;
     }
 
-    /** @return array<TrailingWsNode|LeadingWsNode|EmptyLineNode|InlineWsNode> */
+    /** @return array<TrailingWsNode|EmptyLineNode|LeadingWsNode|InlineWsNode> */
     public function getNodesFromTrivia(?callable $filter = null): array
     {
         return $this->trivia->getNodes($filter);

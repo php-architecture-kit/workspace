@@ -4,12 +4,10 @@ declare(strict_types=1);
 
 namespace PhpArchitecture\Parser\Infrastructure\Grammar\Definition\Json;
 
-use PhpArchitecture\Parser\Foundation\Grammar\Definition\Defaults;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Grammar;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\GrammarOrigin;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Region;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Rule;
-use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeInterface;
 use PhpArchitecture\Parser\Infrastructure\Grammar\Definition\Technical\Whitespace;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\NodeType;
 
@@ -48,30 +46,8 @@ class JsonRfc8259 extends Whitespace
                     Rule::token("colon", ":", type: NodeType::Structure),
                     Rule::token("comma", ",", type: NodeType::Structure),
                     Rule::seq("member", "string[identifier] -* colon -* value")
-                    // ->withDefaults([
-                    //     '-.0' => static fn() => '',
-                    //     '-.1' => [
-                    //         self::STYLE_MINIFIED => static fn() => '',
-                    //         self::STYLE_PRETTY => static fn() => ' ',
-                    //     ]
-                    // ]),
                 )
                 ->withRootSequence("beginObject -t* ?(-l* member/c (-* comma -t* -l* member/c)* -t*)[members]/g -l* endObject")
-                // ->withDefaults([
-                //     '-t.0' => [
-                //         self::STYLE_MINIFIED => static fn() => '',
-                //         self::STYLE_PRETTY => Whitespace::trailingWs(),
-                //     ],
-                //     '-l.1' => static fn() => '',
-                //     '-.2' => [
-                //         self::STYLE_MINIFIED => static fn() => '',
-                //         self::STYLE_PRETTY => $this->indentationResolver(true),
-                //     ],
-                //     '-t.3' => [
-                //         self::STYLE_MINIFIED => static fn() => '',
-                //         self::STYLE_PRETTY => $this->indentationResolver(true),
-                //     ],
-                // ])
                 ->closeWith(
                     Rule::token("endObject", "}", type: NodeType::Structure),
                 )
@@ -121,19 +97,7 @@ class JsonRfc8259 extends Whitespace
         );
 
         $this->grammar->setRootRegion($jsonText);
-
         $this->grammar->stampOrigin(new GrammarOrigin(self::FORMAT, self::VARIANT));
-
-        $this->withIndentationSupport(
-            [Defaults::DEFAULT_STYLE, self::STYLE_PRETTY],
-            static fn() => "    ",
-        );
-
-        $this->grammar->setStyleResolver(
-            static function (NodeInterface $rootNode): string {
-                return self::STYLE_PRETTY;
-            },
-        );
 
         $this->grammar->nodeClassMap = array_merge($this->grammar->nodeClassMap, [
             'json' => \PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Json\Rfc8259\JsonNode::class,

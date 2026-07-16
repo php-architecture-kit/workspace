@@ -75,15 +75,25 @@ class Json5 extends JsonC
         );
 
         $regions['object']
-            ->withRootSequence("beginObject -t* ?(-l* member/c (-* comma -t* -l* member/c)* ?(-* comma[trailingComma]) -t*)[members]/g -l* endObject");
+            ->withRootSequence("beginObject -t* ?(-* member/c (-* comma -t* -* member/c)* ?(-* comma[trailingComma]) -t*)[members]/g -* endObject");
 
         $regions['array']
-            ->withRootSequence("beginArray -t* ?(-l* value[item]/c (-* comma -t* -l* value[item]/c)* ?(-* comma[trailingComma]) -t*)[items]/g -l* endArray");
+            ->withRootSequence("beginArray -t* ?(-* value[item]/c (-* comma -t* -* value[item]/c)* ?(-* comma[trailingComma]) -t*)[items]/g -* endArray");
 
         $this->grammar->stampOrigin(
             new GrammarOrigin(self::FORMAT, self::VARIANT),
             forceRegions: ['number', 'object', 'array'],
         );
+
+        $this->grammar->nodeClassMap = array_merge($this->grammar->nodeClassMap, [
+            'json' => \PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Json\Ver5\JsonNode::class,
+            'lineComment' => \PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Json\Ver5\LineCommentNode::class,
+            'blockComment' => \PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Json\Ver5\BlockCommentNode::class,
+            'object' => \PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Json\Ver5\ObjectNode::class,
+            'member' => \PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Json\Ver5\MemberNode::class,
+            'primitive' => \PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Json\Ver5\PrimitiveNode::class,
+            'array' => \PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Json\Ver5\ArrayNode::class,
+        ]);
 
         return $this->grammar;
     }

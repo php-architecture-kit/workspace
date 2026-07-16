@@ -72,7 +72,13 @@ class TagToChoiceCompiler implements GrammarCompilerInterface
         foreach ($nestedRegions as $nestedRegion) {
             foreach ($nestedRegion->tags as $tag) {
                 if (NodeType::tryFrom($tag) === null) {
-                    $output[$tag][] = $nestedRegion->name;
+                    // A tag normally resolves to "this region, in any possible form"
+                    // (its own name). withPossibleNamesForTag() narrows that to a
+                    // specific subset of withPossibleNames() when the tag is meant to
+                    // pick out only some of the region's runtime-renamed forms — see
+                    // Whitespace.php's '-l'/'-t' for why that distinction matters.
+                    $names = $nestedRegion->config->possibleNamesByTag[$tag] ?? [$nestedRegion->name];
+                    $output[$tag] = array_merge($output[$tag] ?? [], $names);
                 }
             }
         }

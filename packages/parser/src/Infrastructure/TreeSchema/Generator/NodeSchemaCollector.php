@@ -11,6 +11,7 @@ use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Node\GroupAttribut
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\SequenceAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Node\NodeAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Node\OptionalAttribute;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Raw\OptionalRawAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Raw\RawContentAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Raw\RawRegionAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Raw\RawSequenceAttribute;
@@ -130,6 +131,7 @@ final class NodeSchemaCollector
             $attribute instanceof RawRegionAttribute => $this->mergeRawRegion($schema, $attribute),
             $attribute instanceof RawContentAttribute => $this->mergeRawContent($schema, $attribute),
             $attribute instanceof RawSequenceAttribute => $this->mergeRawSequence($schema, $attribute),
+            $attribute instanceof OptionalRawAttribute => $this->mergeOptionalRaw($schema, $attribute),
             // StructureAttribute carries no topology to discover here — its fixed
             // literal content is resolved later by GrammarAugmentor from the grammar's
             // own Defaults, never from a parsed sample (see GrammarLiteralResolver).
@@ -210,27 +212,44 @@ final class NodeSchemaCollector
             } else {
                 // structural element
                 $structName = $child->getName();
-                $alreadyExists = false;
+                $factory = null;
                 foreach ($schema->structuralFactories as $f) {
                     if ($f->name === $structName) {
-                        $alreadyExists = true;
+                        $factory = $f;
                         break;
                     }
                 }
 
-                if (!$alreadyExists) {
+                if ($factory === null) {
                     if ($child instanceof StructureAttribute) {
-                        $schema->structuralFactories[] = new StructuralFactoryInfo(
+                        $factory = new StructuralFactoryInfo(
                             name: $structName,
                             attrClass: StructureAttribute::class,
                             content: $child->content,
                         );
+                        $schema->structuralFactories[] = $factory;
                     } elseif ($child instanceof GroupAttribute) {
-                        $schema->structuralFactories[] = new StructuralFactoryInfo(
+                        $factory = new StructuralFactoryInfo(
                             name: $structName,
                             attrClass: GroupAttribute::class,
                             content: null,
                         );
+                        $schema->structuralFactories[] = $factory;
+                    }
+                }
+
+                // A structural GroupAttribute is a trivia slot repeated once per unit —
+                // its node names must accumulate across samples/positions the same way
+                // mergeGroup() does for a regular top-level GroupAttribute property, so
+                // the renderer can later tell whether *this specific* structural slot
+                // (e.g. "the group right after the separator") has a non-whitespace
+                // alternative worth a TriviaInsertionPolicy hook.
+                if ($factory !== null && $child instanceof GroupAttribute) {
+                    foreach ($child->nodes as $node) {
+                        $nodeName = $node->getName();
+                        if ($this->isValidNodeName($nodeName) && !in_array($nodeName, $factory->unionNodeNames, true)) {
+                            $factory->unionNodeNames[] = $nodeName;
+                        }
                     }
                 }
             }
@@ -246,6 +265,21 @@ final class NodeSchemaCollector
         $alternatives = $attr->getMeta('alternatives');
         if (is_array($alternatives) && !empty($alternatives) && empty($schema->choicesList)) {
             $schema->choicesList = $alternatives;
+        }
+    }
+
+    /**
+     * The wrapped raw is only *sometimes* present (that's the whole point of
+     * "optional") — e.g. across several parsed samples, one comment might have
+     * a leadingWs and another not. Only record the token name (needed by
+     * create() to rebuild a RawRegionAttribute with the right `name`) when we
+     * actually see one; a sample where it happens to be absent must not erase
+     * a name already learned from an earlier sample.
+     */
+    private function mergeOptionalRaw(AttributeSchema $schema, OptionalRawAttribute $attr): void
+    {
+        if ($attr->raw instanceof RawRegionAttribute && $schema->rawTokenName === null) {
+            $schema->rawTokenName = $attr->raw->name;
         }
     }
 

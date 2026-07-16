@@ -25,7 +25,6 @@ class JsonC extends JsonRfc8259
                 ->retokenizedByInnerGrammar((new JsonComment('lineComment'))->grammar())
                 ->setNodeType(NodeType::Node)
                 ->addTag("comment", "-", "-l", "-t"),
-
             Rule::token("blockCommentStart", "/*", type: NodeType::Structure)
                 ->startRegion('blockComment', true)
                 ->retokenizedByInnerGrammar((new JsonComment('blockComment'))->grammar())

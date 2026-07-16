@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Json\Ver5;
 
+use PhpArchitecture\Parser\Foundation\Parsing\Contract\Placement;
+use PhpArchitecture\Parser\Foundation\Parsing\Contract\TriviaInsertionContext;
+use PhpArchitecture\Parser\Foundation\Parsing\Contract\TriviaPolicyRegistry;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Node\GroupAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Node\NodeAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\NodeOrigin;
@@ -41,6 +44,18 @@ class JsonNode extends SequenceNode
         return $node;
     }
 
+    /**
+     * Builds the right node for $text via the TriviaInsertionPolicy registered
+     * for this class (TriviaPolicyRegistry) — this slot accepts more than one
+     * alternative node type, so the policy decides which one is safe here.
+     */
+    public function insertIntoTrivia0(string $text, Placement $placement = Placement::After, int $offset = -1): self
+    {
+        $node = TriviaPolicyRegistry::resolve(static::class)->resolve($text, new TriviaInsertionContext($this->trivia0, $placement, $offset));
+        $this->trivia0->addNode($node->setParent($this), $placement, $offset);
+        return $this;
+    }
+
     public function getNodeValue(): ObjectNode|ArrayNode|PrimitiveNode
     {
         /** @var ObjectNode|ArrayNode|PrimitiveNode $node */
@@ -51,6 +66,18 @@ class JsonNode extends SequenceNode
     public function setNodeValue(ObjectNode|ArrayNode|PrimitiveNode $value): self
     {
         $this->attributes[1] = NodeAttribute::fromNode($value->setParent($this));
+        return $this;
+    }
+
+    /**
+     * Builds the right node for $text via the TriviaInsertionPolicy registered
+     * for this class (TriviaPolicyRegistry) — this slot accepts more than one
+     * alternative node type, so the policy decides which one is safe here.
+     */
+    public function insertIntoTrivia1(string $text, Placement $placement = Placement::After, int $offset = -1): self
+    {
+        $node = TriviaPolicyRegistry::resolve(static::class)->resolve($text, new TriviaInsertionContext($this->trivia1, $placement, $offset));
+        $this->trivia1->addNode($node->setParent($this), $placement, $offset);
         return $this;
     }
 }

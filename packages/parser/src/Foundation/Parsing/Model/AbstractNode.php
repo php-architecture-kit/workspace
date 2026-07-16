@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace PhpArchitecture\Parser\Foundation\Parsing\Model;
 
+use PhpArchitecture\Parser\Foundation\ParsedTree\Context\ContextStack;
 use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeAttributeInterface;
 use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeInterface;
 use PhpArchitecture\Parser\Foundation\Parsing\Contract\Placement;
@@ -11,6 +12,8 @@ use PhpArchitecture\Parser\Foundation\Shared\Meta\MetaTrait;
 use PhpArchitecture\Parser\Foundation\Shared\Tags\TagsTrait;
 use WeakReference;
 use LogicException;
+use PhpArchitecture\Parser\Foundation\ParsedTree\Context\NodeContext;
+use PhpArchitecture\Parser\Foundation\ParsedTree\Format\Formatter;
 
 /**
  * Identity / infrastructure base shared by every parsed-tree node, independent of
@@ -26,7 +29,7 @@ abstract class AbstractNode implements NodeInterface
     /** @var WeakReference<NodeInterface>|null */
     public private(set) ?WeakReference $parent = null;
 
-    public private(set) Context\ContextStack $contextStack;
+    public private(set) ContextStack $contextStack;
 
     /**
      * @param NodeAttributeInterface[] $attributes
@@ -55,19 +58,19 @@ abstract class AbstractNode implements NodeInterface
      * Initializes the context stack for the node. Should be called when the node is created or when its parent is set/changed.
      * So, in theory you should not call this method because it's handled internally by the constructor and setParent method.
      */
-    protected function initializeContext(NodeInterface $node, ?Context\ContextStack $parentContextStack): void
+    protected function initializeContext(NodeInterface $node, ?ContextStack $parentContextStack): void
     {
         if ($parentContextStack === null) {
-            $this->contextStack = new Context\ContextStack([new Context\NodeContext($node)]);
+            $this->contextStack = new ContextStack([new NodeContext($node)]);
             return;
         }
 
-        $this->contextStack = $parentContextStack->push(new Context\NodeContext($node));
+        $this->contextStack = $parentContextStack->push(new NodeContext($node));
     }
 
-    public function applyFormatting(Format\Formatter $formatter, string $style, bool $recursive = false): self
+    public function applyFormatting(Formatter $formatter, string $style, bool $recursive = false): self
     {
-        $this->contextStack->treeContext[Context\ContextStack::STYLE] = $style;
+        $this->contextStack->treeContext[ContextStack::STYLE] = $style;
         $formatter->applyFormatters($this, $style);
 
         if ($recursive) {
@@ -99,7 +102,7 @@ abstract class AbstractNode implements NodeInterface
         return $this->attributes;
     }
 
-    public function getContextStack(): Context\ContextStack
+    public function getContextStack(): ContextStack
     {
         return $this->contextStack;
     }

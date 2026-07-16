@@ -5,8 +5,11 @@ declare(strict_types=1);
 namespace PhpArchitecture\Parser\Foundation\Grammar\Definition;
 
 use InvalidArgumentException;
+use PhpArchitecture\Parser\Foundation\Grammar\Definition\Creation\ContextDefinition;
+use PhpArchitecture\Parser\Foundation\Grammar\Definition\Creation\DefaultsDefinition;
+use PhpArchitecture\Parser\Foundation\Grammar\Definition\Creation\FormatDefinition;
 use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeInterface;
-use PhpArchitecture\Parser\Foundation\Parsing\Model\Context\ContextStack;
+use PhpArchitecture\Parser\Foundation\ParsedTree\Context\ContextStack;
 
 class Grammar
 {
@@ -65,7 +68,7 @@ class Grammar
     {
         $this->contextDefinition->addContextInitializer(
             function (NodeInterface $rootNode) use ($styleResolver): void {
-                $rootNode->getContextStack()->treeContext[ContextStack::STYLE] = $styleResolver($rootNode) ?: Defaults::DEFAULT_STYLE;
+                $rootNode->getContextStack()->treeContext[ContextStack::STYLE] = $styleResolver($rootNode) ?: DefaultsDefinition::DEFAULT_STYLE;
             },
             true
         );

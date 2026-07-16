@@ -283,6 +283,18 @@ class SequenceNodeEnricher
             return $region->regions[$alternative]->config->nodeType;
         }
 
+        // Try to find as a possibleNames() entry of any region — a runtime-only
+        // rename target (e.g. Whitespace's 'trailingWs'/'leadingWs'/...) is never a
+        // Rule or Region name of its own; withPossibleNamesForTag() (see
+        // TagToChoiceCompiler) can surface it as a spread alternative, so it must
+        // resolve to a type here too, or every such alternative would fail as
+        // "no node type assigned" below.
+        foreach ($this->definition->getAllRegions() as $candidateRegion) {
+            if (in_array($alternative, $candidateRegion->config->possibleNames, true)) {
+                return $candidateRegion->config->nodeType;
+            }
+        }
+
         // Try to find as Tag - get all rules with this tag
         $rulesWithTag = [];
         foreach ($region->rules as $rule) {

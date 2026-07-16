@@ -10,9 +10,9 @@ use PhpArchitecture\Parser\Foundation\Grammar\Definition\Grammar;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\GrammarOrigin;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Rule;
 use PhpArchitecture\Parser\Foundation\Grammar\Contract\GrammarDefinitionInterface;
-use PhpArchitecture\Parser\Foundation\Grammar\Definition\Defaults;
+use PhpArchitecture\Parser\Foundation\Grammar\Definition\Creation\DefaultsDefinition;
 use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeInterface;
-use PhpArchitecture\Parser\Foundation\Parsing\Model\Context\ContextStack;
+use PhpArchitecture\Parser\Foundation\ParsedTree\Context\ContextStack;
 use PhpArchitecture\Parser\Foundation\Tokenization\Contract\TokenizationContext;
 use PhpArchitecture\Parser\Foundation\Tokenization\Event\TokenRegionEndedEvent;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\NodeType;
@@ -25,7 +25,6 @@ class Whitespace implements GrammarDefinitionInterface
     public const VARIANT = "whitespace";
 
     public const CONTEXT_INDENT_UNIT = 'indentUnit';
-
     protected Grammar $grammar;
 
     public function grammar(): Grammar
@@ -99,7 +98,18 @@ class Whitespace implements GrammarDefinitionInterface
                 ->closeWith(Rule::taggedWith("_ws"), true, false)
                 ->setNodeType(NodeType::Raw)
                 ->addTag('ws', 'whitespace', '-', '-l', '-t')
-                ->withPossibleNames('emptyLine', 'trailingWs', 'leadingWs', 'inlineWs'),
+                ->withPossibleNames('emptyLine', 'trailingWs', 'leadingWs', 'inlineWs')
+                // '-l'/'-t' pick out only the possible names that keep that tag after
+                // the rename listener above runs removeTag('-t')/removeTag('-l') per
+                // instance — see the listener: emptyLine and leadingWs keep '-l' (lose
+                // '-t'), trailingWs keeps '-t' (loses '-l'), inlineWs keeps both. Without
+                // this, both tags fall back to resolving as "the whitespace region, in
+                // any possible form" — identical for '-l' and '-t' — so e.g. "-t* -l*"
+                // (two adjacent slots meant to divide trailing-then-leading whitespace)
+                // couldn't actually tell them apart, and the first slot greedily
+                // consumed the whole run regardless of which one it was written as.
+                ->withPossibleNamesForTag('-l', 'emptyLine', 'leadingWs', 'inlineWs')
+                ->withPossibleNamesForTag('-t', 'trailingWs', 'inlineWs'),
         );
 
         $this->grammar->stampOrigin(new GrammarOrigin(self::FORMAT, self::VARIANT));
@@ -124,7 +134,7 @@ class Whitespace implements GrammarDefinitionInterface
     ): self {
         $this->grammar->contextDefinition->addContextInitializer(
             function (NodeInterface $rootNode) use ($stylesWithIndentation, $indentUnitResolver): void {
-                $style = $rootNode->getContextStack()->treeContext[ContextStack::STYLE] ?? Defaults::DEFAULT_STYLE;
+                $style = $rootNode->getContextStack()->treeContext[ContextStack::STYLE] ?? DefaultsDefinition::DEFAULT_STYLE;
                 if (!in_array($style, $stylesWithIndentation, true)) {
                     return;
                 }

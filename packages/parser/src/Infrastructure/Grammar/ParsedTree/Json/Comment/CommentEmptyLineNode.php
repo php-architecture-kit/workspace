@@ -15,6 +15,7 @@ use PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Technical\Whitespac
 
 class CommentEmptyLineNode extends SequenceNode
 {
+    /** @var GroupAttribute<LeadingWsNode|EmptyLineNode|TrailingWsNode|InlineWsNode> */
     public GroupAttribute $trivia0 { get => $this->attributes[0]; }
 
     public StructureAttribute $asterisk { get => $this->attributes[1]; }

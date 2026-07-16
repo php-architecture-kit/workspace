@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Json\C;
 
+use PhpArchitecture\Parser\Foundation\Parsing\Contract\Placement;
+use PhpArchitecture\Parser\Foundation\Parsing\Contract\TriviaInsertionContext;
+use PhpArchitecture\Parser\Foundation\Parsing\Contract\TriviaPolicyRegistry;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Node\GroupAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Node\NodeAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Raw\RawRegionAttribute;
@@ -63,6 +66,30 @@ class MemberNode extends SequenceNode
     public function setRawIdentifier(string $identifier): self
     {
         $this->identifier->content = $identifier;
+        return $this;
+    }
+
+    /**
+     * Builds the right node for $text via the TriviaInsertionPolicy registered
+     * for this class (TriviaPolicyRegistry) — this slot accepts more than one
+     * alternative node type, so the policy decides which one is safe here.
+     */
+    public function insertIntoTrivia0(string $text, Placement $placement = Placement::After, int $offset = -1): self
+    {
+        $node = TriviaPolicyRegistry::resolve(static::class)->resolve($text, new TriviaInsertionContext($this->trivia0, $placement, $offset));
+        $this->trivia0->addNode($node->setParent($this), $placement, $offset);
+        return $this;
+    }
+
+    /**
+     * Builds the right node for $text via the TriviaInsertionPolicy registered
+     * for this class (TriviaPolicyRegistry) — this slot accepts more than one
+     * alternative node type, so the policy decides which one is safe here.
+     */
+    public function insertIntoTrivia1(string $text, Placement $placement = Placement::After, int $offset = -1): self
+    {
+        $node = TriviaPolicyRegistry::resolve(static::class)->resolve($text, new TriviaInsertionContext($this->trivia1, $placement, $offset));
+        $this->trivia1->addNode($node->setParent($this), $placement, $offset);
         return $this;
     }
 

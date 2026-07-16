@@ -12,7 +12,7 @@ use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Raw\RawContentAttr
 use PhpArchitecture\Parser\Foundation\Parsing\Model\GroupNode;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\LeafNode;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\NodeOrigin;
-use PhpArchitecture\Parser\Foundation\Parsing\Navigation\TreeNavigator;
+use PhpArchitecture\Parser\Foundation\ParsedTree\Navigation\TreeNavigator;
 
 #[Group('unit')]
 final class TreeNavigatorTest extends TestCase
