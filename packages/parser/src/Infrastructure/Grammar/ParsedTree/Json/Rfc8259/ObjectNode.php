@@ -21,12 +21,13 @@ class ObjectNode extends SequenceNode
 {
     public StructureAttribute $beginObject { get => $this->attributes[0]; }
 
-    /** @var GroupAttribute<TrailingWsNode|InlineWsNode|LeadingWsNode|EmptyLineNode> */
+    /** @var GroupAttribute<TrailingWsNode|InlineWsNode|EmptyLineNode|LeadingWsNode> */
     public GroupAttribute $trivia0 { get => $this->attributes[1]; }
 
     /** @var SequenceAttribute<NodeAttribute<MemberNode>|GroupAttribute|StructureAttribute> */
     public SequenceAttribute $members { get => $this->attributes[2]; }
 
+    /** @var GroupAttribute<LeadingWsNode|EmptyLineNode|TrailingWsNode|InlineWsNode> */
     public GroupAttribute $trivia1 { get => $this->attributes[3]; }
 
     public StructureAttribute $endObject { get => $this->attributes[4]; }
@@ -97,6 +98,6 @@ class ObjectNode extends SequenceNode
 
     private static function membersValidity(): NestedSequence
     {
-        return NestedSequence::fromString('?(whitespace*[trivia0] member (whitespace*[trivia0] comma whitespace*[trivia1] whitespace*[trivia2] member)* whitespace*[trivia1])[members]');
+        return NestedSequence::fromString('?(emptyLine|leadingWs|inlineWs*[trivia0] member (whitespace*[trivia0] comma trailingWs|inlineWs*[trivia1] emptyLine|leadingWs|inlineWs*[trivia2] member)* trailingWs|inlineWs*[trivia1])[members]');
     }
 }
