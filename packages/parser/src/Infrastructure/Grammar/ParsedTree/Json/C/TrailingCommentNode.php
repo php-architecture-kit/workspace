@@ -16,11 +16,11 @@ class TrailingCommentNode extends SequenceNode
     public OptionalRawAttribute $leadingWs { get => $this->attributes[0]; }
 
     /** @var NodeAttribute<BlockCommentNode|LineCommentNode> */
-    public NodeAttribute $lineComment { get => $this->attributes[1]; }
+    public NodeAttribute $comment { get => $this->attributes[1]; }
 
     public RawGroupAttribute $trailingWs { get => $this->attributes[2]; }
 
-    public static function create(?string $leadingWs, BlockCommentNode|LineCommentNode $lineComment): self
+    public static function create(?string $leadingWs, BlockCommentNode|LineCommentNode $comment): self
     {
         $node = new self(
             name: 'trailingComment',
@@ -33,11 +33,11 @@ class TrailingCommentNode extends SequenceNode
                     name: 'leadingWs',
                     anchorName: 'leadingWs',
                 ),
-                NodeAttribute::fromNode($lineComment),
+                NodeAttribute::fromNode($comment),
             ],
             parent: null,
         );
-        $lineComment->setParent($node);
+        $comment->setParent($node);
 
         return $node;
     }
@@ -59,14 +59,14 @@ class TrailingCommentNode extends SequenceNode
         return $this;
     }
 
-    public function getNodeLineComment(): BlockCommentNode|LineCommentNode
+    public function getNodeComment(): BlockCommentNode|LineCommentNode
     {
         /** @var BlockCommentNode|LineCommentNode $node */
-        $node = $this->lineComment->node;
+        $node = $this->comment->node;
         return $node;
     }
 
-    public function setNodeLineComment(BlockCommentNode|LineCommentNode $value): self
+    public function setNodeComment(BlockCommentNode|LineCommentNode $value): self
     {
         $this->attributes[1] = NodeAttribute::fromNode($value->setParent($this));
         return $this;

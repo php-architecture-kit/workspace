@@ -37,8 +37,8 @@ class JsonC extends JsonRfc8259
                 )
                 ->setNodeType(NodeType::Node),
 
-            Rule::seq("leadingComment", "?leadingWs|inlineWs[leadingWs] lineComment|blockComment inlineWs|trailingWs*[trailingWs]", ['-', '-l', 'comment']),
-            Rule::seq("trailingComment", "?inlineWs[leadingWs] lineComment|blockComment inlineWs|trailingWs*[trailingWs]", ['-', '-t', 'comment']),
+            Rule::seq("leadingComment", "?leadingWs|inlineWs[leadingWs] lineComment|blockComment[comment] inlineWs|trailingWs*[trailingWs]", ['-', '-l', 'comment']),
+            Rule::seq("trailingComment", "?inlineWs[leadingWs] lineComment|blockComment[comment] inlineWs|trailingWs*[trailingWs]", ['-', '-t', 'comment']),
         );
 
         $this->grammar->stampOrigin(new GrammarOrigin(self::FORMAT, self::VARIANT));
