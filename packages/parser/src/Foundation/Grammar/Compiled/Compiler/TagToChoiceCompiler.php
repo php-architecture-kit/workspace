@@ -37,17 +37,23 @@ class TagToChoiceCompiler implements GrammarCompilerInterface
     /** @return array<string,string[]> */
     private function getTagsMap(Region $region): array
     {
-        /* @return array<string,string[]> */
+        $tagMap = array_merge_recursive(
+            $this->getTagNestedRegionMap($region),
+            $this->getTagRuleMap($region),
+        );
+
+        foreach ($tagMap as $tag => $options) {
+            usort($options, static fn(array $a, array $b): int => $b['priority'] <=> $a['priority']);
+            $tagMap[$tag] = array_map(static fn(array $option): string => $option['name'], $options);
+        }
+
         return array_map(
             'array_unique',
-            array_merge_recursive(
-                $this->getTagNestedRegionMap($region),
-                $this->getTagRuleMap($region),
-            ),
+            $tagMap
         );
     }
 
-    /** @return array<string,string[]> */
+    /** @return array<string,array{name:string,priority:int}[]> */
     private function getTagRuleMap(Region $region): array
     {
         $output = [];
@@ -55,7 +61,7 @@ class TagToChoiceCompiler implements GrammarCompilerInterface
         foreach ($region->rules as $rule) {
             foreach ($rule->tags as $tag) {
                 if (NodeType::tryFrom($tag) === null) {
-                    $output[$tag][] = $rule->name;
+                    $output[$tag][] = ['name' => $rule->name, 'priority' => $rule->priority];
                 }
             }
         }
@@ -63,7 +69,7 @@ class TagToChoiceCompiler implements GrammarCompilerInterface
         return $output;
     }
 
-    /** @return array<string,string[]> */
+    /** @return array<string,array{name:string,priority:int}[]> */
     private function getTagNestedRegionMap(Region $region): array
     {
         $nestedRegions = $this->getAllNestedRegions($region);
@@ -78,7 +84,10 @@ class TagToChoiceCompiler implements GrammarCompilerInterface
                     // pick out only some of the region's runtime-renamed forms — see
                     // Whitespace.php's '-l'/'-t' for why that distinction matters.
                     $names = $nestedRegion->config->possibleNamesByTag[$tag] ?? [$nestedRegion->name];
-                    $output[$tag] = array_merge($output[$tag] ?? [], $names);
+
+                    $prioritizedNames = array_map(static fn(string $name): array => ['name' => $name, 'priority' => $nestedRegion->config->priority], $names);
+
+                    $output[$tag] = array_merge($output[$tag] ?? [], $prioritizedNames);
                 }
             }
         }

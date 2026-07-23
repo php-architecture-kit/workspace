@@ -36,7 +36,6 @@ class RegionConfig
 
         // parsing
         public NodeType $nodeType = NodeType::Node,
-        public ?Definition $definition = null,
 
         // meta
         /** @var string[] */
@@ -56,6 +55,8 @@ class RegionConfig
          * @var array<string,string[]>
          */
         public array $possibleNamesByTag = [],
+
+        public int $priority = 0,
 
         // pratt
         public ?string $prattGroupedRegionName = null,

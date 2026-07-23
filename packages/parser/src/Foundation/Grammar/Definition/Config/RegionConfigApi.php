@@ -188,23 +188,6 @@ trait RegionConfigApi
         return $this;
     }
 
-    public function asAstNode(string $name, AstDefinitionInterface ...$definitions): self
-    {
-        $this->config->definition = (new Definition($name))->add(...$definitions);
-
-        return $this;
-    }
-
-    public function extendAstNode(AstDefinitionInterface ...$definitions): self
-    {
-        if ($this->config->definition === null) {
-            throw new LogicException('Region must be converted to AST node first using asAstNode() method.');
-        }
-
-        $this->config->definition->add(...$definitions);
-        return $this;
-    }
-
     public function withPossibleNames(string ...$names): self
     {
         $this->config->possibleNames = $names;
@@ -232,6 +215,12 @@ trait RegionConfigApi
     public function prattAtom(): self
     {
         $this->config->isPrattAtom = true;
+        return $this;
+    }
+
+    public function priority(int $priority): self
+    {
+        $this->config->priority = $priority;
         return $this;
     }
 }

@@ -98,6 +98,7 @@ class Whitespace implements GrammarDefinitionInterface
                 ->closeWith(Rule::taggedWith("_ws"), true, false)
                 ->setNodeType(NodeType::Raw)
                 ->addTag('ws', 'whitespace', '-', '-l', '-t')
+                ->priority(-99)
                 ->withPossibleNames('emptyLine', 'trailingWs', 'leadingWs', 'inlineWs')
                 // '-l'/'-t' pick out only the possible names that keep that tag after
                 // the rename listener above runs removeTag('-t')/removeTag('-l') per

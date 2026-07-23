@@ -17,6 +17,7 @@ class CommentEmptyLineNode extends SequenceNode
 {
     /** @var GroupAttribute<LeadingWsNode|EmptyLineNode|TrailingWsNode|InlineWsNode> */
     public GroupAttribute $trivia0 { get => $this->attributes[0]; }
+
     public StructureAttribute $asterisk { get => $this->attributes[1]; }
 
     /** @var GroupAttribute<InlineWsNode|EmptyLineNode|TrailingWsNode|LeadingWsNode> */

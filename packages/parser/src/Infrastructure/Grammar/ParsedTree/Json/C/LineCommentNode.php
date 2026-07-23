@@ -14,8 +14,11 @@ use PhpArchitecture\Parser\Foundation\Parsing\Model\SequenceNode;
 class LineCommentNode extends SequenceNode
 {
     public StructureAttribute $lineCommentStart { get => $this->attributes[0]; }
+
     public OptionalRawAttribute $leadingWs { get => $this->attributes[1]; }
+
     public RawContentAttribute $content { get => $this->attributes[2]; }
+
     public OptionalRawAttribute $trailingWs { get => $this->attributes[3]; }
 
     public static function create(?string $leadingWs, string $content, ?string $trailingWs = null): self

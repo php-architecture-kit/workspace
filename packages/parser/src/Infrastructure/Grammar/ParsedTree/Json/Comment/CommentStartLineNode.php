@@ -21,8 +21,11 @@ use PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Technical\Whitespac
 class CommentStartLineNode extends SequenceNode
 {
     public StructureAttribute $blockCommentStart { get => $this->attributes[0]; }
+
     public StructureAttribute $openingAsterisk { get => $this->attributes[1]; }
+
     public OptionalRawAttribute $leadingWs { get => $this->attributes[2]; }
+
     public RawContentAttribute $content { get => $this->attributes[3]; }
 
     /** @var GroupAttribute<TrailingWsNode|EmptyLineNode|LeadingWsNode|InlineWsNode> */
