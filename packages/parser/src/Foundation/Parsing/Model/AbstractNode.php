@@ -28,7 +28,6 @@ abstract class AbstractNode implements NodeInterface
 
     /** @var WeakReference<NodeInterface>|null */
     public private(set) ?WeakReference $parent = null;
-
     public private(set) ContextStack $contextStack;
 
     /**

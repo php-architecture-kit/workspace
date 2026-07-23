@@ -49,7 +49,6 @@ class GrammarCompiler
 
     /** @var RuleCompilerInterface[] */
     private array $ruleCompilers = [];
-
     private readonly Compiler\RegionConflictResolver $conflictResolver;
 
     public function __construct()

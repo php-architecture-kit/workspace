@@ -20,9 +20,7 @@ use PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Technical\Whitespac
 class LineCommentNode extends SequenceNode
 {
     public StructureAttribute $hash { get => $this->attributes[0]; }
-
     public OptionalRawAttribute $leadingWs { get => $this->attributes[1]; }
-
     public RawContentAttribute $content { get => $this->attributes[2]; }
 
     /** @var GroupAttribute<TrailingWsNode|EmptyLineNode|LeadingWsNode|InlineWsNode> */

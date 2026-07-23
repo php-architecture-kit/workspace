@@ -22,7 +22,7 @@ class DefaultsDefinition
     ) {
         $this->factoryByStyles = array_map(
             static fn($factory) => $factory instanceof Closure ? $factory : Closure::fromCallable($factory),
-            $factoryByStyles
+            $factoryByStyles,
         );
     }
 

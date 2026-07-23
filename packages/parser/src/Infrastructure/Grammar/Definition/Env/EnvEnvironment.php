@@ -31,7 +31,6 @@ class EnvEnvironment extends Whitespace
                 ->retokenizedByInnerGrammar((new EnvComment())->grammar())
                 ->setNodeType(NodeType::Node)
                 ->addTag("comment", "-"),
-
             Rule::expr("identifier", "[a-zA-Z_][a-zA-Z0-9_]*")
                 ->startRegion('assignment', true)
                 ->add(

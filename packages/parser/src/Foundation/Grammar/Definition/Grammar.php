@@ -19,7 +19,6 @@ class Grammar
 
     /** @var array<string,class-string> */
     public array $nodeClassMap = [];
-
     public ContextDefinition $contextDefinition;
     public FormatDefinition $formatDefinition;
 
@@ -70,7 +69,7 @@ class Grammar
             function (NodeInterface $rootNode) use ($styleResolver): void {
                 $rootNode->getContextStack()->treeContext[ContextStack::STYLE] = $styleResolver($rootNode) ?: DefaultsDefinition::DEFAULT_STYLE;
             },
-            true
+            true,
         );
     }
 

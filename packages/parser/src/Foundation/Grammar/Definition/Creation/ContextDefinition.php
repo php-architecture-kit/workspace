@@ -22,7 +22,7 @@ class ContextDefinition
     ) {
         $this->initializers = array_map(
             static fn($initializer) => $initializer instanceof Closure ? $initializer : Closure::fromCallable($initializer),
-            $initializers
+            $initializers,
         );
     }
 

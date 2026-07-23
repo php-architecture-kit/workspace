@@ -45,7 +45,7 @@ class JsonRfc8259 extends Whitespace
                 ->add(
                     Rule::token("colon", ":", type: NodeType::Structure),
                     Rule::token("comma", ",", type: NodeType::Structure),
-                    Rule::seq("member", "string[identifier] -* colon -* value")
+                    Rule::seq("member", "string[identifier] -* colon -* value"),
                 )
                 ->withRootSequence("beginObject -t* ?(-l* member/c (-* comma -t* -l* member/c)* -t*)[members]/g -l* endObject")
                 ->closeWith(

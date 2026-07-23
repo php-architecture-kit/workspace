@@ -22,7 +22,7 @@ class FormatDefinition
     ) {
         $this->formatters = array_map(
             static fn($formatter) => $formatter instanceof Closure ? $formatter : Closure::fromCallable($formatter),
-            $formatters
+            $formatters,
         );
     }
 

@@ -9,11 +9,11 @@ use PhpArchitecture\Parser\Foundation\Grammar\Definition\EventSubscriber;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Grammar;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Region;
 use UnitEnum;
+use ReflectionClass;
 
 final class RegionHasher
 {
     use HashClosure;
-
     private array $visiting = [];
 
     /**
@@ -105,7 +105,7 @@ final class RegionHasher
         }
         $this->visiting[$oid] = true;
 
-        $reflection = new \ReflectionClass($obj);
+        $reflection = new ReflectionClass($obj);
         $props = [];
         foreach ($reflection->getProperties() as $prop) {
             if (in_array($prop->getName(), ['meta', 'tags'], true)) {

@@ -21,15 +21,10 @@ class CommentEndLineNode extends SequenceNode
 {
     /** @var GroupAttribute<LeadingWsNode|EmptyLineNode|TrailingWsNode|InlineWsNode> */
     public GroupAttribute $trivia { get => $this->attributes[0]; }
-
     public StructureAttribute $asterisk { get => $this->attributes[1]; }
-
     public OptionalRawAttribute $leadingWs { get => $this->attributes[2]; }
-
     public OptionalRawAttribute $trailingWs { get => $this->attributes[3]; }
-
     public StructureAttribute $closingAsterisk { get => $this->attributes[4]; }
-
     public StructureAttribute $blockCommentEnd { get => $this->attributes[5]; }
 
     public static function create(?string $leadingWs, ?string $trailingWs = null): self

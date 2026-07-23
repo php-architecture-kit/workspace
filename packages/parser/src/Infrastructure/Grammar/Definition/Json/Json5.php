@@ -47,14 +47,13 @@ class Json5 extends JsonC
                     Rule::keyword("Infinity", true, "StandardInfinity")->priority(1),
                     Rule::keyword("+Infinity", true, "positiveInfinity")->priority(1)
                 ],
-                type: NodeType::Raw
+                type: NodeType::Raw,
             ),
-
             Rule::choice(
                 "primitive",
                 ["false", "null", "true", "infinity", "nan", "number", "string"],
                 tags: ["value"],
-                attributeTags: ['r']
+                attributeTags: ['r'],
             ),
         );
 
