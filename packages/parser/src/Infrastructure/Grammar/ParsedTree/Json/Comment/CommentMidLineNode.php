@@ -20,11 +20,8 @@ class CommentMidLineNode extends SequenceNode
 {
     /** @var GroupAttribute<LeadingWsNode|EmptyLineNode|TrailingWsNode|InlineWsNode> */
     public GroupAttribute $trivia0 { get => $this->attributes[0]; }
-
     public StructureAttribute $asterisk { get => $this->attributes[1]; }
-
     public OptionalRawAttribute $leadingWs { get => $this->attributes[2]; }
-
     public RawContentAttribute $content { get => $this->attributes[3]; }
 
     /** @var GroupAttribute<InlineWsNode|TrailingWsNode|EmptyLineNode|LeadingWsNode> */

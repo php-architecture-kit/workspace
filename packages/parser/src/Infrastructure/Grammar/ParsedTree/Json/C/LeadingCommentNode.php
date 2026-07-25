@@ -17,7 +17,6 @@ class LeadingCommentNode extends SequenceNode
 
     /** @var NodeAttribute<BlockCommentNode|LineCommentNode> */
     public NodeAttribute $comment { get => $this->attributes[1]; }
-
     public RawGroupAttribute $trailingWs { get => $this->attributes[2]; }
 
     public static function create(?string $leadingWs, BlockCommentNode|LineCommentNode $comment): self

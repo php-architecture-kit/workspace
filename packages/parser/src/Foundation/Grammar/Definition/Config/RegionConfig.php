@@ -55,7 +55,6 @@ class RegionConfig
          * @var array<string,string[]>
          */
         public array $possibleNamesByTag = [],
-
         public int $priority = 0,
 
         // pratt

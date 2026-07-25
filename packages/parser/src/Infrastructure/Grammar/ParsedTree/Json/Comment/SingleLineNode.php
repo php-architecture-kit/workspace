@@ -14,17 +14,11 @@ use PhpArchitecture\Parser\Foundation\Parsing\Model\SequenceNode;
 class SingleLineNode extends SequenceNode
 {
     public StructureAttribute $blockCommentStart { get => $this->attributes[0]; }
-
     public StructureAttribute $openingAsterisk { get => $this->attributes[1]; }
-
     public OptionalRawAttribute $leadingWs { get => $this->attributes[2]; }
-
     public RawContentAttribute $content { get => $this->attributes[3]; }
-
     public OptionalRawAttribute $trailingWs { get => $this->attributes[4]; }
-
     public StructureAttribute $closingAsterisk { get => $this->attributes[5]; }
-
     public StructureAttribute $blockCommentEnd { get => $this->attributes[6]; }
 
     public static function create(?string $leadingWs, string $content, ?string $trailingWs = null): self

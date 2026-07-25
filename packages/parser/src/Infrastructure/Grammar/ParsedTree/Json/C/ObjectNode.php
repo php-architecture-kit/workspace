@@ -29,7 +29,6 @@ class ObjectNode extends SequenceNode
 
     /** @var GroupAttribute<LeadingWsNode|LeadingCommentNode|EmptyLineNode|TrailingWsNode|InlineWsNode> */
     public GroupAttribute $trivia1 { get => $this->attributes[3]; }
-
     public StructureAttribute $endObject { get => $this->attributes[4]; }
 
     public static function create(): self

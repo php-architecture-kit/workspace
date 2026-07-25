@@ -21,7 +21,6 @@ class MemberNode extends SequenceNode
 
     /** @var GroupAttribute<InlineWsNode|LeadingCommentNode|EmptyLineNode|TrailingWsNode|LeadingWsNode> */
     public GroupAttribute $trivia0 { get => $this->attributes[1]; }
-
     public StructureAttribute $colon { get => $this->attributes[2]; }
 
     /** @var GroupAttribute<TrailingWsNode|InlineWsNode|LeadingCommentNode|LeadingWsNode|EmptyLineNode> */

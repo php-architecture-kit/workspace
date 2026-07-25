@@ -24,7 +24,6 @@ class JsonC extends JsonRfc8259
                 ->closeWith(Rule::ref("lineComment"), false, true, true)
                 ->retokenizedByInnerGrammar((new JsonComment('lineComment'))->grammar())
                 ->setNodeType(NodeType::Node),
-
             Rule::token("blockCommentStart", "/*", type: NodeType::Structure)
                 ->startRegion('blockComment', true)
                 ->retokenizedByInnerGrammar((new JsonComment('blockComment'))->grammar())
@@ -36,7 +35,6 @@ class JsonC extends JsonRfc8259
                     Rule::expr("commentContent", "(?:[^*]|\*(?!/))+"),
                 )
                 ->setNodeType(NodeType::Node),
-
             Rule::seq("leadingComment", "?leadingWs|inlineWs[leadingWs] lineComment|blockComment[comment] inlineWs|trailingWs*[trailingWs]", ['-', '-l', 'comment']),
             Rule::seq("trailingComment", "?inlineWs[leadingWs] lineComment|blockComment[comment] inlineWs|trailingWs*[trailingWs]", ['-', '-t', 'comment']),
         );

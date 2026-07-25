@@ -49,7 +49,7 @@ class TagToChoiceCompiler implements GrammarCompilerInterface
 
         return array_map(
             'array_unique',
-            $tagMap
+            $tagMap,
         );
     }
 
