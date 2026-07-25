@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace PhpArchitecture\Parser\Infrastructure\TreeSchema\Generator;
 
-use PhpArchitecture\Parser\Foundation\Grammar\Definition\Defaults;
+use PhpArchitecture\Parser\Foundation\Grammar\Definition\Creation\DefaultsDefinition;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\EventListener\Tokenization\EndRegionEventListener;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\EventListener\Tokenization\StartRegionEventListener;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Grammar;
@@ -13,7 +13,7 @@ use PhpArchitecture\Parser\Foundation\Grammar\Definition\Model\Sequence\Sequence
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Model\Sequence\SequenceRule;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Region;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Rule;
-use PhpArchitecture\Parser\Foundation\Parsing\Model\Context\ContextStack;
+use PhpArchitecture\Parser\Foundation\ParsedTree\Context\ContextStack;
 
 /**
  * Resolves a rule's fixed literal text from the grammar Definition's own
@@ -159,11 +159,11 @@ final class GrammarLiteralResolver
             return null;
         }
 
-        $factory = $definition->defaults->factoryFor(Defaults::DEFAULT_STYLE);
+        $factory = $definition->defaults->factoryFor(DefaultsDefinition::DEFAULT_STYLE);
         if ($factory === null) {
             return null;
         }
 
-        return $factory(new ContextStack(), Defaults::DEFAULT_STYLE);
+        return $factory(new ContextStack(), DefaultsDefinition::DEFAULT_STYLE);
     }
 }

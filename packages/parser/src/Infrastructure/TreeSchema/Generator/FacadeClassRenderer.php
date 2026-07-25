@@ -11,6 +11,7 @@ use PhpArchitecture\Parser\Foundation\Parsing\Contract\Placement;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Node\GroupAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Node\NodeAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Node\OptionalAttribute;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Raw\OptionalRawAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Raw\RawAttributeInterface;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Raw\RawContentAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Raw\RawRegionAttribute;
@@ -407,10 +408,11 @@ final class FacadeClassRenderer
         // A choice-raw param can only default to its keyword literal (via the factory's
         // own `?? literal` fallback) when no required param follows it — PHP forbids a
         // required param after one with a default. Find the last param-contributing
-        // attribute so only a trailing choice-raw slot is offered that convenience.
+        // attribute so only a trailing choice-raw slot (or a trailing optional-raw
+        // slot — see isOptionalRawAttribute() below) is offered that convenience.
         $paramContributing = static fn(AttributeSchema $a): bool => $a->isChoiceRaw()
             || $a->isRawRegionAttribute() || $a->isRawContentAttribute()
-            || $a->isRawSequenceAttribute() || $a->isNodeAttribute();
+            || $a->isRawSequenceAttribute() || $a->isNodeAttribute() || $a->isOptionalRawAttribute();
         $lastParamAttr = null;
         foreach ($schema->attributes as $attr) {
             if ($paramContributing($attr)) {
@@ -422,7 +424,7 @@ final class FacadeClassRenderer
             if ($attr->isChoiceRaw()) {
                 // Raw-choice slot: create() picks the variant via the backed enum and
                 // builds the right attribute through the shared factory. A keyword
-                // variant's content is fixed by the grammar's own Defaults, so when this
+                // variant's content is fixed by the grammar's own DefaultsDefinition, so when this
                 // is the trailing param it may be omitted; any other variant (or a
                 // non-trailing position, where PHP forbids a default) still requires it.
                 $enumClass = ucfirst($attr->propName) . 'Type';
@@ -480,6 +482,24 @@ final class FacadeClassRenderer
                 $params[] = 'string ' . $paramVar;
                 $attrInits[] = self::I . self::I . self::I . self::I . 'new RawContentAttribute(' . $paramVar . '),';
                 $imports[] = RawContentAttribute::class;
+            } elseif ($attr->isOptionalRawAttribute()) {
+                // Unlike RawContentAttribute, a null default here is not a guess baked
+                // from a sample — OptionalRawAttribute's own $raw is ?RawAttributeInterface,
+                // so "absent" is a legitimate value of the type itself, not an arbitrary one.
+                $paramVar = '$' . $attr->propName;
+                $params[] = $attr === $lastParamAttr ? '?string ' . $paramVar . ' = null' : '?string ' . $paramVar;
+                $rawTokenName = $attr->rawTokenName ?? $attr->propName;
+                $attrInits[] = self::I . self::I . self::I . self::I . 'new OptionalRawAttribute(';
+                $attrInits[] = self::I . self::I . self::I . self::I . self::I . $paramVar . ' !== null';
+                $attrInits[] = self::I . self::I . self::I . self::I . self::I . self::I
+                    . '? new RawRegionAttribute(opener: null, content: ' . $paramVar . ', closer: null, name: '
+                    . var_export($rawTokenName, true) . ', anchorName: ' . var_export($attr->propName, true) . ')';
+                $attrInits[] = self::I . self::I . self::I . self::I . self::I . self::I . ': null,';
+                $attrInits[] = self::I . self::I . self::I . self::I . self::I . 'name: ' . var_export($attr->propName, true) . ',';
+                $attrInits[] = self::I . self::I . self::I . self::I . self::I . 'anchorName: ' . var_export($attr->propName, true) . ',';
+                $attrInits[] = self::I . self::I . self::I . self::I . '),';
+                $imports[] = OptionalRawAttribute::class;
+                $imports[] = RawRegionAttribute::class;
             } elseif ($attr->isRawSequenceAttribute()) {
                 $paramVar = '$' . $attr->propName;
                 $params[] = 'string ' . $paramVar;
@@ -572,6 +592,8 @@ final class FacadeClassRenderer
                 $m = $this->renderRawRegionMethods($attr, $imports);
             } elseif ($attr->isRawSequenceAttribute()) {
                 $m = $this->renderRawSequenceMethods($attr, $imports);
+            } elseif ($attr->isOptionalRawAttribute()) {
+                $m = $this->renderOptionalRawAttributeMethods($attr, $imports);
             }
 
             if ($m !== '') {
@@ -715,7 +737,7 @@ final class FacadeClassRenderer
 
     /**
      * Per-variant attribute builder. A keyword variant's content never actually
-     * varies (Rule::keyword()/Rule::token() fix it via Defaults), so when none is
+     * varies (Rule::keyword()/Rule::token() fix it via DefaultsDefinition), so when none is
      * passed it falls back to that literal. A variable-content variant (e.g. number,
      * doubleQuotedString) has no such Defaults and must reject a missing content —
      * the generator must never invent a value for it.
@@ -973,6 +995,44 @@ final class FacadeClassRenderer
         $m .= self::I . self::I . '$this->' . $prop . '->content = $' . lcfirst($propU) . ';' . PHP_EOL;
         $m .= self::I . self::I . 'return $this;' . PHP_EOL;
         $m .= self::I . '}' . PHP_EOL;
+
+        return $m;
+    }
+
+    /**
+     * OptionalRawAttribute's own $raw may be entirely absent (unlike
+     * RawContentAttribute/RawRegionAttribute, which always hold something) —
+     * getter/setter both go through that nullability rather than assuming a
+     * RawRegionAttribute is already there to mutate in place.
+     *
+     * @param string[] &$imports
+     */
+    private function renderOptionalRawAttributeMethods(AttributeSchema $attr, array &$imports): string
+    {
+        $prop = $attr->propName;
+        $propU = ucfirst($prop);
+        $rawTokenName = var_export($attr->rawTokenName ?? $attr->propName, true);
+        $anchorName = var_export($attr->propName, true);
+
+        $m  = self::I . 'public function getRaw' . $propU . '(): ?string' . PHP_EOL;
+        $m .= self::I . '{' . PHP_EOL;
+        $m .= self::I . self::I . 'return $this->' . $prop . '->raw?->content;' . PHP_EOL;
+        $m .= self::I . '}' . PHP_EOL;
+        $m .= PHP_EOL;
+        $m .= self::I . 'public function setRaw' . $propU . '(?string $value): self' . PHP_EOL;
+        $m .= self::I . '{' . PHP_EOL;
+        $m .= self::I . self::I . 'if ($value === null) {' . PHP_EOL;
+        $m .= self::I . self::I . self::I . '$this->' . $prop . '->raw = null;' . PHP_EOL;
+        $m .= self::I . self::I . '} elseif ($this->' . $prop . '->raw instanceof RawRegionAttribute) {' . PHP_EOL;
+        $m .= self::I . self::I . self::I . '$this->' . $prop . '->raw->content = $value;' . PHP_EOL;
+        $m .= self::I . self::I . '} else {' . PHP_EOL;
+        $m .= self::I . self::I . self::I . '$this->' . $prop . '->raw = new RawRegionAttribute(opener: null, content: $value, closer: null, name: '
+            . $rawTokenName . ', anchorName: ' . $anchorName . ');' . PHP_EOL;
+        $m .= self::I . self::I . '}' . PHP_EOL;
+        $m .= self::I . self::I . 'return $this;' . PHP_EOL;
+        $m .= self::I . '}' . PHP_EOL;
+
+        $imports[] = RawRegionAttribute::class;
 
         return $m;
     }

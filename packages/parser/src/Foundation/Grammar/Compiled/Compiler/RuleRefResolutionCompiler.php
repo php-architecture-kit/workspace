@@ -28,7 +28,7 @@ class RuleRefResolutionCompiler implements GrammarPrecompilerInterface
                 if ($resolved === null) {
                     throw new RuntimeException(
                         "Rule::ref('{$rule->definition->refName}') in region '{$region->name}' could not be resolved. "
-                        . "No rule named '{$rule->definition->refName}' found in inner grammar, ancestor regions, or global region."
+                        . "No rule named '{$rule->definition->refName}' found in inner grammar, ancestor regions, or global region.",
                     );
                 }
 

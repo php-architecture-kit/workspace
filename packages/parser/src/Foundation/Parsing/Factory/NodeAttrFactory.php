@@ -276,7 +276,7 @@ class NodeAttrFactory implements NodeAttrFactoryInterface
                     $content === '' ? null : $content,
                     $sequenceNode->getComprehensiveMeta(),
                     $sequenceNode->tags,
-                )
+                ),
             );
 
             return;
@@ -301,7 +301,7 @@ class NodeAttrFactory implements NodeAttrFactoryInterface
                         $sequenceNode->anchorName,
                         $sequenceNode->getComprehensiveMeta(),
                         $sequenceNode->tags,
-                    )
+                    ),
                 );
 
                 return;
@@ -324,7 +324,7 @@ class NodeAttrFactory implements NodeAttrFactoryInterface
                         $sequenceNode->anchorName,
                         $sequenceNode->getComprehensiveMeta(),
                         $sequenceNode->tags,
-                    )
+                    ),
                 );
 
                 return;
@@ -355,7 +355,7 @@ class NodeAttrFactory implements NodeAttrFactoryInterface
                     $nodes,
                     $sequenceNode->getComprehensiveMeta(),
                     $sequenceNode->tags,
-                )
+                ),
             );
 
             return;

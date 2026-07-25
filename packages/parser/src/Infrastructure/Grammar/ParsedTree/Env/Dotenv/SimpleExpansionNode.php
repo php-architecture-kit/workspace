@@ -11,7 +11,6 @@ use PhpArchitecture\Parser\Foundation\Parsing\Model\SequenceNode;
 class SimpleExpansionNode extends SequenceNode
 {
     public RawContentAttribute $dollar { get => $this->attributes[0]; }
-
     public RawContentAttribute $varRef { get => $this->attributes[1]; }
 
     public static function create(string $dollar, string $varRef): self

@@ -36,11 +36,27 @@ class RegionConfig
 
         // parsing
         public NodeType $nodeType = NodeType::Node,
-        public ?Definition $definition = null,
 
         // meta
         /** @var string[] */
         public array $possibleNames = [],
+
+        /**
+         * Per-tag override of which of $possibleNames a given tag on this region
+         * actually covers. Without an entry here, a tag resolves (via
+         * TagToChoiceCompiler) to this region's own name — meaning every tag on the
+         * region is an indistinguishable synonym for "this region, in any of its
+         * possible runtime-renamed forms". Declare an entry when a tag is meant to
+         * pick out only a subset of $possibleNames (e.g. Whitespace's '-t'/'-l',
+         * which should resolve to the runtime rename targets that keep that tag
+         * after TokenRegionEndedEvent's per-instance rename/removeTag, not to every
+         * possible whitespace sub-kind).
+         *
+         * @var array<string,string[]>
+         */
+        public array $possibleNamesByTag = [],
+
+        public int $priority = 0,
 
         // pratt
         public ?string $prattGroupedRegionName = null,

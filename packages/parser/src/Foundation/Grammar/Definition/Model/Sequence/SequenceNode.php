@@ -5,14 +5,20 @@ declare(strict_types=1);
 namespace PhpArchitecture\Parser\Foundation\Grammar\Definition\Model\Sequence;
 
 use InvalidArgumentException;
-use PhpArchitecture\Parser\Foundation\Grammar\Definition\Defaults;
+use PhpArchitecture\Parser\Foundation\Grammar\Definition\Creation\DefaultsDefinition;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Model\Cardinality;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\NodeType;
 
 final class SequenceNode
 {
     public ?NodeType $nodeType = null;
-    public ?Defaults $defaults = null;
+    public ?DefaultsDefinition $defaults = null;
+
+    /**
+     * Marks this node as the repeating *content* unit of an enclosing `/g` group
+     * (declared via the `/c` tag). Everything else in the group is structural.
+     */
+    public bool $isContent = false;
 
     /**
      * Marks this node as the repeating *content* unit of an enclosing `/g` group

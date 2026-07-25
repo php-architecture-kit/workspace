@@ -13,6 +13,18 @@ use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Structure\Structur
  */
 final class StructuralFactoryInfo
 {
+    /**
+     * Node names observed inside this structural slot across sample parses —
+     * only populated for GroupAttribute-typed slots (trivia). Mirrors
+     * AttributeSchema::$unionNodeNames but scoped to one named structural
+     * position within a SequenceAttribute, used to decide whether that
+     * specific slot has a non-whitespace alternative worth a
+     * TriviaInsertionPolicy hook.
+     *
+     * @var string[]
+     */
+    public array $unionNodeNames = [];
+
     public function __construct(
         public readonly string $name,
         public readonly string $attrClass,

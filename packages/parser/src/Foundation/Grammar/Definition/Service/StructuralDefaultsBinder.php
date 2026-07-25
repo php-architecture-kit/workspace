@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace PhpArchitecture\Parser\Foundation\Grammar\Definition\Service;
 
-use PhpArchitecture\Parser\Foundation\Grammar\Definition\Defaults;
+use PhpArchitecture\Parser\Foundation\Grammar\Definition\Creation\DefaultsDefinition;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Model\Sequence\NestedSequence;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Model\Sequence\SequenceNode;
 
@@ -19,7 +19,7 @@ final class StructuralDefaultsBinder
     /**
      * @param array<NestedSequence|SequenceNode> $nodes
      */
-    public static function bind(array $nodes, string $selector, Defaults $defaults): void
+    public static function bind(array $nodes, string $selector, DefaultsDefinition $defaults): void
     {
         foreach ($nodes as $node) {
             if ($node instanceof SequenceNode) {

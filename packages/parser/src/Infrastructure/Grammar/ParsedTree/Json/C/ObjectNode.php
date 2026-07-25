@@ -21,12 +21,13 @@ class ObjectNode extends SequenceNode
 {
     public StructureAttribute $beginObject { get => $this->attributes[0]; }
 
-    /** @var GroupAttribute<TrailingWsNode|BlockCommentNode|LineCommentNode|InlineWsNode|LeadingWsNode|EmptyLineNode> */
+    /** @var GroupAttribute<TrailingWsNode|TrailingCommentNode|InlineWsNode|EmptyLineNode|LeadingWsNode> */
     public GroupAttribute $trivia0 { get => $this->attributes[1]; }
 
     /** @var SequenceAttribute<NodeAttribute<MemberNode>|GroupAttribute|StructureAttribute> */
     public SequenceAttribute $members { get => $this->attributes[2]; }
 
+    /** @var GroupAttribute<LeadingWsNode|LeadingCommentNode|EmptyLineNode|TrailingWsNode|InlineWsNode> */
     public GroupAttribute $trivia1 { get => $this->attributes[3]; }
 
     public StructureAttribute $endObject { get => $this->attributes[4]; }
@@ -97,6 +98,6 @@ class ObjectNode extends SequenceNode
 
     private static function membersValidity(): NestedSequence
     {
-        return NestedSequence::fromString('?(lineComment|blockComment|whitespace*[trivia0] member (lineComment|blockComment|whitespace*[trivia0] comma lineComment|blockComment|whitespace*[trivia1] lineComment|blockComment|whitespace*[trivia2] member)* lineComment|blockComment|whitespace*[trivia1])[members]');
+        return NestedSequence::fromString('?(leadingComment|emptyLine|leadingWs|inlineWs*[trivia0] member (leadingComment|trailingComment|whitespace*[trivia0] comma trailingComment|trailingWs|inlineWs*[trivia1] leadingComment|emptyLine|leadingWs|inlineWs*[trivia2] member)* trailingComment|trailingWs|inlineWs*[trivia1])[members]');
     }
 }

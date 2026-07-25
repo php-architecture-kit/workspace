@@ -22,12 +22,12 @@ class MemberNode extends SequenceNode
 {
     public RawAttributeInterface $identifier { get => $this->attributes[0]; }
 
-    /** @var GroupAttribute<InlineWsNode|BlockCommentNode|EmptyLineNode|TrailingWsNode|LeadingWsNode> */
+    /** @var GroupAttribute<InlineWsNode|LeadingCommentNode|EmptyLineNode|TrailingWsNode|LeadingWsNode> */
     public GroupAttribute $trivia0 { get => $this->attributes[1]; }
 
     public StructureAttribute $colon { get => $this->attributes[2]; }
 
-    /** @var GroupAttribute<TrailingWsNode|InlineWsNode|BlockCommentNode|LeadingWsNode|EmptyLineNode> */
+    /** @var GroupAttribute<TrailingWsNode|InlineWsNode|LeadingCommentNode|LeadingWsNode|EmptyLineNode> */
     public GroupAttribute $trivia1 { get => $this->attributes[3]; }
 
     /** @var NodeAttribute<PrimitiveNode|ArrayNode|ObjectNode> */

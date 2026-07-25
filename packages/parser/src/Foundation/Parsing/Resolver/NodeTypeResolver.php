@@ -10,6 +10,7 @@ use PhpArchitecture\Parser\Foundation\Matching\Model\MatchedSequenceNode;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\NodeType;
 use PhpArchitecture\Parser\Foundation\Tokenization\Model\Token;
 use PhpArchitecture\Parser\Foundation\Tokenization\Model\TokenRegion;
+use LogicException;
 
 final class NodeTypeResolver
 {
@@ -20,7 +21,7 @@ final class NodeTypeResolver
             in_array(NodeType::Node->value, $item->tags) => NodeType::Node,
             in_array(NodeType::Structure->value, $item->tags) => NodeType::Structure,
             in_array(NodeType::Raw->value, $item->tags) => NodeType::Raw,
-            default => throw new \LogicException("Unable to resolve node type for item `" . $item->getName() . "` with tags: `" . implode(", ", $item->tags) . "`"),
+            default => throw new LogicException("Unable to resolve node type for item `" . $item->getName() . "` with tags: `" . implode(", ", $item->tags) . "`"),
         };
     }
 }

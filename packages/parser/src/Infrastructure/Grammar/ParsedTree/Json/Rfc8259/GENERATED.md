@@ -13,5 +13,5 @@ bin/console parser:tree:generate 'assets/parser-source-files/json/rfc8259/json-r
 
 | Field     | Value |
 |-----------|-------|
-| Generated | 2026-06-29 11:00:12 UTC |
+| Generated | 2026-07-16 08:36:10 UTC |
 

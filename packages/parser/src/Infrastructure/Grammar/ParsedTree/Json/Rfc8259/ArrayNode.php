@@ -21,14 +21,14 @@ class ArrayNode extends SequenceNode
 {
     public StructureAttribute $beginArray { get => $this->attributes[0]; }
 
-    /** @var GroupAttribute<TrailingWsNode|LeadingWsNode|InlineWsNode|EmptyLineNode> */
+    /** @var GroupAttribute<TrailingWsNode|InlineWsNode|EmptyLineNode|LeadingWsNode> */
     public GroupAttribute $trivia0 { get => $this->attributes[1]; }
 
     /** @var SequenceAttribute<NodeAttribute<PrimitiveNode|ObjectNode|ArrayNode>|GroupAttribute|StructureAttribute> */
     public SequenceAttribute $items { get => $this->attributes[2]; }
 
+    /** @var GroupAttribute<LeadingWsNode|EmptyLineNode|TrailingWsNode|InlineWsNode> */
     public GroupAttribute $trivia1 { get => $this->attributes[3]; }
-
     public StructureAttribute $endArray { get => $this->attributes[4]; }
 
     public static function create(): self
@@ -97,6 +97,6 @@ class ArrayNode extends SequenceNode
 
     private static function itemsValidity(): NestedSequence
     {
-        return NestedSequence::fromString('?(whitespace*[trivia0] array|object|primitive[item] (whitespace*[trivia0] comma whitespace*[trivia1] whitespace*[trivia2] array|object|primitive[item])* whitespace*[trivia1])[items]');
+        return NestedSequence::fromString('?(emptyLine|leadingWs|inlineWs*[trivia0] array|object|primitive[item] (whitespace*[trivia0] comma trailingWs|inlineWs*[trivia1] emptyLine|leadingWs|inlineWs*[trivia2] array|object|primitive[item])* trailingWs|inlineWs*[trivia1])[items]');
     }
 }

@@ -15,13 +15,13 @@ use PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Technical\Whitespac
 
 class JsonNode extends SequenceNode
 {
-    /** @var GroupAttribute<LeadingWsNode|LineCommentNode|TrailingWsNode|BlockCommentNode|EmptyLineNode|InlineWsNode> */
+    /** @var GroupAttribute<LeadingCommentNode|EmptyLineNode|TrailingWsNode|LeadingWsNode|InlineWsNode> */
     public GroupAttribute $trivia0 { get => $this->attributes[0]; }
 
     /** @var NodeAttribute<ObjectNode|ArrayNode|PrimitiveNode> */
     public NodeAttribute $value { get => $this->attributes[1]; }
 
-    /** @var GroupAttribute<TrailingWsNode|EmptyLineNode|BlockCommentNode|LineCommentNode|LeadingWsNode|InlineWsNode> */
+    /** @var GroupAttribute<TrailingWsNode|EmptyLineNode|LeadingCommentNode|LeadingWsNode|InlineWsNode> */
     public GroupAttribute $trivia1 { get => $this->attributes[2]; }
 
     public static function create(ObjectNode|ArrayNode|PrimitiveNode $value): self

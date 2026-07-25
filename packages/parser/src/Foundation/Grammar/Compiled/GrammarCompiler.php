@@ -24,15 +24,12 @@ use PhpArchitecture\Parser\Foundation\Grammar\Compiled\Compiler\TagToChoiceCompi
 use PhpArchitecture\Parser\Foundation\Grammar\Compiled\Model\CompiledEventSubscriber;
 use PhpArchitecture\Parser\Foundation\Grammar\Compiled\Model\CompiledGrammar;
 use PhpArchitecture\Parser\Foundation\Grammar\Compiled\Model\CompiledRegion;
-use PhpArchitecture\Parser\Foundation\Grammar\Definition\Definition;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Grammar;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Region;
 use PhpArchitecture\Parser\Foundation\Matching\Event\Contract\MatchingEventListener;
 use PhpArchitecture\Parser\Foundation\Tokenization\Contract\TokenizationContext;
 use PhpArchitecture\Parser\Foundation\Tokenization\Event\Contract\TokenizationEvent;
 use PhpArchitecture\Parser\Foundation\Tokenization\Event\Contract\TokenizationEventListener;
-use PhpArchitecture\Parser\Foundation\AST\Definition\FormatDefinition;
-use PhpArchitecture\Parser\Foundation\AST\Definition\NodeDefinition;
 use PhpArchitecture\Parser\Foundation\Matching\Model\Sequence;
 use PhpArchitecture\Parser\Foundation\Matching\Model\SequenceLibrary;
 use PhpArchitecture\Parser\Foundation\Tokenization\Model\Pattern;
@@ -52,7 +49,6 @@ class GrammarCompiler
 
     /** @var RuleCompilerInterface[] */
     private array $ruleCompilers = [];
-
     private readonly Compiler\RegionConflictResolver $conflictResolver;
 
     public function __construct()
@@ -237,7 +233,6 @@ class GrammarCompiler
                     $hostRegion->sequenceLibrary->rootSequence ?? $innerRoot->sequenceLibrary->rootSequence,
                 ),
                 $hostRegion->innerGrammar,
-                $hostRegion->definition,
                 $hostRegion->tags,
                 $hostRegion->getMetaAll(),
             );
@@ -295,7 +290,6 @@ class GrammarCompiler
             new PatternLibrary([]),
             $region->sequenceLibrary,
             null,
-            $region->definition,
             $region->tags,
             $region->getMetaAll(),
         );
@@ -462,10 +456,6 @@ class GrammarCompiler
             }
         }
 
-        $definition = $region->config->definition !== null
-            ? $this->compileDefinition($region->config->definition)
-            : null;
-
         $meta = $region->getMetaAll();
         if (!empty($region->config->possibleNames)) {
             $meta[CompiledRegion::META_POSSIBLE_NAMES] = $region->config->possibleNames;
@@ -477,14 +467,8 @@ class GrammarCompiler
             new PatternLibrary($patterns),
             new SequenceLibrary($sequences, $rootSequence),
             $region->getMeta("innerGrammar.compiled"),
-            $definition,
             $region->getAllTags(),
             $meta,
         );
-    }
-
-    private function compileDefinition(Definition $definition): NodeDefinition
-    {
-        return new NodeDefinition($definition->name, [], [], [], new FormatDefinition(name: 'default'), []);
     }
 }

@@ -11,7 +11,6 @@ use PhpArchitecture\Parser\Foundation\Grammar\Definition\Grammar;
 use PhpArchitecture\Parser\Infrastructure\Grammar\Definition\Env\EnvDotenv;
 use PhpArchitecture\Parser\Infrastructure\Grammar\Definition\Env\EnvEnvironment;
 use PhpArchitecture\Parser\Infrastructure\Grammar\Definition\Git\GitIgnore;
-use PhpArchitecture\Parser\Infrastructure\Grammar\Definition\Git\GitModules;
 use PhpArchitecture\Parser\Infrastructure\Grammar\Definition\Json\JsonC;
 use PhpArchitecture\Parser\Infrastructure\Grammar\Definition\Json\Json5;
 use PhpArchitecture\Parser\Infrastructure\Grammar\Definition\Json\JsonRfc8259;
@@ -33,7 +32,6 @@ final class InMemoryGrammarRegistry implements GrammarRegistry
             new EnvEnvironment(),
             new EnvDotenv(),
             new GitIgnore(),
-            new GitModules(),
             new JsonRfc8259(),
             new JsonC(),
             new Json5(),
