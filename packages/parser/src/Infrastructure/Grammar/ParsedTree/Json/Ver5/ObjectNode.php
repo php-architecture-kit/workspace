@@ -6,11 +6,6 @@ namespace PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Json\Ver5;
 
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Model\Sequence\NestedSequence;
 use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeAttributeInterface;
-use PhpArchitecture\Parser\Foundation\Parsing\Contract\Placement;
-use PhpArchitecture\Parser\Foundation\Parsing\Contract\SequenceUnitTrivia;
-use PhpArchitecture\Parser\Foundation\Parsing\Contract\TriviaInsertionContext;
-use PhpArchitecture\Parser\Foundation\Parsing\Contract\TriviaPolicyRegistry;
-use PhpArchitecture\Parser\Foundation\Parsing\Contract\UnitTriviaPosition;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Node\GroupAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Node\NodeAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\SequenceAttribute;
@@ -26,7 +21,7 @@ class ObjectNode extends SequenceNode
 {
     public StructureAttribute $beginObject { get => $this->attributes[0]; }
 
-    /** @var GroupAttribute<TrailingWsNode|BlockCommentNode|LineCommentNode|InlineWsNode|EmptyLineNode|LeadingWsNode> */
+    /** @var GroupAttribute<TrailingWsNode|TrailingCommentNode|InlineWsNode|EmptyLineNode|LeadingWsNode> */
     public GroupAttribute $trivia0 { get => $this->attributes[1]; }
 
     /** @var SequenceAttribute<NodeAttribute<MemberNode>|GroupAttribute|StructureAttribute> */
@@ -34,6 +29,7 @@ class ObjectNode extends SequenceNode
 
     /** @var GroupAttribute<LeadingWsNode|EmptyLineNode|TrailingWsNode|InlineWsNode> */
     public GroupAttribute $trivia1 { get => $this->attributes[3]; }
+
     public StructureAttribute $endObject { get => $this->attributes[4]; }
 
     public static function create(): self
@@ -54,18 +50,6 @@ class ObjectNode extends SequenceNode
         $node->withMembersValidation();
 
         return $node;
-    }
-
-    /**
-     * Builds the right node for $text via the TriviaInsertionPolicy registered
-     * for this class (TriviaPolicyRegistry) — this slot accepts more than one
-     * alternative node type, so the policy decides which one is safe here.
-     */
-    public function insertIntoTrivia0(string $text, Placement $placement = Placement::After, int $offset = -1): self
-    {
-        $node = TriviaPolicyRegistry::resolve(static::class)->resolve($text, new TriviaInsertionContext($this->trivia0, $placement, $offset));
-        $this->trivia0->addNode($node->setParent($this), $placement, $offset);
-        return $this;
     }
 
     public function withMembersValidation(): self
@@ -116,34 +100,6 @@ class ObjectNode extends SequenceNode
 
     private static function membersValidity(): NestedSequence
     {
-        return NestedSequence::fromString('?(lineComment|blockComment|whitespace*[trivia0] member (lineComment|blockComment|whitespace*[trivia0] comma trailingWs|inlineWs|lineComment|blockComment*[trivia1] lineComment|blockComment|whitespace*[trivia2] member)* ?(lineComment|blockComment|whitespace*[trivia] comma[trailingComma]) trailingWs|inlineWs|lineComment|blockComment*[trivia1])[members]');
-    }
-
-    /**
-     * Builds the right node for $text via the TriviaInsertionPolicy registered
-     * for this class, then inserts it into the trivia group at $position within
-     * the $unitIndex-th members unit (SequenceUnitTrivia resolves $position
-     * relative to that unit's own content — these groups repeat once per unit,
-     * so unlike insertInto{Trivia}(), there is no single fixed property here).
-     */
-    public function insertIntoMembersTrivia(int $unitIndex, UnitTriviaPosition $position, string $text, Placement $placement = Placement::After, int $offset = -1): self
-    {
-        $group = SequenceUnitTrivia::locate($this->members->getUnit($unitIndex), $position);
-        $node = TriviaPolicyRegistry::resolve(static::class)->resolve($text, new TriviaInsertionContext($group, $placement, $offset));
-        $group->addNode($node->setParent($this), $placement, $offset);
-        return $this;
-    }
-
-    /**
-     * Builds the right node for $text via the TriviaInsertionPolicy registered
-     * for this class, then inserts it right after the structural attribute
-     * named $structuralName (e.g. 'comma') within the $unitIndex-th members unit.
-     */
-    public function insertIntoMembersTriviaAfterStructural(int $unitIndex, string $structuralName, string $text, Placement $placement = Placement::After, int $offset = -1): self
-    {
-        $group = SequenceUnitTrivia::locateAfterStructural($this->members->getUnit($unitIndex), $structuralName);
-        $node = TriviaPolicyRegistry::resolve(static::class)->resolve($text, new TriviaInsertionContext($group, $placement, $offset));
-        $group->addNode($node->setParent($this), $placement, $offset);
-        return $this;
+        return NestedSequence::fromString('?(leadingComment|trailingComment|whitespace*[trivia0] member (leadingComment|trailingComment|whitespace*[trivia0] comma trailingComment|trailingWs|inlineWs*[trivia1] leadingComment|trailingComment|whitespace*[trivia2] member)* ?(leadingComment|trailingComment|whitespace*[trivia] comma[trailingComma]) trailingComment|trailingWs|inlineWs*[trivia1])[members]');
     }
 }

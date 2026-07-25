@@ -86,11 +86,13 @@ class Json5 extends JsonC
 
         $this->grammar->nodeClassMap = array_merge($this->grammar->nodeClassMap, [
             'json' => \PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Json\Ver5\JsonNode::class,
+            'leadingComment' => \PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Json\Ver5\LeadingCommentNode::class,
             'lineComment' => \PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Json\Ver5\LineCommentNode::class,
             'blockComment' => \PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Json\Ver5\BlockCommentNode::class,
             'object' => \PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Json\Ver5\ObjectNode::class,
             'member' => \PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Json\Ver5\MemberNode::class,
             'primitive' => \PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Json\Ver5\PrimitiveNode::class,
+            'trailingComment' => \PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Json\Ver5\TrailingCommentNode::class,
             'array' => \PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Json\Ver5\ArrayNode::class,
         ]);
 
