@@ -8,6 +8,7 @@ use Closure;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\EventListener\RuleMatchedEventListener;
 use PhpArchitecture\Parser\Foundation\Matching\Event\Contract\MatchingEvent;
 use PhpArchitecture\Parser\Foundation\Matching\Event\Contract\MatchingEventListener;
+use PhpArchitecture\Parser\Foundation\Tokenization\Contract\TokenizationContext;
 use PhpArchitecture\Parser\Foundation\Tokenization\Event\Contract\TokenizationEvent;
 use PhpArchitecture\Parser\Foundation\Tokenization\Event\Contract\TokenizationEventListener;
 use PhpArchitecture\Parser\Foundation\Shared\Hash\HashClosure;

@@ -4,65 +4,70 @@ declare(strict_types=1);
 
 namespace PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Json\Rfc8259;
 
-use PhpArchitecture\Parser\Foundation\Matching\Model\NestedSequence;
+use PhpArchitecture\Parser\Foundation\Grammar\Definition\Model\Sequence\NestedSequence;
 use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeAttributeInterface;
-use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\GroupAttribute;
-use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\NodeAttribute;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Node\GroupAttribute;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Node\NodeAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\SequenceAttribute;
-use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\SequenceValidityCursor;
-use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\StructureAttribute;
-use PhpArchitecture\Parser\Foundation\Parsing\Model\Node;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Structure\StructureAttribute;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\NodeOrigin;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\SequenceNode;
 use PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Technical\Whitespace\EmptyLineNode;
 use PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Technical\Whitespace\InlineWsNode;
 use PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Technical\Whitespace\LeadingWsNode;
 use PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Technical\Whitespace\TrailingWsNode;
 
-class ObjectNode extends Node
+class ObjectNode extends SequenceNode
 {
     public StructureAttribute $beginObject { get => $this->attributes[0]; }
 
-    /** @var GroupAttribute<TrailingWsNode|InlineWsNode|LeadingWsNode|EmptyLineNode> */
+    /** @var GroupAttribute<TrailingWsNode|InlineWsNode|EmptyLineNode|LeadingWsNode> */
     public GroupAttribute $trivia0 { get => $this->attributes[1]; }
 
-    /** @var SequenceAttribute<NodeAttribute<MemberNode>|GroupAttribute|StructureAttribute|MemberNode> */
+    /** @var SequenceAttribute<NodeAttribute<MemberNode>|GroupAttribute|StructureAttribute> */
     public SequenceAttribute $members { get => $this->attributes[2]; }
 
-    /** @var GroupAttribute<TrailingWsNode|LeadingWsNode|EmptyLineNode|InlineWsNode> */
+    /** @var GroupAttribute<LeadingWsNode|EmptyLineNode|TrailingWsNode|InlineWsNode> */
     public GroupAttribute $trivia1 { get => $this->attributes[3]; }
-
     public StructureAttribute $endObject { get => $this->attributes[4]; }
 
     public static function create(): self
     {
         $node = new self(
             name: 'object',
+            origin: NodeOrigin::Sequence,
             attributes: [
-            new StructureAttribute(true, 'beginObject', '{'),
-            new GroupAttribute('trivia0', []),
-            new SequenceAttribute('members', null, []),
-            new GroupAttribute('trivia1', []),
-            new StructureAttribute(true, 'endObject', '}'),
+                new StructureAttribute(true, 'beginObject', '{'),
+                new GroupAttribute('trivia0', []),
+                new SequenceAttribute('members', null, []),
+                new GroupAttribute('trivia1', []),
+                new StructureAttribute(true, 'endObject', '}'),
             ],
             parent: null,
         );
         $node->members->withParent($node);
+        $node->withMembersValidation();
 
         return $node;
     }
 
-    public function withMembersValidation(NestedSequence|SequenceValidityCursor $sequence): self
+    public function withMembersValidation(): self
     {
-        $this->members->withValidSequence($sequence, [
-            'trivia0' => static fn() => new GroupAttribute('trivia0', []),
-            'comma' => static fn() => new StructureAttribute(true, 'comma', ','),
-            'trivia1' => static fn() => new GroupAttribute('trivia1', []),
-        ]);
+        $this->members->withValidSequence(
+            self::membersValidity(),
+            [
+                'trivia0' => static fn() => new GroupAttribute('trivia0', []),
+                'comma' => static fn() => new StructureAttribute(true, 'comma', ','),
+                'trivia1' => static fn() => new GroupAttribute('trivia1', []),
+                'trivia2' => static fn() => new GroupAttribute('trivia2', []),
+            ],
+        );
         return $this;
     }
 
     public function addMember(MemberNode $node): self
     {
-        $this->members->addUnit(NodeAttribute::fromNode($node->setParent($this)));
+        $this->members->addUnit(new NodeAttribute('member', $node->setParent($this)));
         return $this;
     }
 
@@ -88,5 +93,10 @@ class ObjectNode extends Node
             }
         }
         return $result;
+    }
+
+    private static function membersValidity(): NestedSequence
+    {
+        return NestedSequence::fromString('?(emptyLine|leadingWs|inlineWs*[trivia0] member (whitespace*[trivia0] comma trailingWs|inlineWs*[trivia1] emptyLine|leadingWs|inlineWs*[trivia2] member)* trailingWs|inlineWs*[trivia1])[members]');
     }
 }

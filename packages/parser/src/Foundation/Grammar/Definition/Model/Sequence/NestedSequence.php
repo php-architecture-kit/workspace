@@ -189,6 +189,49 @@ final class NestedSequence
     }
 
     /**
+     * Like getFirstValidNodeNodeNames() but prefers anchorName over alternatives for
+     * SequenceNodes. Used by SequenceValidityCursor to return names consistent with how
+     * it validates advances.
+     *
+     * @return string[]
+     */
+    public function getFirstValidAnchoredNodeNames(): array
+    {
+        $output = [];
+        foreach ($this->alternativeSequences as $nodes) {
+            foreach ($nodes as $node) {
+                if ($node->isLookbehind) {
+                    continue;
+                }
+
+                if ($node instanceof SequenceNode && $node->isNegation) {
+                    if ($node->cardinality->min() >= 1) {
+                        break;
+                    }
+                    continue;
+                }
+
+                if ($node instanceof SequenceNode) {
+                    $output = array_merge(
+                        $output,
+                        $node->anchorName !== null ? [$node->anchorName] : $node->alternatives,
+                    );
+                }
+
+                if ($node instanceof NestedSequence) {
+                    $output = array_merge($output, $node->getFirstValidAnchoredNodeNames());
+                }
+
+                if ($node->cardinality->min() >= 1) {
+                    break;
+                }
+            }
+        }
+
+        return array_unique($output);
+    }
+
+    /**
      * @return string[]
      */
     public function getFirstValidNodeNodeNames(): array

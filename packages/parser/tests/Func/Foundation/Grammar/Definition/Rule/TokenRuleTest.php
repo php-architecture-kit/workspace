@@ -8,7 +8,7 @@ use PhpArchitecture\Parser\Foundation\Grammar\Definition\Grammar;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Rule;
 use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeInterface;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Raw\RawContentAttribute;
-use PhpArchitecture\Parser\Foundation\Parsing\Model\Node;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\AbstractNode;
 use PhpArchitecture\Parser\Foundation\Tokenization\Model\Token;
 use PhpArchitecture\Parser\Foundation\Tokenization\Model\TokenRegion;
 use PhpArchitecture\Parser\Tests\Func\Grammar\GrammarTestCase;
@@ -126,7 +126,7 @@ final class TokenRuleTest extends GrammarTestCase
             string: '[',
             grammar: $grammar,
             assertParsingResultValid: function (NodeInterface $node, self $test): void {
-                $test->assertInstanceOf(Node::class, $node);
+                $test->assertInstanceOf(AbstractNode::class, $node);
             },
         );
     }

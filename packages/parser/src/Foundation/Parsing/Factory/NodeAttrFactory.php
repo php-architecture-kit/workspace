@@ -40,6 +40,21 @@ class NodeAttrFactory implements NodeAttrFactoryInterface
 
     public function fillTokenBasedNodeWithAttributes(NodeInterface $tokenBasedNode, Token $token): void
     {
+        $nodeType = NodeTypeResolver::resolveNodeType($token);
+
+        if ($nodeType === NodeType::Skip) {
+            return;
+        }
+
+        if ($nodeType === NodeType::Structure) {
+            $tokenBasedNode->addAttribute(
+                new StructureAttribute(true, $token->name, $token->raw === '' ? null : $token->raw, $token->meta, $token->tags),
+            );
+
+            return;
+        }
+
+        // NodeType::Node and NodeType::Raw both render the token verbatim.
         $tokenBasedNode->addAttribute(
             new RawContentAttribute(
                 $token->raw,
@@ -50,20 +65,68 @@ class NodeAttrFactory implements NodeAttrFactoryInterface
 
     public function fillRegionBasedNodeWithAttributes(NodeInterface $regionBasedNode, TokenRegion|MatchedRegion $region): void
     {
+        $nodeType = NodeTypeResolver::resolveNodeType($region);
+
+        if ($nodeType === NodeType::Skip) {
+            return;
+        }
+
+        if ($nodeType === NodeType::Raw) {
+            $regionBasedNode->addAttribute($this->createRawRegionAttribute($region, null));
+
+            return;
+        }
+
+        if ($nodeType === NodeType::Structure) {
+            $content = $region->__toString();
+            $regionBasedNode->addAttribute(
+                new StructureAttribute(true, $region->name, $content === '' ? null : $content, $region->meta, $region->tags),
+            );
+
+            return;
+        }
+
+        // NodeType::Node — decompose into one attribute per contained item.
         $items = $region instanceof MatchedRegion ? $region->items : $region->stream->tokens;
         foreach ($items as $item) {
-            $nodeType = NodeTypeResolver::resolveNodeType($item);
+            $itemNodeType = NodeTypeResolver::resolveNodeType($item);
 
             match ($item::class) {
-                Token::class => $this->fromToken($item, $nodeType, $regionBasedNode),
-                TokenRegion::class => $this->fromTokenRegion($item, $nodeType, $regionBasedNode),
-                MatchedSequence::class => $this->fromMatchedSequence($item, $nodeType, $regionBasedNode),
+                Token::class => $this->fromToken($item, $itemNodeType, $regionBasedNode),
+                TokenRegion::class => $this->fromTokenRegion($item, $itemNodeType, $regionBasedNode),
+                MatchedSequence::class => $this->fromMatchedSequence($item, $itemNodeType, $regionBasedNode),
                 default => throw new InvalidArgumentException('Unknown item type'),
             };
         }
     }
 
     public function fillSequenceBasedNodeWithAttributes(NodeInterface $sequenceBasedNode, MatchedSequence $sequence): void
+    {
+        $nodeType = NodeTypeResolver::resolveNodeType($sequence);
+
+        if ($nodeType === NodeType::Skip) {
+            return;
+        }
+
+        if ($nodeType === NodeType::Raw) {
+            $sequenceBasedNode->addAttribute($this->createRawSequenceAttribute($sequence, null));
+
+            return;
+        }
+
+        if ($nodeType === NodeType::Structure) {
+            $content = $sequence->__toString();
+            $sequenceBasedNode->addAttribute(
+                new StructureAttribute(true, $sequence->name, $content === '' ? null : $content, $sequence->meta, $sequence->tags),
+            );
+
+            return;
+        }
+
+        $this->fillSequenceBasedNodeAsNode($sequenceBasedNode, $sequence);
+    }
+
+    private function fillSequenceBasedNodeAsNode(NodeInterface $sequenceBasedNode, MatchedSequence $sequence): void
     {
         $sequenceAttr = null;
         $rawParts = null;
@@ -213,7 +276,7 @@ class NodeAttrFactory implements NodeAttrFactoryInterface
                     $content === '' ? null : $content,
                     $sequenceNode->getComprehensiveMeta(),
                     $sequenceNode->tags,
-                )
+                ),
             );
 
             return;
@@ -238,7 +301,7 @@ class NodeAttrFactory implements NodeAttrFactoryInterface
                         $sequenceNode->anchorName,
                         $sequenceNode->getComprehensiveMeta(),
                         $sequenceNode->tags,
-                    )
+                    ),
                 );
 
                 return;
@@ -261,7 +324,7 @@ class NodeAttrFactory implements NodeAttrFactoryInterface
                         $sequenceNode->anchorName,
                         $sequenceNode->getComprehensiveMeta(),
                         $sequenceNode->tags,
-                    )
+                    ),
                 );
 
                 return;
@@ -292,7 +355,7 @@ class NodeAttrFactory implements NodeAttrFactoryInterface
                     $nodes,
                     $sequenceNode->getComprehensiveMeta(),
                     $sequenceNode->tags,
-                )
+                ),
             );
 
             return;

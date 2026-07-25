@@ -27,6 +27,7 @@ final class SequenceNode implements MetaInterface
         array $meta = [],
         array $tags = [],
         public bool $isNegation = false,
+        public bool $isContent = false,
     ) {
         $this->meta = $meta;
         $this->tags = $tags;

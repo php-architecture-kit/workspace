@@ -66,5 +66,5 @@ arrayWithComments:
   "first",
       'second',// inline
 /* block */ "third",  ],
-              lastProperty:"JSON5 allows trailing comma here",}
+              lastProperty:"JSON5 allows trailing comma here",}}
 // trailing comment after closing brace

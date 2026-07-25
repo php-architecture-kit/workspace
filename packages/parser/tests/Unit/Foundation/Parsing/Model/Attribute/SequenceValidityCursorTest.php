@@ -8,8 +8,9 @@ use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use PhpArchitecture\Parser\Foundation\Matching\Model\NestedSequence;
-use PhpArchitecture\Parser\Foundation\Matching\Model\SequenceNode;
+use PhpArchitecture\Parser\Foundation\Grammar\Definition\Model\Cardinality;
+use PhpArchitecture\Parser\Foundation\Grammar\Definition\Model\Sequence\NestedSequence;
+use PhpArchitecture\Parser\Foundation\Grammar\Definition\Model\Sequence\SequenceNode;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\SequenceValidityCursor;
 
 #[Group('unit')]
@@ -21,8 +22,7 @@ final class SequenceValidityCursorTest extends TestCase
     {
         return new SequenceNode(
             alternatives: (array) $alternatives,
-            min: $min,
-            max: $max,
+            cardinality: Cardinality::fromBounds($min, $max),
         );
     }
 
@@ -35,8 +35,7 @@ final class SequenceValidityCursorTest extends TestCase
     {
         return new NestedSequence(
             alternativeSequences: [$alternative],
-            min: $min,
-            max: $max,
+            cardinality: Cardinality::fromBounds($min, $max),
         );
     }
 
@@ -141,8 +140,7 @@ final class SequenceValidityCursorTest extends TestCase
                 [self::node('A'), self::node('B')],
                 [self::node('C'), self::node('D')],
             ],
-            min: 1,
-            max: 1,
+            cardinality: Cardinality::ExactlyOne,
         ));
 
         self::assertEqualsCanonicalizing(['A', 'C'], $cursor->getValidNextNames());
@@ -156,8 +154,7 @@ final class SequenceValidityCursorTest extends TestCase
                 [self::node('A'), self::node('B')],
                 [self::node('C'), self::node('D')],
             ],
-            min: 1,
-            max: 1,
+            cardinality: Cardinality::ExactlyOne,
         ));
 
         $cursor->advance('C');
@@ -182,8 +179,7 @@ final class SequenceValidityCursorTest extends TestCase
                 clone $ws,
                 self::node('member'),
             ]],
-            min: 0,
-            max: PHP_INT_MAX,
+            cardinality: Cardinality::ZeroOrMore,
         );
 
         // ?(member (-* comma -* member)*)  — outer is ZeroOrOne
@@ -192,8 +188,7 @@ final class SequenceValidityCursorTest extends TestCase
                 self::node('member'),
                 $innerRepetition,
             ]],
-            min: 0,
-            max: 1,
+            cardinality: Cardinality::ZeroOrOne,
         );
     }
 

@@ -7,6 +7,7 @@ namespace PhpArchitecture\Parser\Tests\Func\Foundation\Grammar\Definition\Sequen
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Grammar;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Rule;
 use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeInterface;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Node\NodeAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Raw\RawContentAttribute;
 use PhpArchitecture\Parser\Tests\Func\Grammar\GrammarTestCase;
 use PHPUnit\Framework\Attributes\Group;
@@ -159,8 +160,8 @@ final class SequenceTriviaTest extends GrammarTestCase
             assertParsingResultValid: function (NodeInterface $node, self $test): void {
                 $attributes = $node->getAttributes();
 
-                $test->assertInstanceOf(RawContentAttribute::class, $attributes[1]);
-                $test->assertSame('   ', $attributes[1]->content);
+                $test->assertInstanceOf(NodeAttribute::class, $attributes[1]);
+                $test->assertSame('   ', (string) $attributes[1]);
             },
             requireBofEof: false,
         );

@@ -4,13 +4,15 @@ declare(strict_types=1);
 
 namespace PhpArchitecture\Parser\Infrastructure\TreeSchema\Generator\Schema;
 
-use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\GroupAttribute;
-use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\NodeAttribute;
-use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\OptionalAttribute;
-use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\RawContentAttribute;
-use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\RawRegionAttribute;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Node\GroupAttribute;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Node\NodeAttribute;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Node\OptionalAttribute;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Raw\OptionalRawAttribute;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Raw\RawContentAttribute;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Raw\RawRegionAttribute;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Raw\RawSequenceAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\SequenceAttribute;
-use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\StructureAttribute;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Structure\StructureAttribute;
 
 /**
  * All data about one attribute needed by the renderer to generate property hook + methods.
@@ -28,6 +30,13 @@ final class AttributeSchema
 
     /** @var StructuralFactoryInfo[] for GroupedAttribute */
     public array $structuralFactories = [];
+
+    /**
+     * For SequenceAttribute: the validity FSM (NestedSequence) serialized to its compact
+     * DSL string, baked into the facade so create() can self-validate without compiling
+     * the grammar at runtime.
+     */
+    public ?string $validityDescriptor = null;
 
     /** content node name for GroupedAttribute (e.g. "member") */
     public ?string $groupedContentNodeName = null;
@@ -51,9 +60,6 @@ final class AttributeSchema
 
     /** for RawContentAttribute/RawRegionAttribute: the raw name (not anchorName) */
     public ?string $rawTokenName = null;
-
-    /** for RawContentAttribute top-level: default content from parse output */
-    public ?string $rawDefaultContent = null;
 
     public function __construct(
         public readonly string $propName,
@@ -91,14 +97,33 @@ final class AttributeSchema
         return $this->attrClass === RawContentAttribute::class;
     }
 
+    /**
+     * OptionalRawAttribute wraps a possibly-absent raw fragment (e.g. a comment's
+     * own `leadingWs`/`trailingWs`) — distinct from OptionalAttribute, which wraps
+     * a possibly-absent *node*.
+     */
+    public function isOptionalRawAttribute(): bool
+    {
+        return $this->attrClass === OptionalRawAttribute::class;
+    }
+
     public function isRawRegionAttribute(): bool
     {
         return $this->attrClass === RawRegionAttribute::class;
     }
 
+    public function isRawSequenceAttribute(): bool
+    {
+        return $this->attrClass === RawSequenceAttribute::class;
+    }
+
+    /**
+     * choicesList (from meta['alternatives'], a compile-time grammar fact) decides this
+     * — not rawChoices, which augmentation derives afterward and is empty beforehand.
+     */
     public function isChoiceRaw(): bool
     {
-        return ($this->isRawContentAttribute() || $this->isRawRegionAttribute()) && count($this->rawChoices) > 1;
+        return ($this->isRawContentAttribute() || $this->isRawRegionAttribute()) && count($this->choicesList) > 1;
     }
 
     public function isChoiceNodes(): bool

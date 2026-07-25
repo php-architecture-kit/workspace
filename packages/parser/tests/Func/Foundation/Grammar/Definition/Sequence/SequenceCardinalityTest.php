@@ -8,8 +8,10 @@ use PhpArchitecture\Parser\Foundation\Grammar\Definition\Grammar;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Rule;
 use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeInterface;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Node\GroupAttribute;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Node\NodeAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Node\OptionalAttribute;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Raw\RawContentAttribute;
+use PhpArchitecture\Parser\Infrastructure\Grammar\Definition\Technical\Whitespace;
 use PhpArchitecture\Parser\Tests\Func\Grammar\GrammarTestCase;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
@@ -243,6 +245,108 @@ final class SequenceCardinalityTest extends GrammarTestCase
 
                 $test->assertInstanceOf(GroupAttribute::class, $groupAttr);
                 $test->assertCount(0, $groupAttr->nodes);
+            },
+        );
+    }
+
+    // --- Trivia tags (-, -l, -t) ---
+    //
+    // The trivia markers resolve through a different path than direct `/n` tagging:
+    // `-`/`-l`/`-t` are tags on Whitespace's `whitespace` region, expanded by
+    // SequenceNodeEnricher's tag-spreading (and, for `whitespace`, a self-referential
+    // tag-on-its-own-region edge case it must not mistake for "no type"). These tests
+    // pin down that the cardinality-to-attribute-class mapping holds for that path too,
+    // not just for tokens tagged `/n` directly.
+
+    private function triviaGrammar(string $rootSequence): Grammar
+    {
+        $grammar = (new Whitespace())->grammar();
+        $grammar->global->add(
+            Rule::token('open', '['),
+            Rule::token('close', ']'),
+        );
+        $grammar->global->withRootSequence($rootSequence);
+
+        return $grammar;
+    }
+
+    #[Test]
+    public function shouldProduceGroupAttributeForZeroOrMoreLeadingTrivia(): void
+    {
+        $this->assertGrammarParsing(
+            string: '[  ]',
+            grammar: $this->triviaGrammar('open -l* close'),
+            requireBofEof: false,
+            assertParsingResultValid: function (NodeInterface $node, self $test): void {
+                $trivia = $node->getAttributes()[1];
+
+                $test->assertInstanceOf(GroupAttribute::class, $trivia, '`-l*` is zero-or-more, so it is a GroupAttribute even though it matched once');
+                $test->assertSame('  ', (string) $node->getAttributes()[1]);
+            },
+        );
+    }
+
+    #[Test]
+    public function shouldProduceEmptyGroupAttributeWhenZeroOrMoreLeadingTriviaMatchesNothing(): void
+    {
+        $this->assertGrammarParsing(
+            string: '[]',
+            grammar: $this->triviaGrammar('open -l* close'),
+            requireBofEof: false,
+            assertParsingResultValid: function (NodeInterface $node, self $test): void {
+                $trivia = $node->getAttributes()[1];
+
+                $test->assertInstanceOf(GroupAttribute::class, $trivia, 'no match still produces a GroupAttribute, not an absent attribute');
+                $test->assertCount(0, $trivia->nodes);
+            },
+        );
+    }
+
+    #[Test]
+    public function shouldProduceNullOptionalAttributeWhenZeroOrOneTrailingTriviaIsAbsent(): void
+    {
+        $this->assertGrammarParsing(
+            string: '[]',
+            grammar: $this->triviaGrammar('open ?-t close'),
+            requireBofEof: false,
+            assertParsingResultValid: function (NodeInterface $node, self $test): void {
+                $trivia = $node->getAttributes()[1];
+
+                $test->assertInstanceOf(OptionalAttribute::class, $trivia, '`?-t` is zero-or-one, so it is an OptionalAttribute');
+                $test->assertNull($trivia->node);
+            },
+        );
+    }
+
+    #[Test]
+    public function shouldOptionalAttributeHoldNodeWhenZeroOrOneTrailingTriviaIsPresent(): void
+    {
+        $this->assertGrammarParsing(
+            string: '[ ]',
+            grammar: $this->triviaGrammar('open ?-t close'),
+            requireBofEof: false,
+            assertParsingResultValid: function (NodeInterface $node, self $test): void {
+                $trivia = $node->getAttributes()[1];
+
+                $test->assertInstanceOf(OptionalAttribute::class, $trivia);
+                $test->assertNotNull($trivia->node);
+                $test->assertSame(' ', (string) $trivia->node);
+            },
+        );
+    }
+
+    #[Test]
+    public function shouldProduceNodeAttributeForRequiredLeadingTrivia(): void
+    {
+        $this->assertGrammarParsing(
+            string: '[ ]',
+            grammar: $this->triviaGrammar('open -l close'),
+            requireBofEof: false,
+            assertParsingResultValid: function (NodeInterface $node, self $test): void {
+                $trivia = $node->getAttributes()[1];
+
+                $test->assertInstanceOf(NodeAttribute::class, $trivia, 'bare `-l` is exactly-one, so it is a plain NodeAttribute');
+                $test->assertSame(' ', (string) $trivia->node);
             },
         );
     }

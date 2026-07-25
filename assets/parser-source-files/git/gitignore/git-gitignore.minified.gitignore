@@ -1,0 +1,16 @@
+.DS_Store
+*.log
+node_modules/
+build/
+!important.log
+**/*.tmp
+src/**/*.min.js
+*.swp
+file?.txt
+[Bb]uild/
+[!a]*.log
+file[0-9].txt
+/root-relative.txt
+\#escaped-hash.txt
+\!escaped-bang.txt
+*~

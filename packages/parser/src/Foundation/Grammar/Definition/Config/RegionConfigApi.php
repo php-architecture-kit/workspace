@@ -10,8 +10,10 @@ use PhpArchitecture\Parser\Foundation\Grammar\Definition\EventListener\Tokenizat
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\EventListener\Tokenization\StartRegionEventListener;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\EventSubscriber;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Grammar;
+use PhpArchitecture\Parser\Foundation\Grammar\Definition\Creation\DefaultsDefinition;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Middleware\GrammarMiddleware;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Model\Sequence\SequenceRule;
+use PhpArchitecture\Parser\Foundation\Grammar\Definition\Service\StructuralDefaultsBinder;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Region;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Rule;
 use PhpArchitecture\Parser\Foundation\Tokenization\Event\TokenAddedEvent;
@@ -92,8 +94,24 @@ trait RegionConfigApi
         return $this;
     }
 
+    /**
+     * Attaches structural Defaults to the region's root sequence nodes. Requires
+     * withRootSequence() to have been called first.
+     *
+     * @param array<string, DefaultsDefinition> $defaults
+     */
     public function withDefaults(array $defaults): self
     {
+        $rootSequence = $this->config->rootSequence;
+        if (!$rootSequence instanceof SequenceRule) {
+            throw new LogicException(
+                "withDefaults() requires a root sequence. Call withRootSequence() before withDefaults() on region '{$this->name}'.",
+            );
+        }
+
+        foreach ($defaults as $selector => $def) {
+            StructuralDefaultsBinder::bind($rootSequence->nodes, (string) $selector, $def);
+        }
 
         return $this;
     }
@@ -170,26 +188,21 @@ trait RegionConfigApi
         return $this;
     }
 
-    public function asAstNode(string $name, AstDefinitionInterface ...$definitions): self
-    {
-        $this->config->definition = (new Definition($name))->add(...$definitions);
-
-        return $this;
-    }
-
-    public function extendAstNode(AstDefinitionInterface ...$definitions): self
-    {
-        if ($this->config->definition === null) {
-            throw new LogicException('Region must be converted to AST node first using asAstNode() method.');
-        }
-
-        $this->config->definition->add(...$definitions);
-        return $this;
-    }
-
     public function withPossibleNames(string ...$names): self
     {
         $this->config->possibleNames = $names;
+        return $this;
+    }
+
+    /**
+     * Restricts what a $tag on this region resolves to (via TagToChoiceCompiler)
+     * to the given subset of withPossibleNames() — instead of the default of
+     * resolving to this region's own name (i.e. "any possible name"). Call once
+     * per tag that needs to pick out a subset. See RegionConfig::$possibleNamesByTag.
+     */
+    public function withPossibleNamesForTag(string $tag, string ...$names): self
+    {
+        $this->config->possibleNamesByTag[$tag] = $names;
         return $this;
     }
 
@@ -202,6 +215,12 @@ trait RegionConfigApi
     public function prattAtom(): self
     {
         $this->config->isPrattAtom = true;
+        return $this;
+    }
+
+    public function priority(int $priority): self
+    {
+        $this->config->priority = $priority;
         return $this;
     }
 }

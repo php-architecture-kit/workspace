@@ -8,8 +8,9 @@ use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use PhpArchitecture\Parser\Foundation\Matching\Model\NestedSequence;
-use PhpArchitecture\Parser\Foundation\Matching\Model\SequenceNode;
+use PhpArchitecture\Parser\Foundation\Grammar\Definition\Model\Cardinality;
+use PhpArchitecture\Parser\Foundation\Grammar\Definition\Model\Sequence\NestedSequence;
+use PhpArchitecture\Parser\Foundation\Grammar\Definition\Model\Sequence\SequenceNode;
 use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeAttributeInterface;
 use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeInterface;
 use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\SequenceAttribute;
@@ -29,12 +30,12 @@ final class SequenceAttributeTest extends TestCase
 
     private static function seq(array $alternative, int $min = 1, int $max = 1): NestedSequence
     {
-        return new NestedSequence([$alternative], $min, $max);
+        return new NestedSequence([$alternative], Cardinality::fromBounds($min, $max));
     }
 
     private static function node(string $name, int $min = 1): SequenceNode
     {
-        return new SequenceNode([$name], $min, PHP_INT_MAX);
+        return new SequenceNode([$name], Cardinality::fromBounds($min, PHP_INT_MAX));
     }
 
     // -------------------------------------------------------------------------

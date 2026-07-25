@@ -16,10 +16,11 @@ class Json5 extends JsonC
 
     public function grammar(): Grammar
     {
-        $grammar = parent::grammar();
-        $regions = $grammar->getAllRegions();
+        parent::grammar();
+        $regions = $this->grammar->getAllRegions();
 
-        $grammar->global->add(
+        $this->grammar->global->add(
+            // string
             Rule::token("singleQuote", "'", type: NodeType::Structure)
                 ->startRegion("singleQuotedString", true)
                 ->add(
@@ -30,18 +31,29 @@ class Json5 extends JsonC
                     Rule::expr("unescaped", "[^\\x00-\\x1F\\x27\\x5C]+"),
                 )
                 ->setNodeType(NodeType::Raw)
-                ->closeWith(Rule::token("singleQuote", "'", type: NodeType::Structure)),
-            Rule::expr("identifierKey", "[\p{L}_\$][\p{L}\p{N}_\$]*", type: NodeType::Raw),
-            Rule::expr("signedInfinity", "[+\\-]?Infinity", caseSensitive: true)
-                ->priority(1)
-                ->addTag("value"),
-            Rule::keyword(keyword: "NaN", caseSensitive: true, name: "nan")
-                ->priority(1)
-                ->addTag("value"),
+                ->closeWith(Rule::token("singleQuote", "'", type: NodeType::Structure))
+                ->addTag("string"),
+
+            // identifier variant
+            Rule::expr("nonQuotedIdentifier", "[\p{L}_\$][\p{L}\p{N}_\$]*", type: NodeType::Raw),
+
+            // literals
+            Rule::keyword("NaN", true, "nan")
+                ->priority(1),
+            Rule::choice(
+                "infinity",
+                [
+                    Rule::keyword("-Infinity", true, "negativeInfinity")->priority(1),
+                    Rule::keyword("Infinity", true, "StandardInfinity")->priority(1),
+                    Rule::keyword("+Infinity", true, "positiveInfinity")->priority(1)
+                ],
+                type: NodeType::Raw,
+            ),
             Rule::choice(
                 "primitive",
-                ["false", "null", "true", "signedInfinity", "nan", "number", "string", "singleQuotedString"],
+                ["false", "null", "true", "infinity", "nan", "number", "string"],
                 tags: ["value"],
+                attributeTags: ['r'],
             ),
         );
 
@@ -54,35 +66,36 @@ class Json5 extends JsonC
             Rule::seq("leadingDotNumber", "decimalPoint digit+", type: NodeType::Raw),
         );
         $regions['number']->withRootSequence(
-            "?minus|plus (hexInteger | leadingDotNumber | integer ?frac ?exp)",
+            "?minus|plus[operator] (hexInteger|integer[integer] ?frac)|(leadingDotNumber) ?exp",
         );
 
         $regions['object']->add(
-            Rule::choice("key", [
-                "string",
-                "singleQuotedString",
-                "identifierKey",
-                "null",
-                "true",
-                "false",
-                "signedInfinity",
-                "nan"
-            ]),
-            Rule::seq("member", "key[identifier] -* colon -* value"),
-        );
-        $regions['object']->withRootSequence(
-            "beginObject -* ?(member (-* comma -* member)* -* ?comma)/g -* endObject",
+            Rule::seq("member", "nonQuotedIdentifier|string[identifier]/r -* colon -* value"),
         );
 
-        $regions['array']->withRootSequence(
-            "beginArray -* ?(value[item] (-* comma -* value[item])* -* ?comma)/g -* endArray",
-        );
+        $regions['object']
+            ->withRootSequence("beginObject -t* ?(-* member/c (-* comma -t* -* member/c)* ?(-* comma[trailingComma]) -t*)[members]/g -* endObject");
 
-        $grammar->stampOrigin(
+        $regions['array']
+            ->withRootSequence("beginArray -t* ?(-* value[item]/c (-* comma -t* -* value[item]/c)* ?(-* comma[trailingComma]) -t*)[items]/g -* endArray");
+
+        $this->grammar->stampOrigin(
             new GrammarOrigin(self::FORMAT, self::VARIANT),
             forceRegions: ['number', 'object', 'array'],
         );
 
-        return $grammar;
+        $this->grammar->nodeClassMap = array_merge($this->grammar->nodeClassMap, [
+            'json' => \PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Json\Ver5\JsonNode::class,
+            'leadingComment' => \PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Json\Ver5\LeadingCommentNode::class,
+            'lineComment' => \PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Json\Ver5\LineCommentNode::class,
+            'blockComment' => \PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Json\Ver5\BlockCommentNode::class,
+            'object' => \PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Json\Ver5\ObjectNode::class,
+            'member' => \PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Json\Ver5\MemberNode::class,
+            'primitive' => \PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Json\Ver5\PrimitiveNode::class,
+            'trailingComment' => \PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Json\Ver5\TrailingCommentNode::class,
+            'array' => \PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Json\Ver5\ArrayNode::class,
+        ]);
+
+        return $this->grammar;
     }
 }

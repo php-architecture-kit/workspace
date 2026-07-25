@@ -13,6 +13,12 @@ final class Sequence implements MetaInterface
     use MetaTrait;
     use TagsTrait;
 
+    /** GrammarOrigin (format/variant) of the rule this sequence was compiled from. */
+    public const META_ORIGIN = 'grammar.origin';
+
+    /** True when this sequence was spliced in from an inserted retokenize inner grammar. */
+    public const META_INSERTED = 'grammar.insertedByInnerGrammar';
+
     /**
      * @param (NestedSequence|SequenceNode)[] $nodes
      * @param array<string,mixed> $meta

@@ -55,18 +55,18 @@ class JsonComment extends Whitespace
                     Rule::token("blockCommentStart", "/*", type: NodeType::Structure),
                     Rule::token("blockCommentEnd", "*/", type: NodeType::Structure)
                         ->priority(2),
-                    Rule::token("asterisk", "*", ['-', '-l', '-t'], NodeType::Structure)
+                    Rule::token("asterisk", "*", type: NodeType::Structure)
                         ->priority(1),
                     Rule::expr("word", "\S+")
                         ->priority(-1),
-                    Rule::seq("commentStartLine", "blockCommentStart ?asterisk ?inlineWs[leadingWs]/r ?(word (inlineWs/r word)*)[content]/r -t+"),
+                    Rule::seq("commentStartLine", "blockCommentStart ?asterisk[openingAsterisk] ?inlineWs[leadingWs]/r ?(word (inlineWs/r word)*)[content]/r -t+"),
                     Rule::seq("commentEmptyLine", "-l* ?asterisk -t+")->priority(1),
                     Rule::seq("commentMidLine", "-l* ?asterisk ?inlineWs[leadingWs]/r ?(word (inlineWs/r word)*)[content]/r -t+"),
-                    Rule::seq("commentEndLine", "-l* ?asterisk ?inlineWs[leadingWs]/r ?(word (inlineWs/r word)*)[content]/r ?inlineWs[trailingWs]/r blockCommentEnd"),
-                    Rule::seq("singleLine", "blockCommentStart ?asterisk ?inlineWs[leadingWs]/r ?(word (inlineWs/r word)*)[content]/r ?inlineWs[trailingWs]/r blockCommentEnd"),
-                    Rule::seq("multiLine", "commentStartLine commentEmptyLine|commentMidLine* commentEndLine"),
+                    Rule::seq("commentEndLine", "-l* ?asterisk ?inlineWs[leadingWs]/r ?(word (inlineWs/r word)*)[content]/r ?inlineWs[trailingWs]/r ?asterisk[closingAsterisk] blockCommentEnd"),
+                    Rule::seq("singleLine", "blockCommentStart ?asterisk[openingAsterisk] ?inlineWs[leadingWs]/r ?(word (inlineWs/r word)*)[content]/r ?inlineWs[trailingWs]/r ?asterisk[closingAsterisk] blockCommentEnd"),
+                    Rule::seq("multiLine", "commentStartLine commentEmptyLine|commentMidLine*[body] commentEndLine"),
                 )
-                ->withRootSequence("singleLine|multiLine")
+                ->withRootSequence("singleLine|multiLine[variant]")
                 ->setNodeType(NodeType::Node)
                 ->addTag("comment", "-", "-l", "-t");
 
@@ -75,6 +75,15 @@ class JsonComment extends Whitespace
         }
 
         $this->grammar->stampOrigin(new GrammarOrigin(self::FORMAT, self::VARIANT));
+
+        $this->grammar->nodeClassMap = array_merge($this->grammar->nodeClassMap, [
+            'singleLine' => \PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Json\Comment\SingleLineNode::class,
+            'multiLine' => \PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Json\Comment\MultiLineNode::class,
+            'commentStartLine' => \PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Json\Comment\CommentStartLineNode::class,
+            'commentMidLine' => \PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Json\Comment\CommentMidLineNode::class,
+            'commentEndLine' => \PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Json\Comment\CommentEndLineNode::class,
+            'commentEmptyLine' => \PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Json\Comment\CommentEmptyLineNode::class,
+        ]);
 
         return $this->grammar;
     }

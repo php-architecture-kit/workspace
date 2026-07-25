@@ -34,7 +34,8 @@ final class NextTokenRemovalEventListener implements TokenizationEventListener, 
 
     public function priority(): int
     {
-        return -100;
+        // Runs early, before default-priority (0) listeners (higher = earlier).
+        return 100;
     }
 
     public function rule(): ?string

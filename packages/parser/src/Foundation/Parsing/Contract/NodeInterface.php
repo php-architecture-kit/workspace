@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace PhpArchitecture\Parser\Foundation\Parsing\Contract;
 
-use PhpArchitecture\Parser\Foundation\Parsing\Model\Context\ContextStack;
+use PhpArchitecture\Parser\Foundation\ParsedTree\Context\ContextStack;
 use PhpArchitecture\Parser\Foundation\Shared\Meta\MetaInterface;
 use PhpArchitecture\Parser\Foundation\Shared\Tags\TagsInterface;
 use Stringable;

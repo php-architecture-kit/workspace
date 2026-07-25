@@ -101,7 +101,7 @@ final class EventTest extends GrammarTestCase
     #[Test]
     public function shouldRespectEventSubscriberPriority(): void
     {
-        // Lower priority number = earlier execution (ascending sort in dispatcher).
+        // Higher priority number = earlier execution (descending sort in dispatcher).
         $order = [];
         $grammar = new Grammar('event-test');
         $grammar->global->add(Rule::token('x', 'x'));
@@ -111,7 +111,7 @@ final class EventTest extends GrammarTestCase
                 function (TokenAddedEvent $event, TokenizationContext $ctx) use (&$order): void {
                     $order[] = 'second';
                 },
-            )->onlyForRuleName('x')->priority(10),
+            )->onlyForRuleName('x')->priority(1),
         );
         $grammar->global->add(
             EventSubscriber::on(
@@ -119,7 +119,7 @@ final class EventTest extends GrammarTestCase
                 function (TokenAddedEvent $event, TokenizationContext $ctx) use (&$order): void {
                     $order[] = 'first';
                 },
-            )->onlyForRuleName('x')->priority(1),
+            )->onlyForRuleName('x')->priority(10),
         );
 
         $this->assertGrammarParsing(string: 'x', grammar: $grammar, requireBofEof: false);

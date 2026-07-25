@@ -11,6 +11,20 @@ enum Cardinality: string
     case OneOrMore = '1..*';
     case ExactlyOne = '1';
 
+    /**
+     * Inverse of {@see min()}/{@see max()}: reconstructs the cardinality from concrete
+     * bounds (e.g. the min/max carried by a compiled Matching sequence node).
+     */
+    public static function fromBounds(int $min, int $max): self
+    {
+        return match (true) {
+            $min === 0 && $max === 1 => self::ZeroOrOne,
+            $min === 0 => self::ZeroOrMore,
+            $max > 1 => self::OneOrMore,
+            default => self::ExactlyOne,
+        };
+    }
+
     public function min(): int
     {
         return match ($this->name) {

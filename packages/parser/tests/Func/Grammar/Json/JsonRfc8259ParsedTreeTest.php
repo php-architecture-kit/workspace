@@ -122,7 +122,7 @@ final class JsonRfc8259ParsedTreeTest extends GrammarTestCase
                 $firstAttr = reset($topLevelAttrs);
                 $test->assertInstanceOf(MetaInterface::class, $firstAttr);
                 $test->assertSame(
-                    ['false', 'null', 'true', 'number', 'string'],
+                    ['false', 'null', 'true', 'number', 'doubleQuotedString'],
                     $firstAttr->meta['alternatives'] ?? null,
                     'The matched alternative\'s attribute must carry the full set of choices in meta[\'alternatives\']',
                 );
@@ -166,7 +166,7 @@ final class JsonRfc8259ParsedTreeTest extends GrammarTestCase
                 $test->assertNotNull($attr);
 
                 $test->assertEquals(
-                    ['false', 'null', 'true', 'number', 'string'],
+                    ['false', 'null', 'true', 'number', 'doubleQuotedString'],
                     $attr->meta['alternatives'] ?? null,
                     'meta[\'alternatives\'] must list all defined primitive alternatives',
                 );
@@ -195,9 +195,9 @@ final class JsonRfc8259ParsedTreeTest extends GrammarTestCase
 
                 /** @var RawRegionAttribute $attr */
                 $test->assertEquals(
-                    'string',
+                    'doubleQuotedString',
                     $attr->name,
-                    'RawRegionAttribute::$name must be "string" (the matched choice), even though getName() returns the anchor "primitive"',
+                    'RawRegionAttribute::$name must be "doubleQuotedString" (the matched choice), even though getName() returns the anchor "primitive"',
                 );
             },
         );
@@ -249,7 +249,7 @@ final class JsonRfc8259ParsedTreeTest extends GrammarTestCase
                     'Boolean "true" is matched as a Token, so it resolves to a RawContentAttribute',
                 );
                 $test->assertSame(
-                    ['false', 'null', 'true', 'number', 'string'],
+                    ['false', 'null', 'true', 'number', 'doubleQuotedString'],
                     $attr->meta['alternatives'] ?? null,
                 );
                 $test->assertSame('true', (string) $attr);
@@ -270,7 +270,7 @@ final class JsonRfc8259ParsedTreeTest extends GrammarTestCase
                 $attr = $primitiveNode->getAttributes()[0] ?? null;
                 $test->assertNotNull($attr);
                 $test->assertSame(
-                    ['false', 'null', 'true', 'number', 'string'],
+                    ['false', 'null', 'true', 'number', 'doubleQuotedString'],
                     $attr->meta['alternatives'] ?? null,
                 );
             },

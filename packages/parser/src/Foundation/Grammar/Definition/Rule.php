@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace PhpArchitecture\Parser\Foundation\Grammar\Definition;
 
 use Closure;
-use PhpArchitecture\Parser\Foundation\AST\Definition\AstDefinitionInterface;
+use LogicException;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\EventListener\Tokenization\EndRegionEventListener;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Model\Cardinality;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Model\Ref\RefRuleDefinition;
@@ -14,6 +14,7 @@ use PhpArchitecture\Parser\Foundation\Grammar\Definition\Model\Regex\RegexRule;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Model\RuleDefinition;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Model\RuleType;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Model\Sequence\SequenceRule;
+use PhpArchitecture\Parser\Foundation\Grammar\Definition\Service\StructuralDefaultsBinder;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Model\Technical\TaggedRule;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Model\Technical\TechnicalTokenRule;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Pratt\PrattRoleDefinition;
@@ -25,7 +26,7 @@ use PhpArchitecture\Parser\Foundation\Parsing\Model\NodeType;
 use PhpArchitecture\Parser\Foundation\Tokenization\Model\Token;
 use PhpArchitecture\Parser\Foundation\Shared\Meta\MetaTrait;
 use PhpArchitecture\Parser\Foundation\Shared\Tags\TagsTrait;
-use LogicException;
+use PhpArchitecture\Parser\Foundation\Grammar\Definition\Creation\DefaultsDefinition;
 
 class Rule
 {
@@ -40,7 +41,6 @@ class Rule
     /** @var Rule[] */
     public private(set) array $inheritedRuleDefs = [];
     public private(set) int $priority = 0;
-    public private(set) ?Definition $astDefinition = null;
     public private(set) ?PrattRoleDefinition $prattRole = null;
 
     /**
@@ -72,7 +72,7 @@ class Rule
         NodeType $type = NodeType::Raw,
     ): self {
         $def = RegexRule::fromString(preg_quote($token, '~'));
-        $def->defaults = new Defaults([Defaults::DEFAULT_STYLE => static fn() => $token]);
+        $def->defaults = new DefaultsDefinition([DefaultsDefinition::DEFAULT_STYLE => static fn() => $token]);
 
         return new self(
             $name,
@@ -92,7 +92,7 @@ class Rule
         NodeType $type = NodeType::Raw,
     ): self {
         $def = RegexRule::fromString(preg_quote($keyword, '~'), $caseSensitive);
-        $def->defaults = new Defaults([Defaults::DEFAULT_STYLE => static fn() => $keyword]);
+        $def->defaults = new DefaultsDefinition([DefaultsDefinition::DEFAULT_STYLE => static fn() => $keyword]);
 
         return new self(
             $name ?? $keyword,
@@ -200,6 +200,7 @@ class Rule
         array $options,
         Cardinality $cardinality = Cardinality::ExactlyOne,
         array $tags = [],
+        array $attributeTags = [],
         NodeType $type = NodeType::Node,
     ): self {
         if (in_array($name, $tags, true)) {
@@ -224,7 +225,7 @@ class Rule
             RuleType::Choice,
             new SequenceRule(
                 [
-                    new Model\Sequence\SequenceNode($rulesNames, $cardinality, anchorName: $name)
+                    new Model\Sequence\SequenceNode($rulesNames, $cardinality, tags: $attributeTags, anchorName: $name)
                 ],
             ),
             $type,
@@ -295,23 +296,6 @@ class Rule
         return $this;
     }
 
-    public function asAstNode(string $name, AstDefinitionInterface ...$definitions): self
-    {
-        $this->astDefinition = (new Definition($name))->add(...$definitions);
-
-        return $this;
-    }
-
-    public function extendAstNode(AstDefinitionInterface ...$definitions): self
-    {
-        if ($this->astDefinition === null) {
-            throw new LogicException('Rule must be converted to AST node first using asAstNode() method.');
-        }
-
-        $this->astDefinition->add(...$definitions);
-        return $this;
-    }
-
     public function prattAtom(): self
     {
         $this->prattRole = PrattRoleDefinition::atom();
@@ -324,9 +308,30 @@ class Rule
         return $this;
     }
 
+    /**
+     * Attaches structural DefaultsDefinition to nodes of this rule's sequence.
+     *
+     * Keys are slot selectors: a structural node's anchor name, or one of its
+     * alternative names (e.g. `comma`, or the raw trivia token `-l`/`-t`/`-`,
+     * matched before TriviaSequenceNamingMiddleware renames it). For a token /
+     * keyword (RegexRule) rule, a single Defaults keyed by the rule name (or the
+     * sole entry) is attached to the rule itself.
+     *
+     * @param array<string, DefaultsDefinition> $defaults
+     */
     public function withDefaults(array $defaults): self
     {
-        
+        if ($this->definition instanceof SequenceRule) {
+            foreach ($defaults as $selector => $def) {
+                StructuralDefaultsBinder::bind($this->definition->nodes, (string) $selector, $def);
+            }
+        } elseif ($this->definition instanceof RegexRule) {
+            $only = $defaults[$this->name] ?? (count($defaults) === 1 ? reset($defaults) : null);
+            if ($only instanceof DefaultsDefinition) {
+                $this->definition->defaults = $only;
+            }
+        }
+
         return $this;
     }
 }

@@ -4,22 +4,40 @@ declare(strict_types=1);
 
 namespace PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Technical\Whitespace;
 
-use PhpArchitecture\Parser\Foundation\Parsing\Contract\NodeInterface;
-use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\RawContentAttribute;
-use PhpArchitecture\Parser\Foundation\Parsing\Model\Node;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Raw\RawRegionAttribute;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\LeafNode;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\NodeOrigin;
 
-class InlineWsNode extends Node
+class InlineWsNode extends LeafNode
 {
-    public RawContentAttribute $raw { get => $this->attributes[0]; }
+    public RawRegionAttribute $inlineWs { get => $this->attributes[0]; }
 
-    public static function create(string $raw = " ", ?NodeInterface $parent = null): self
+    public static function create(string $inlineWs): self
     {
-        $node = new self(
+        return new self(
             name: 'inlineWs',
-            attributes: [new RawContentAttribute($raw)],
-            parent: $parent,
+            origin: NodeOrigin::Region,
+            attributes: [
+                new RawRegionAttribute(
+                    opener: null,
+                    closer: null,
+                    content: $inlineWs,
+                    name: 'inlineWs',
+                    anchorName: null,
+                ),
+            ],
+            parent: null,
         );
+    }
 
-        return $node;
+    public function getRawInlineWs(): string
+    {
+        return $this->inlineWs->content;
+    }
+
+    public function setRawInlineWs(string $inlineWs): self
+    {
+        $this->inlineWs->content = $inlineWs;
+        return $this;
     }
 }

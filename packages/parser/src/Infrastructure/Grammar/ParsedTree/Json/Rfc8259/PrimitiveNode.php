@@ -5,75 +5,69 @@ declare(strict_types=1);
 namespace PhpArchitecture\Parser\Infrastructure\Grammar\ParsedTree\Json\Rfc8259;
 
 use InvalidArgumentException;
-use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\RawContentAttribute;
-use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\RawRegionAttribute;
-use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\StructureAttribute;
-use PhpArchitecture\Parser\Foundation\Parsing\Model\Node;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Raw\RawAttributeInterface;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Raw\RawContentAttribute;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\Attribute\Raw\RawRegionAttribute;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\NodeOrigin;
+use PhpArchitecture\Parser\Foundation\Parsing\Model\SequenceNode;
 
-class PrimitiveNode extends Node
+class PrimitiveNode extends SequenceNode
 {
-    public RawRegionAttribute $primitive { get => $this->attributes[0]; }
+    public RawAttributeInterface $primitive { get => $this->attributes[0]; }
 
-    public static function create(string $primitive): self
+    public static function create(PrimitiveType $primitiveType, ?string $primitive = null): self
     {
         return new self(
             name: 'primitive',
+            origin: NodeOrigin::Sequence,
             attributes: [
-            new RawRegionAttribute(
-                opener: new StructureAttribute(true, 'doubleQuote', '"'),
-                closer: new StructureAttribute(true, 'doubleQuote', '"'),
-                content: $primitive,
-                name: 'string',
-                anchorName: 'primitive',
-            ),
+                self::makePrimitive($primitiveType, $primitive),
             ],
             parent: null,
         );
     }
 
-    public function setPrimitive(PrimitiveType $type, ?string $content = null): self
+    private static function makePrimitive(PrimitiveType $primitiveType, ?string $primitive = null): RawAttributeInterface
     {
-        if ($type === PrimitiveType::String) {
-            if ($content === null) {
-                throw new InvalidArgumentException('Content required for string.');
+        if ($primitiveType === PrimitiveType::False) {
+            return new RawContentAttribute($primitive ?? 'false', 'false', null);
+        }
+
+        if ($primitiveType === PrimitiveType::Null) {
+            return new RawContentAttribute($primitive ?? 'null', 'null', null);
+        }
+
+        if ($primitiveType === PrimitiveType::True) {
+            return new RawContentAttribute($primitive ?? 'true', 'true', null);
+        }
+
+        if ($primitiveType === PrimitiveType::Number) {
+            if ($primitive === null) {
+                throw new InvalidArgumentException('Content is required for type: ' . $primitiveType->value);
             }
-            $this->primitive = new RawRegionAttribute(
-                new StructureAttribute(true, 'doubleQuote', '"'),
-                new StructureAttribute(true, 'doubleQuote', '"'),
-                $content, 'string', null,
-            );
-            return $this;
+            return new RawRegionAttribute(opener: null, content: $primitive, closer: null, name: 'number', anchorName: null);
         }
 
-        if ($type === PrimitiveType::Number) {
-            if ($content === null) {
-                throw new InvalidArgumentException('Content required for number.');
+        if ($primitiveType === PrimitiveType::DoubleQuotedString) {
+            if ($primitive === null) {
+                throw new InvalidArgumentException('Content is required for type: ' . $primitiveType->value);
             }
-            $this->primitive = new RawRegionAttribute(null, null, $content, 'number', null);
-            return $this;
+            return new RawRegionAttribute(opener: '"', content: $primitive, closer: '"', name: 'doubleQuotedString', anchorName: null);
         }
 
-        if ($type === PrimitiveType::True) {
-            $this->primitive = new RawContentAttribute('true', 'true', null);
-            return $this;
-        }
+        throw new InvalidArgumentException('Unsupported type: ' . $primitiveType->value);
+    }
 
-        if ($type === PrimitiveType::False) {
-            $this->primitive = new RawContentAttribute('false', 'false', null);
-            return $this;
-        }
-
-        if ($type === PrimitiveType::Null) {
-            $this->primitive = new RawContentAttribute('null', 'null', null);
-            return $this;
-        }
-
-        throw new InvalidArgumentException('Unsupported type: ' . $type->value);
+    public function setPrimitive(PrimitiveType $primitiveType, ?string $primitive = null): self
+    {
+        $this->attributes[0] = self::makePrimitive($primitiveType, $primitive);
+        return $this;
     }
 
     public function getPrimitiveType(): PrimitiveType|null
     {
-        return PrimitiveType::from($this->primitive->name);
+        return PrimitiveType::tryFrom($this->primitive->name)
+            ?? PrimitiveType::tryFrom((string) ($this->primitive->content ?? ''));
     }
 
     public function getPrimitiveContent(): string|null

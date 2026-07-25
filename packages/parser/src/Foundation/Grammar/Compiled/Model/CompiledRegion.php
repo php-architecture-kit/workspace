@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace PhpArchitecture\Parser\Foundation\Grammar\Compiled\Model;
 
-use PhpArchitecture\Parser\Foundation\AST\Definition\NodeDefinition;
 use PhpArchitecture\Parser\Foundation\Matching\Model\SequenceLibrary;
 use PhpArchitecture\Parser\Foundation\Shared\Meta\MetaInterface;
 use PhpArchitecture\Parser\Foundation\Shared\Meta\MetaTrait;
@@ -27,7 +26,6 @@ final class CompiledRegion implements MetaInterface
         public readonly PatternLibrary $patternLibrary,
         public readonly SequenceLibrary $sequenceLibrary,
         public readonly ?CompiledGrammar $innerGrammar,
-        public readonly ?NodeDefinition $definition = null,
         public readonly array $tags = [],
         array $meta = [],
     ) {

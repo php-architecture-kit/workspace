@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace PhpArchitecture\Parser\Foundation\Grammar\Definition\Model\Regex;
 
-use PhpArchitecture\Parser\Foundation\Grammar\Definition\Defaults;
+use PhpArchitecture\Parser\Foundation\Grammar\Definition\Creation\DefaultsDefinition;
 use PhpArchitecture\Parser\Foundation\Grammar\Definition\Model\RuleDefinition;
 
 final class RegexRule implements RuleDefinition
 {
-    public ?Defaults $defaults = null;
+    public ?DefaultsDefinition $defaults = null;
 
     public function __construct(
         public readonly string $regex,
