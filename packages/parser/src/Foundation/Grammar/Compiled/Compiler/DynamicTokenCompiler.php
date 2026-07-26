@@ -47,7 +47,7 @@ class DynamicTokenCompiler implements GrammarPrecompilerInterface
                         default => isset($regions[$regionName]) ? [$regions[$regionName]] : [],
                     };
 
-                    foreach ($listenerRegions as $region) {
+                    foreach ($listenerRegions as $compilerRegion) {
                         if ($region === null) {
                             throw new RuntimeException("Region `{$regionName}` not found for rule `{$rule->name}`");
                         }

@@ -14,6 +14,8 @@ use PhpArchitecture\Parser\Infrastructure\Grammar\Definition\Git\GitIgnore;
 use PhpArchitecture\Parser\Infrastructure\Grammar\Definition\Json\JsonC;
 use PhpArchitecture\Parser\Infrastructure\Grammar\Definition\Json\Json5;
 use PhpArchitecture\Parser\Infrastructure\Grammar\Definition\Json\JsonRfc8259;
+use PhpArchitecture\Parser\Infrastructure\Grammar\Definition\PHP\Php56;
+use PhpArchitecture\Parser\Infrastructure\Grammar\Definition\PHP\Php70;
 use PhpArchitecture\Parser\Infrastructure\Grammar\Definition\Technical\Whitespace;
 
 final class InMemoryGrammarRegistry implements GrammarRegistry
@@ -36,6 +38,8 @@ final class InMemoryGrammarRegistry implements GrammarRegistry
             new JsonRfc8259(),
             new JsonC(),
             new Json5(),
+            new Php56(),
+            new Php70(),
         );
     }
 
