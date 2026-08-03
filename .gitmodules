@@ -25,3 +25,7 @@
 [submodule "state-machine"]
 	path = packages/state-machine
 	url = git@github.com:php-architecture-kit/state-machine.git
+
+[submodule "lazy-operators"]
+	path = packages/lazy-operators
+	url = git@github.com:php-architecture-kit/lazy-operators.git

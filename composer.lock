@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "598a9bcfd05e275be13529bd886f559a",
+    "content-hash": "177163118afec9e41bd43e03df31fade",
     "packages": [
         {
             "name": "php-architecture-kit/actor",
@@ -193,6 +193,62 @@
             "support": {
                 "issues": "https://github.com/php-architecture-kit/graph/issues",
                 "source": "https://github.com/php-architecture-kit/graph"
+            },
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
+        },
+        {
+            "name": "php-architecture-kit/lazy-operators",
+            "version": "dev-master",
+            "dist": {
+                "type": "path",
+                "url": "packages/lazy-operators",
+                "reference": "5f2a9f39cab8239dbd6c2b0067f752139832a01e"
+            },
+            "require": {
+                "php": "^8.1"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^10.5"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "PhpArchitecture\\LazyOperators\\": "src/"
+                }
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "PhpArchitecture\\LazyOperators\\Tests\\": "tests/"
+                }
+            },
+            "scripts": {
+                "test": [
+                    "phpunit"
+                ]
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Patryk Baszak",
+                    "email": "patryk.baszak@gmail.com",
+                    "homepage": "https://patrykbaszak.com/"
+                }
+            ],
+            "description": "Lazy, composable expression operators (arithmetic, comparison, logical, conditional) for building deferred data-transformation flows in PHP.",
+            "homepage": "https://github.com/php-architecture-kit/lazy-operators",
+            "keywords": [
+                "expressions",
+                "framework-agnostic",
+                "lazy-operators"
+            ],
+            "support": {
+                "issues": "https://github.com/php-architecture-kit/lazy-operators/issues",
+                "source": "https://github.com/php-architecture-kit/lazy-operators"
             },
             "transport-options": {
                 "symlink": true,
@@ -7709,6 +7765,7 @@
         "php-architecture-kit/clock": 20,
         "php-architecture-kit/domain-core": 20,
         "php-architecture-kit/graph": 20,
+        "php-architecture-kit/lazy-operators": 20,
         "php-architecture-kit/state-machine": 20,
         "php-architecture-kit/technical": 20,
         "php-architecture-kit/uuid": 20

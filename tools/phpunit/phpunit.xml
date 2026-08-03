@@ -36,6 +36,9 @@
         <testsuite name="State Machine Package Test Suite">
             <directory>../../packages/state-machine/tests</directory>
         </testsuite>
+        <testsuite name="Lazy Operators Package Test Suite">
+            <directory>../../packages/lazy-operators/tests</directory>
+        </testsuite>
     </testsuites>
 
     <source restrictNotices="true" restrictWarnings="true">
