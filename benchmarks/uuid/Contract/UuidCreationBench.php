@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Benchmarks\PhpArchitecture\Uuid\Contract;
 
-use PhpArchitecture\Uuid\Uuid;
+use PhpArchitecture\Uuid\Foundation\Uuid;
 use PhpBench\Attributes as Bench;
 
 #[Bench\Warmup(1)]
