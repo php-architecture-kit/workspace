@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace Benchmarks\PhpArchitecture\Uuid;
 
 use Benchmarks\PhpArchitecture\Uuid\Contract\UuidCreationBench as Contract;
-use PhpArchitecture\Uuid\Bridge\Ramsey\RamseyUuidProvider;
-use PhpArchitecture\Uuid\Bridge\Symfony\SymfonyUuidProvider;
-use PhpArchitecture\Uuid\Exception\InvalidUuidException;
-use PhpArchitecture\Uuid\Provider\UuidProviderRegistry;
-use PhpArchitecture\Uuid\Uuid;
+use PhpArchitecture\Uuid\Infrastructure\Bridge\Ramsey\RamseyUuidProvider;
+use PhpArchitecture\Uuid\Infrastructure\Bridge\Symfony\SymfonyUuidProvider;
+use PhpArchitecture\Uuid\Foundation\Exception\InvalidUuidException;
+use PhpArchitecture\Uuid\Foundation\Provider\UuidProviderRegistry;
+use PhpArchitecture\Uuid\Foundation\Uuid;
 use PhpBench\Attributes as Bench;
 use Exception;
 use Generator;
