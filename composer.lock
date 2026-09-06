@@ -8,15 +8,15 @@
     "packages": [
         {
             "name": "php-architecture-kit/actor",
-            "version": "dev-main",
+            "version": "dev-chore/update-uuid-foundation-namespace",
             "dist": {
                 "type": "path",
                 "url": "packages/actor",
-                "reference": "4979549d47baf7a8a61e72ed43af9441be2c22ce"
+                "reference": "8a2bd675190eb1297e876125d562226d809b9a25"
             },
             "require": {
                 "php": "^7.4 || ^8.0",
-                "php-architecture-kit/uuid": "^1.0 || @dev"
+                "php-architecture-kit/uuid": "^2.0 || @dev"
             },
             "type": "library",
             "autoload": {
@@ -155,11 +155,14 @@
             "dist": {
                 "type": "path",
                 "url": "packages/graph",
-                "reference": "a0568c2f39ff51234780028ac70760b4f4c7989e"
+                "reference": "f2430aad6324f1769827147bdfebbbae0a09164d"
             },
             "require": {
                 "php": "^8.0",
                 "php-architecture-kit/uuid": "*"
+            },
+            "conflict": {
+                "php-architecture-kit/uuid": "<2.0"
             },
             "type": "library",
             "extra": {
@@ -205,13 +208,21 @@
             "dist": {
                 "type": "path",
                 "url": "packages/lazy-operators",
-                "reference": "5f2a9f39cab8239dbd6c2b0067f752139832a01e"
+                "reference": "bc0b99627d46220e3e6af38b6d0bfd7acb0c4a16"
             },
             "require": {
-                "php": "^8.1"
+                "php": "^8.4"
             },
             "require-dev": {
-                "phpunit/phpunit": "^10.5"
+                "friendsofphp/php-cs-fixer": "*",
+                "monolog/monolog": "^3.0",
+                "phpstan/phpstan": "*",
+                "phpunit/phpunit": "^10.5",
+                "psr/log": "^3.0"
+            },
+            "suggest": {
+                "ext-bcmath": "For arbitrary-precision arithmetic (bcadd, bcsub, bcmul, bcdiv, bccomp) usable via Foundation\\Expression\\Extension\\BcMath.",
+                "ext-math": "For additional math functions (e.g. gcd, factorial) usable with the arithmetic operators."
             },
             "type": "library",
             "autoload": {
@@ -226,7 +237,23 @@
             },
             "scripts": {
                 "test": [
-                    "phpunit"
+                    "bin/phpunit"
+                ],
+                "test:coverage": [
+                    "@putenv XDEBUG_MODE=coverage",
+                    "@test --do-not-cache-result --coverage-cobertura var/coverage/phpunit-coverage.xml"
+                ],
+                "code:fix": [
+                    "vendor/bin/php-cs-fixer --config=tools/php-cs-fixer/php-cs-fixer.php fix"
+                ],
+                "code:fix:dry": [
+                    "vendor/bin/php-cs-fixer --config=tools/php-cs-fixer/php-cs-fixer.php check --diff"
+                ],
+                "code:analyse": [
+                    "vendor/bin/phpstan analyse src -c tools/phpstan/phpstan.neon"
+                ],
+                "code:analyse:b": [
+                    "vendor/bin/phpstan analyse src -c tools/phpstan/phpstan.neon --generate-baseline tools/phpstan/baseline.neon --allow-empty-baseline"
                 ]
             },
             "license": [
@@ -261,7 +288,7 @@
             "dist": {
                 "type": "path",
                 "url": "packages/state-machine",
-                "reference": "b020fbfde32bde2fa138dbb81a7630a5949d701f"
+                "reference": "a265a65aac8e9889eb7332f9a21cbcf09e416d76"
             },
             "require": {
                 "php": "^8.4",
@@ -269,13 +296,13 @@
                 "php-architecture-kit/domain-core": "^1.0",
                 "php-architecture-kit/graph": ">=1.0.1",
                 "php-architecture-kit/technical": "^1.0",
-                "php-architecture-kit/uuid": "^1.1",
+                "php-architecture-kit/uuid": "^2.0",
                 "psr/clock": "^1.0",
                 "psr/container": "^2.0"
             },
             "conflict": {
                 "php-architecture-kit/graph": "<1.0.1",
-                "php-architecture-kit/uuid": "<1.1"
+                "php-architecture-kit/uuid": "<2.0"
             },
             "require-dev": {
                 "jawira/plantuml-encoding": "^1.1",
@@ -317,7 +344,7 @@
         },
         {
             "name": "php-architecture-kit/technical",
-            "version": "dev-main",
+            "version": "1.0.1",
             "dist": {
                 "type": "path",
                 "url": "packages/technical",
@@ -365,30 +392,71 @@
         },
         {
             "name": "php-architecture-kit/uuid",
-            "version": "dev-main",
+            "version": "2.0.0",
             "dist": {
                 "type": "path",
                 "url": "packages/uuid",
-                "reference": "302dd279db4485aa90ae46d8410368e3c63c9684"
+                "reference": "5cf0c0eb2fec1002f5251139b2220e6f3fc74b8a"
             },
             "require": {
-                "php": "^7.4 || ^8.0",
+                "php": "^8.0",
                 "psr/clock": "^1.0"
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "*",
+                "phpbench/phpbench": "*",
+                "phpmd/phpmd": "*",
+                "phpstan/phpstan": "*",
+                "phpunit/phpunit": "*",
+                "ramsey/uuid": "*",
+                "rector/rector": "*",
+                "symfony/uid": "*"
             },
             "suggest": {
                 "ramsey/uuid": "Allows using Ramsey UUID as provider implementation",
                 "symfony/uid": "Allows using Symfony UID component as provider implementation"
             },
             "type": "library",
-            "extra": {
-                "branch-alias": {
-                    "dev-main": "1.1.x-dev"
-                }
-            },
             "autoload": {
                 "psr-4": {
                     "PhpArchitecture\\Uuid\\": "src/"
                 }
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "PhpArchitecture\\Uuid\\Tests\\": "tests/",
+                    "PhpArchitecture\\Uuid\\Benchmarks\\": "benchmarks/"
+                }
+            },
+            "scripts": {
+                "benchmark": [
+                    "vendor/bin/phpbench run benchmarks --config=tools/phpbench/phpbench.json --report=by_method"
+                ],
+                "code:fix": [
+                    "vendor/bin/php-cs-fixer --config=tools/php-cs-fixer/php-cs-fixer.php fix"
+                ],
+                "code:fix:dry": [
+                    "vendor/bin/php-cs-fixer --config=tools/php-cs-fixer/php-cs-fixer.php check --diff"
+                ],
+                "code:analyse": [
+                    "vendor/bin/phpstan analyse src -c tools/phpstan/phpstan.neon"
+                ],
+                "code:analyse:b": [
+                    "vendor/bin/phpstan analyse src -c tools/phpstan/phpstan.neon --generate-baseline tools/phpstan/baseline.neon --allow-empty-baseline"
+                ],
+                "code:rector": [
+                    "vendor/bin/rector process --config tools/phprector/rector.php"
+                ],
+                "code:rector:dry": [
+                    "vendor/bin/rector process --dry-run --config tools/phprector/rector.php"
+                ],
+                "test": [
+                    "vendor/bin/phpunit --configuration tools/phpunit/phpunit.xml --do-not-record-test-run-history"
+                ],
+                "test:coverage": [
+                    "@putenv XDEBUG_MODE=coverage",
+                    "@phpunit --log-junit var/coverage/phpunit-report.xml --coverage-cobertura var/coverage/phpunit-coverage.xml --coverage-html var/coverage/html"
+                ]
             },
             "license": [
                 "MIT"
@@ -7776,5 +7844,5 @@
         "php": "*"
     },
     "platform-dev": {},
-    "plugin-api-version": "2.6.0"
+    "plugin-api-version": "2.9.0"
 }
