@@ -15,9 +15,6 @@
     </php>
 
     <testsuites>
-        <testsuite name="Actor Package Test Suite">
-            <directory>../../packages/actor/tests</directory>
-        </testsuite>
         <testsuite name="Clock Package Test Suite">
             <directory>../../packages/clock/tests</directory>
         </testsuite>
