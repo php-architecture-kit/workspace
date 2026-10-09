@@ -3,7 +3,9 @@
 $finder = (new PhpCsFixer\Finder())
     ->in([
         dirname(__DIR__, 2)
-    ]);
+    ])
+    // parser test fixtures: must stay byte-for-byte as written
+    ->exclude(['assets']);
 
 return (new PhpCsFixer\Config())
     ->setCacheFile(__DIR__ . '/.php-cs-fixer.cache')

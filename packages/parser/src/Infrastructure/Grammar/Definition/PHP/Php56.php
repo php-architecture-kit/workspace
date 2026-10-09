@@ -38,7 +38,6 @@ class Php56 extends Whitespace
             Rule::token('shortOpenTagWithEcho', '<?=', ['_opener'], NodeType::Structure),
             Rule::token('aspOpenTagWithEcho', '<%=', ['_opener'], NodeType::Structure),
             Rule::expr('scriptOpenTag', "<script[ \\t\\r\\n]+language[ \\t\\r\\n]*=[ \\t\\r\\n]*(\"php\"|'php'|php)[ \\t\\r\\n]*>", true, ['_opener']),
-
             Rule::taggedWith("_opener")
                 ->startRegion("code", true)
                 ->setInheritanceFromGlobal()
@@ -47,7 +46,6 @@ class Php56 extends Whitespace
                     Rule::token('closeTag', '?>', [], NodeType::Structure)->closeRegion(true),
                     Rule::token('aspCloseTag', '%>', [], NodeType::Structure)->closeRegion(true),
                     Rule::keyword('</script>', true, 'scriptCloseTag')->closeRegion(true),
-
                     Rule::token('semicolon', ';', type: NodeType::Structure),
                     Rule::token('colon', ':', type: NodeType::Structure),
 
@@ -108,11 +106,10 @@ class Php56 extends Whitespace
 
                                                 return;
                                             }
-                                        }
+                                        },
                                     ),
                                 )
                                 ->closeWith(Rule::ref('semicolon'), false, false, false),
-
                             EventSubscriber::on(TokenAddedEvent::class, static function (TokenAddedEvent $event, TokenizationContext $context): void {
                                 if ($event->token->name !== 'semicolon' || $context->getCurrentRegion()->getName() !== 'ifStatement') {
                                     return;
@@ -121,7 +118,6 @@ class Php56 extends Whitespace
                                 $currentRegion = $context->getCurrentRegion();
                                 $currentRegion->setMeta('closeIfNotFollowedBy', true);
                             }),
-
                             EventSubscriber::on(TokenMatchedEvent::class, static function (TokenMatchedEvent $event, TokenizationContext $context): void {
                                 $currentRegion = $context->getCurrentRegion();
                                 if ($currentRegion->getName() !== 'ifStatement' || $currentRegion->getMeta('closeIfNotFollowedBy') !== true) {
@@ -146,7 +142,6 @@ class Php56 extends Whitespace
                                     $context->escapeToRegion($parentRegion);
                                 }
                             })->priority(100),
-
                             EventSubscriber::on(
                                 TokenRegionReturnEvent::class,
                                 static function (TokenRegionReturnEvent $event, TokenizationContext $context): void {
@@ -164,7 +159,7 @@ class Php56 extends Whitespace
 
                                         return;
                                     }
-                                }
+                                },
                             ),
                         ),
                 ),

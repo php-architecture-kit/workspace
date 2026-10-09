@@ -56,8 +56,6 @@ composer code:fix                   # php-cs-fixer, apply fixes
 composer code:fix:dry                # php-cs-fixer, dry-run/diff only
 composer code:analyse               # phpstan level 8 against packages/*/src
 composer code:analyse:b             # regenerate the phpstan baseline
-
-composer benchmark:uuid             # phpbench for packages/uuid
 ```
 
 Test suites are wired per-package in `tools/phpunit/phpunit.xml` (only submodule packages + `parser`
@@ -123,6 +121,6 @@ this model, including the Task ↔ TaskHandler ↔ TransitionCondition resumptio
 
 - `bin/console` at the workspace root wires together the `parser` CLI commands and the `state-machine`
   `PrintStateMachineCommand`.
-- `benchmarks/uuid` holds phpbench cases for the `uuid` package (autoloaded under
-  `Benchmarks\PhpArchitecture\Uuid\`).
+- phpbench cases for `uuid` live inside the package itself (`packages/uuid/benchmarks`); run them
+  standalone from `packages/uuid/` with `composer benchmark`.
 - `.personal/` is scratch/notes content, not part of any package.
