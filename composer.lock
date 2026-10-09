@@ -4,57 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "f1faddd7f754ebeb199376228460bdec",
+    "content-hash": "bed230041913925af7c16e63dc7f7f9c",
     "packages": [
-        {
-            "name": "php-architecture-kit/actor",
-            "version": "dev-2177daf2655089c6eec7a42c77fbb7c918581fd1",
-            "dist": {
-                "type": "path",
-                "url": "packages/actor",
-                "reference": "160df8b32ebbd2aeaeb185dc816bfc9f4f62de74"
-            },
-            "require": {
-                "php": "^8.0"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "PhpArchitecture\\Actor\\": "src/"
-                }
-            },
-            "autoload-dev": {
-                "psr-4": {
-                    "PhpArchitecture\\Actor\\Tests\\": "tests/"
-                }
-            },
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "email": "patryk.baszak@gmail.com",
-                    "name": "Patryk Baszak",
-                    "homepage": "https://patrykbaszak.com/"
-                }
-            ],
-            "description": "Actor abstraction for PHP applications - represents who performs actions in the system.",
-            "homepage": "https://github.com/php-architecture-kit/actor",
-            "keywords": [
-                "actor",
-                "ddd",
-                "framework-agnostic",
-                "identity"
-            ],
-            "support": {
-                "issues": "https://github.com/php-architecture-kit/actor/issues",
-                "source": "https://github.com/php-architecture-kit/actor"
-            },
-            "transport-options": {
-                "symlink": true,
-                "relative": true
-            }
-        },
         {
             "name": "php-architecture-kit/clock",
             "version": "dev-main",
@@ -7938,7 +7889,6 @@
     "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": {
-        "php-architecture-kit/actor": 20,
         "php-architecture-kit/clock": 20,
         "php-architecture-kit/domain-core": 20,
         "php-architecture-kit/graph": 20,

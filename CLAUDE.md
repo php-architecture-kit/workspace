@@ -11,7 +11,7 @@ in `packages/<name>` as a **git submodule** with its own repo, license, README, 
 workspace wires them together via a Composer `path` repository (`packages/*`, symlinked) so cross-package
 `require` entries resolve to the local checkout instead of Packagist.
 
-Published packages (submodules, listed in `.gitmodules`): `actor`, `clock`, `domain-core`, `graph`,
+Published packages (submodules, listed in `.gitmodules`): `clock`, `domain-core`, `graph`,
 `uuid`, `technical`, `state-machine`, `lazy-operators`.
 
 Other directories under `packages/` (`address`, `clean-architecture`, `ddd`, `domain-constraint`,
@@ -30,7 +30,6 @@ Other directories under `packages/` (`address`, `clean-architecture`, `ddd`, `do
 ```
 clock ──▶ (psr/clock only)
 uuid ──▶ psr/clock
-actor ──▶ uuid
 graph ──▶ uuid                              (PHP ^8.0)
 domain-core, technical ──▶ (zero deps)
 state-machine ──▶ clock, graph, domain-core, uuid, technical, psr/container   (PHP ^8.4)
