@@ -106,7 +106,7 @@
         },
         {
             "name": "php-architecture-kit/graph",
-            "version": "dev-main",
+            "version": "1.1.0",
             "dist": {
                 "type": "path",
                 "url": "packages/graph",
@@ -239,24 +239,24 @@
         },
         {
             "name": "php-architecture-kit/state-machine",
-            "version": "dev-d7a0756aba4854e2138030c2b9852eff3d38c845",
+            "version": "1.7.0",
             "dist": {
                 "type": "path",
                 "url": "packages/state-machine",
-                "reference": "a265a65aac8e9889eb7332f9a21cbcf09e416d76"
+                "reference": "ed31afe072190f49344f24d12c4339650e727b47"
             },
             "require": {
                 "php": "^8.4",
                 "php-architecture-kit/clock": "^1.0",
                 "php-architecture-kit/domain-core": "^1.0",
-                "php-architecture-kit/graph": ">=1.0.1",
+                "php-architecture-kit/graph": "^1.1",
                 "php-architecture-kit/technical": "^1.0",
                 "php-architecture-kit/uuid": "^2.0",
                 "psr/clock": "^1.0",
                 "psr/container": "^2.0"
             },
             "conflict": {
-                "php-architecture-kit/graph": "<1.0.1",
+                "php-architecture-kit/graph": "<1.1",
                 "php-architecture-kit/uuid": "<2.0"
             },
             "require-dev": {
