@@ -30,16 +30,23 @@ Other directories under `packages/` (`address`, `clean-architecture`, `ddd`, `do
 ```
 clock ──▶ (psr/clock only)
 uuid ──▶ psr/clock
-graph ──▶ uuid                              (PHP ^8.0)
+graph ──▶ uuid                              (PHP ^8.2)
 domain-core, technical ──▶ (zero deps)
 state-machine ──▶ clock, graph, domain-core, uuid, technical, psr/container   (PHP ^8.4)
 parser ──▶ uuid                              (PHP ^8.0)
 lazy-operators ──▶ (zero deps)               (PHP ^8.4)
 ```
 
-**PHP version split matters**: most packages target `^7.4 || ^8.0`, but `state-machine` and
-`lazy-operators` require `^8.4` (asymmetric visibility, readonly classes). Don't backport 8.4-only
-syntax into the lower-baseline packages.
+**PHP version split matters** (PHP 7 is no longer supported): `clock`, `domain-core`, `technical`,
+`uuid` and `parser` target `^8.0`; `graph` requires `^8.2` (enums, readonly classes);
+`state-machine` and `lazy-operators` require `^8.4` (asymmetric visibility). Don't use syntax newer
+than a package's minimum — each package's `tools/phpstan/phpstan.neon` pins `phpVersion` to it, so
+its CI fails on newer syntax/features (the workspace-level phpstan config does not).
+
+**Per-package CI**: every published package has its own `.github/workflows/ci.yml` (modelled on
+`uuid`: tests on PHP 8.5, PHPStan, PHP CS Fixer) running the package's own composer scripts
+(`test`, `code:analyse`, `code:fix:dry`) against a standalone install — so a package must declare
+in its own `composer.json` everything its src/tests need, even if the workspace happens to provide it.
 
 ## Common commands
 
