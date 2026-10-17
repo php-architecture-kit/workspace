@@ -1,0 +1,11 @@
+{
+    "private": true,
+    "workspaces": [
+        "demo",
+        "packages/*/assets"
+    ],
+    "scripts": {
+        "demo:dev": "npm run dev -w demo",
+        "demo:build": "npm run build -w demo"
+    }
+}

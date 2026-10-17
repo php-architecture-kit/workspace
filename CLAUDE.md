@@ -131,3 +131,10 @@ this model, including the Task ↔ TaskHandler ↔ TransitionCondition resumptio
 - phpbench cases for `uuid` live inside the package itself (`packages/uuid/benchmarks`); run them
   standalone from `packages/uuid/` with `composer benchmark`.
 - `.personal/` is scratch/notes content, not part of any package.
+- `demo/` is the Symfony demo app (`php-architecture-kit/demo`) with its own `vendor/`; a path
+  repository (`../packages/*`) makes it use the local packages. Layout follows the application
+  archetype from `packages/clean-architecture/README.md` (Kernel in
+  `src/Shared/Framework/Infrastructure`, pages in `src/<Module>/Presentation`). Frontend is React +
+  TSX in `demo/assets/`, built with Vite (`pentatrion/vite-bundle`); the root `package.json` declares
+  npm workspaces (`demo`, `packages/*/assets`). To install, launch and verify it, follow
+  `.ai/skills/run-demo/SKILL.md`.

@@ -1,0 +1,7 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ props.title }}{% endblock %}
+
+{% block body %}
+    <div data-react-component="ShowcaseHome" data-props="{{ props|json_encode }}"></div>
+{% endblock %}
