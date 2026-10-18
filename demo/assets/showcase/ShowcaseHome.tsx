@@ -6,6 +6,7 @@ type StackItem = {
 type PackageItem = {
     name: string;
     description: string;
+    url: string;
 };
 
 export type ShowcaseHomeProps = {
@@ -37,9 +38,11 @@ export default function ShowcaseHome({ title, stack, packages }: ShowcaseHomePro
                 ) : (
                     <ul className="packages">
                         {packages.map((item) => (
-                            <li key={item.name} className="package">
-                                <h3>{item.name}</h3>
-                                <p>{item.description}</p>
+                            <li key={item.name}>
+                                <a className="package" href={item.url}>
+                                    <h3>{item.name}</h3>
+                                    <p>{item.description}</p>
+                                </a>
                             </li>
                         ))}
                     </ul>

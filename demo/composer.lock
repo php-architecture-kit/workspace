@@ -4,8 +4,68 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "edcd3654dfd66db74f9e4b399a450f40",
+    "content-hash": "c85acc7eab88b1cf3026ffe78d63a914",
     "packages": [
+        {
+            "name": "brick/math",
+            "version": "1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/brick/math.git",
+                "reference": "2effe05d2177c451b86c6a073196a4034c02f211"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/brick/math/zipball/2effe05d2177c451b86c6a073196a4034c02f211",
+                "reference": "2effe05d2177c451b86c6a073196a4034c02f211",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^8.2"
+            },
+            "require-dev": {
+                "phpstan/phpstan": "2.2.13",
+                "phpstan/phpstan-phpunit": "2.0.18",
+                "phpunit/phpunit": "^11.5"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Brick\\Math\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "Arbitrary-precision arithmetic library",
+            "keywords": [
+                "Arbitrary-precision",
+                "BigInteger",
+                "BigRational",
+                "arithmetic",
+                "bigdecimal",
+                "bignum",
+                "bignumber",
+                "brick",
+                "decimal",
+                "integer",
+                "math",
+                "mathematics",
+                "rational"
+            ],
+            "support": {
+                "issues": "https://github.com/brick/math/issues",
+                "source": "https://github.com/brick/math/tree/1.0.0"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/BenMorel",
+                    "type": "github"
+                }
+            ],
+            "time": "2026-09-12T10:28:18+00:00"
+        },
         {
             "name": "pentatrion/vite-bundle",
             "version": "v8.2.4",
@@ -68,6 +128,271 @@
             "time": "2026-03-22T11:41:50+00:00"
         },
         {
+            "name": "php-architecture-kit/clock",
+            "version": "1.1.0",
+            "dist": {
+                "type": "path",
+                "url": "../packages/clock",
+                "reference": "6e09a0c5b2f72f7d70052c7272565c1e7c73de0e"
+            },
+            "require": {
+                "php": "^8.0",
+                "psr/clock": "^1.0"
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "*",
+                "phpstan/phpstan": "*",
+                "phpunit/phpunit": "*"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-main": "1.1.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "PhpArchitecture\\Clock\\": "src/"
+                }
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "PhpArchitecture\\Clock\\Tests\\": "tests/"
+                }
+            },
+            "scripts": {
+                "code:fix": [
+                    "vendor/bin/php-cs-fixer --config=tools/php-cs-fixer/php-cs-fixer.php fix"
+                ],
+                "code:fix:dry": [
+                    "vendor/bin/php-cs-fixer --config=tools/php-cs-fixer/php-cs-fixer.php check --diff"
+                ],
+                "code:analyse": [
+                    "vendor/bin/phpstan analyse src -c tools/phpstan/phpstan.neon"
+                ],
+                "code:analyse:b": [
+                    "vendor/bin/phpstan analyse src -c tools/phpstan/phpstan.neon --generate-baseline tools/phpstan/baseline.neon --allow-empty-baseline"
+                ],
+                "test": [
+                    "vendor/bin/phpunit --configuration tools/phpunit/phpunit.xml --do-not-record-test-run-history"
+                ],
+                "test:coverage": [
+                    "@putenv XDEBUG_MODE=coverage",
+                    "@test --log-junit var/coverage/phpunit-report.xml --coverage-cobertura var/coverage/phpunit-coverage.xml --coverage-html var/coverage/html"
+                ]
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "email": "patryk.baszak@gmail.com",
+                    "name": "Patryk Baszak",
+                    "homepage": "https://patrykbaszak.com/"
+                }
+            ],
+            "description": "Another Clock implementation but if you allow the PHP Architecture library to be used on your domains, then you may prefer `new SystemClock` from that library rather than any other.",
+            "homepage": "https://github.com/php-architecture-kit/clock",
+            "keywords": [
+                "clock",
+                "ddd",
+                "framework-agnostic"
+            ],
+            "support": {
+                "issues": "https://github.com/php-architecture-kit/clock/issues",
+                "source": "https://github.com/php-architecture-kit/clock"
+            },
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
+        },
+        {
+            "name": "php-architecture-kit/lazy-operators",
+            "version": "dev-master",
+            "dist": {
+                "type": "path",
+                "url": "../packages/lazy-operators",
+                "reference": "9810fff29dcf23a4de2bb71b650aecc3a332d021"
+            },
+            "require": {
+                "php": "^8.4"
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "*",
+                "monolog/monolog": "^3.0",
+                "phpstan/phpstan": "*",
+                "phpunit/phpunit": "^10.5",
+                "psr/log": "^3.0"
+            },
+            "suggest": {
+                "ext-bcmath": "For arbitrary-precision arithmetic (bcadd, bcsub, bcmul, bcdiv, bccomp) usable via Foundation\\Expression\\Extension\\BcMath.",
+                "ext-math": "For additional math functions (e.g. gcd, factorial) usable with the arithmetic operators."
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.7.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "PhpArchitecture\\LazyOperators\\": "src/"
+                }
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "PhpArchitecture\\LazyOperators\\Tests\\": "tests/"
+                }
+            },
+            "scripts": {
+                "test": [
+                    "bin/phpunit"
+                ],
+                "test:coverage": [
+                    "@putenv XDEBUG_MODE=coverage",
+                    "@test --do-not-cache-result --coverage-cobertura var/coverage/phpunit-coverage.xml"
+                ],
+                "code:fix": [
+                    "vendor/bin/php-cs-fixer --config=tools/php-cs-fixer/php-cs-fixer.php fix"
+                ],
+                "code:fix:dry": [
+                    "vendor/bin/php-cs-fixer --config=tools/php-cs-fixer/php-cs-fixer.php check --diff"
+                ],
+                "code:analyse": [
+                    "vendor/bin/phpstan analyse src -c tools/phpstan/phpstan.neon"
+                ],
+                "code:analyse:b": [
+                    "vendor/bin/phpstan analyse src -c tools/phpstan/phpstan.neon --generate-baseline tools/phpstan/baseline.neon --allow-empty-baseline"
+                ]
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Patryk Baszak",
+                    "email": "patryk.baszak@gmail.com",
+                    "homepage": "https://patrykbaszak.com/"
+                }
+            ],
+            "description": "Lazy, composable expression operators (arithmetic, comparison, logical, conditional) for building deferred data-transformation flows in PHP.",
+            "homepage": "https://github.com/php-architecture-kit/lazy-operators",
+            "keywords": [
+                "expressions",
+                "framework-agnostic",
+                "lazy-operators"
+            ],
+            "support": {
+                "issues": "https://github.com/php-architecture-kit/lazy-operators/issues",
+                "source": "https://github.com/php-architecture-kit/lazy-operators"
+            },
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
+        },
+        {
+            "name": "php-architecture-kit/uuid",
+            "version": "dev-main",
+            "dist": {
+                "type": "path",
+                "url": "../packages/uuid",
+                "reference": "0b2e439c3be683e93c46e698e0efb861ee595a31"
+            },
+            "require": {
+                "php": "^8.0",
+                "psr/clock": "^1.0"
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "*",
+                "phpbench/phpbench": "*",
+                "phpmd/phpmd": "*",
+                "phpstan/phpstan": "*",
+                "phpunit/phpunit": "*",
+                "ramsey/uuid": "*",
+                "rector/rector": "*",
+                "symfony/uid": "*"
+            },
+            "suggest": {
+                "ramsey/uuid": "Allows using Ramsey UUID as provider implementation",
+                "symfony/uid": "Allows using Symfony UID component as provider implementation"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-main": "2.0.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "PhpArchitecture\\Uuid\\": "src/"
+                }
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "PhpArchitecture\\Uuid\\Tests\\": "tests/",
+                    "PhpArchitecture\\Uuid\\Benchmarks\\": "benchmarks/"
+                }
+            },
+            "scripts": {
+                "benchmark": [
+                    "vendor/bin/phpbench run benchmarks --config=tools/phpbench/phpbench.json --report=by_method"
+                ],
+                "code:fix": [
+                    "vendor/bin/php-cs-fixer --config=tools/php-cs-fixer/php-cs-fixer.php fix"
+                ],
+                "code:fix:dry": [
+                    "vendor/bin/php-cs-fixer --config=tools/php-cs-fixer/php-cs-fixer.php check --diff"
+                ],
+                "code:analyse": [
+                    "vendor/bin/phpstan analyse src -c tools/phpstan/phpstan.neon"
+                ],
+                "code:analyse:b": [
+                    "vendor/bin/phpstan analyse src -c tools/phpstan/phpstan.neon --generate-baseline tools/phpstan/baseline.neon --allow-empty-baseline"
+                ],
+                "code:rector": [
+                    "vendor/bin/rector process --config tools/phprector/rector.php"
+                ],
+                "code:rector:dry": [
+                    "vendor/bin/rector process --dry-run --config tools/phprector/rector.php"
+                ],
+                "test": [
+                    "vendor/bin/phpunit --configuration tools/phpunit/phpunit.xml --do-not-record-test-run-history"
+                ],
+                "test:coverage": [
+                    "@putenv XDEBUG_MODE=coverage",
+                    "@phpunit --log-junit var/coverage/phpunit-report.xml --coverage-cobertura var/coverage/phpunit-coverage.xml --coverage-html var/coverage/html"
+                ]
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "email": "patryk.baszak@gmail.com",
+                    "name": "Patryk Baszak",
+                    "homepage": "https://patrykbaszak.com/"
+                }
+            ],
+            "description": "UUID Value Object with provider-agnostic facade and optional interoperability with popular UUID libraries.",
+            "homepage": "https://github.com/php-architecture-kit/uuid",
+            "keywords": [
+                "ddd",
+                "framework-agnostic",
+                "identifier",
+                "uuid"
+            ],
+            "support": {
+                "issues": "https://github.com/php-architecture-kit/uuid/issues",
+                "source": "https://github.com/php-architecture-kit/uuid"
+            },
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
+        },
+        {
             "name": "psr/cache",
             "version": "3.0.0",
             "source": {
@@ -115,6 +440,54 @@
                 "source": "https://github.com/php-fig/cache/tree/3.0.0"
             },
             "time": "2021-02-03T23:26:27+00:00"
+        },
+        {
+            "name": "psr/clock",
+            "version": "1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/php-fig/clock.git",
+                "reference": "e41a24703d4560fd0acb709162f73b8adfc3aa0d"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/php-fig/clock/zipball/e41a24703d4560fd0acb709162f73b8adfc3aa0d",
+                "reference": "e41a24703d4560fd0acb709162f73b8adfc3aa0d",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.0 || ^8.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Psr\\Clock\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "PHP-FIG",
+                    "homepage": "https://www.php-fig.org/"
+                }
+            ],
+            "description": "Common interface for reading the clock.",
+            "homepage": "https://github.com/php-fig/clock",
+            "keywords": [
+                "clock",
+                "now",
+                "psr",
+                "psr-20",
+                "time"
+            ],
+            "support": {
+                "issues": "https://github.com/php-fig/clock/issues",
+                "source": "https://github.com/php-fig/clock/tree/1.0.0"
+            },
+            "time": "2022-11-25T14:36:26+00:00"
         },
         {
             "name": "psr/container",
@@ -268,6 +641,160 @@
                 "source": "https://github.com/php-fig/log/tree/3.0.2"
             },
             "time": "2024-09-11T13:17:53+00:00"
+        },
+        {
+            "name": "ramsey/collection",
+            "version": "2.1.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/ramsey/collection.git",
+                "reference": "344572933ad0181accbf4ba763e85a0306a8c5e2"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/ramsey/collection/zipball/344572933ad0181accbf4ba763e85a0306a8c5e2",
+                "reference": "344572933ad0181accbf4ba763e85a0306a8c5e2",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^8.1"
+            },
+            "require-dev": {
+                "captainhook/plugin-composer": "^5.3",
+                "ergebnis/composer-normalize": "^2.45",
+                "fakerphp/faker": "^1.24",
+                "hamcrest/hamcrest-php": "^2.0",
+                "jangregor/phpstan-prophecy": "^2.1",
+                "mockery/mockery": "^1.6",
+                "php-parallel-lint/php-console-highlighter": "^1.0",
+                "php-parallel-lint/php-parallel-lint": "^1.4",
+                "phpspec/prophecy-phpunit": "^2.3",
+                "phpstan/extension-installer": "^1.4",
+                "phpstan/phpstan": "^2.1",
+                "phpstan/phpstan-mockery": "^2.0",
+                "phpstan/phpstan-phpunit": "^2.0",
+                "phpunit/phpunit": "^10.5",
+                "ramsey/coding-standard": "^2.3",
+                "ramsey/conventional-commits": "^1.6",
+                "roave/security-advisories": "dev-latest"
+            },
+            "type": "library",
+            "extra": {
+                "captainhook": {
+                    "force-install": true
+                },
+                "ramsey/conventional-commits": {
+                    "configFile": "conventional-commits.json"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Ramsey\\Collection\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Ben Ramsey",
+                    "email": "ben@benramsey.com",
+                    "homepage": "https://benramsey.com"
+                }
+            ],
+            "description": "A PHP library for representing and manipulating collections.",
+            "keywords": [
+                "array",
+                "collection",
+                "hash",
+                "map",
+                "queue",
+                "set"
+            ],
+            "support": {
+                "issues": "https://github.com/ramsey/collection/issues",
+                "source": "https://github.com/ramsey/collection/tree/2.1.1"
+            },
+            "time": "2025-03-22T05:38:12+00:00"
+        },
+        {
+            "name": "ramsey/uuid",
+            "version": "4.9.4",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/ramsey/uuid.git",
+                "reference": "75d73f48d02797c2c285a7e9f348fadc0102ffe2"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/ramsey/uuid/zipball/75d73f48d02797c2c285a7e9f348fadc0102ffe2",
+                "reference": "75d73f48d02797c2c285a7e9f348fadc0102ffe2",
+                "shasum": ""
+            },
+            "require": {
+                "brick/math": "^0.8.16 || ^0.9 || ^0.10 || ^0.11 || ^0.12 || ^0.13 || ^0.14 || ^0.15 || ^0.16 || ^0.17 || ^0.18 || ^0.19 || ^0.20 || ^1.0",
+                "php": "^8.0",
+                "ramsey/collection": "^1.2 || ^2.0"
+            },
+            "replace": {
+                "rhumsaa/uuid": "self.version"
+            },
+            "require-dev": {
+                "captainhook/captainhook": "^5.25",
+                "captainhook/plugin-composer": "^5.3",
+                "dealerdirect/phpcodesniffer-composer-installer": "^1.0",
+                "ergebnis/composer-normalize": "^2.47",
+                "mockery/mockery": "^1.6",
+                "paragonie/random-lib": "^2",
+                "php-mock/php-mock": "^2.6",
+                "php-mock/php-mock-mockery": "^1.5",
+                "php-parallel-lint/php-parallel-lint": "^1.4.0",
+                "phpbench/phpbench": "^1.2.14",
+                "phpstan/extension-installer": "^1.4",
+                "phpstan/phpstan": "^2.1",
+                "phpstan/phpstan-mockery": "^2.0",
+                "phpstan/phpstan-phpunit": "^2.0",
+                "phpunit/phpunit": "^9.6",
+                "slevomat/coding-standard": "^8.18",
+                "squizlabs/php_codesniffer": "^3.13"
+            },
+            "suggest": {
+                "ext-bcmath": "Enables faster math with arbitrary-precision integers using BCMath.",
+                "ext-gmp": "Enables faster math with arbitrary-precision integers using GMP.",
+                "ext-uuid": "Enables the use of PeclUuidTimeGenerator and PeclUuidRandomGenerator.",
+                "paragonie/random-lib": "Provides RandomLib for use with the RandomLibAdapter",
+                "ramsey/uuid-doctrine": "Allows the use of Ramsey\\Uuid\\Uuid as Doctrine field type."
+            },
+            "type": "library",
+            "extra": {
+                "captainhook": {
+                    "force-install": true
+                }
+            },
+            "autoload": {
+                "files": [
+                    "src/functions.php"
+                ],
+                "psr-4": {
+                    "Ramsey\\Uuid\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "A PHP library for generating and working with universally unique identifiers (UUIDs).",
+            "keywords": [
+                "guid",
+                "identifier",
+                "uuid"
+            ],
+            "support": {
+                "issues": "https://github.com/ramsey/uuid/issues",
+                "source": "https://github.com/ramsey/uuid/tree/4.9.4"
+            },
+            "time": "2026-09-16T11:39:30+00:00"
         },
         {
             "name": "symfony/asset",
@@ -2314,6 +2841,89 @@
             "time": "2026-09-25T15:46:47+00:00"
         },
         {
+            "name": "symfony/polyfill-uuid",
+            "version": "v1.43.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/polyfill-uuid.git",
+                "reference": "b23ff8245cc5c4479ea2be3d0132d2e6dd433993"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/polyfill-uuid/zipball/b23ff8245cc5c4479ea2be3d0132d2e6dd433993",
+                "reference": "b23ff8245cc5c4479ea2be3d0132d2e6dd433993",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.2"
+            },
+            "provide": {
+                "ext-uuid": "*"
+            },
+            "suggest": {
+                "ext-uuid": "For best performance"
+            },
+            "type": "library",
+            "extra": {
+                "thanks": {
+                    "url": "https://github.com/symfony/polyfill",
+                    "name": "symfony/polyfill"
+                }
+            },
+            "autoload": {
+                "files": [
+                    "bootstrap.php"
+                ],
+                "psr-4": {
+                    "Symfony\\Polyfill\\Uuid\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Grégoire Pineau",
+                    "email": "lyrixx@lyrixx.info"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "https://symfony.com/contributors"
+                }
+            ],
+            "description": "Symfony polyfill for uuid functions",
+            "homepage": "https://symfony.com",
+            "keywords": [
+                "compatibility",
+                "polyfill",
+                "portable",
+                "uuid"
+            ],
+            "support": {
+                "source": "https://github.com/symfony/polyfill-uuid/tree/v1.43.0"
+            },
+            "funding": [
+                {
+                    "url": "https://symfony.com/sponsor",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/fabpot",
+                    "type": "github"
+                },
+                {
+                    "url": "https://github.com/nicolas-grekas",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+                    "type": "tidelift"
+                }
+            ],
+            "time": "2026-09-24T05:20:52+00:00"
+        },
+        {
             "name": "symfony/routing",
             "version": "v8.1.9",
             "source": {
@@ -2929,6 +3539,84 @@
             "time": "2026-10-09T16:13:24+00:00"
         },
         {
+            "name": "symfony/uid",
+            "version": "v8.1.9",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/uid.git",
+                "reference": "cb487cf30380f0b0b090973bb9c0588193c06685"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/uid/zipball/cb487cf30380f0b0b090973bb9c0588193c06685",
+                "reference": "cb487cf30380f0b0b090973bb9c0588193c06685",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=8.4.1",
+                "symfony/polyfill-uuid": "^1.15"
+            },
+            "require-dev": {
+                "symfony/console": "^7.4|^8.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Symfony\\Component\\Uid\\": ""
+                },
+                "exclude-from-classmap": [
+                    "/Tests/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Grégoire Pineau",
+                    "email": "lyrixx@lyrixx.info"
+                },
+                {
+                    "name": "Nicolas Grekas",
+                    "email": "p@tchwork.com"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "https://symfony.com/contributors"
+                }
+            ],
+            "description": "Provides an object-oriented API to generate and represent UIDs",
+            "homepage": "https://symfony.com",
+            "keywords": [
+                "UID",
+                "ulid",
+                "uuid"
+            ],
+            "support": {
+                "source": "https://github.com/symfony/uid/tree/v8.1.9"
+            },
+            "funding": [
+                {
+                    "url": "https://symfony.com/sponsor",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/fabpot",
+                    "type": "github"
+                },
+                {
+                    "url": "https://github.com/nicolas-grekas",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+                    "type": "tidelift"
+                }
+            ],
+            "time": "2026-10-12T14:32:04+00:00"
+        },
+        {
             "name": "symfony/var-dumper",
             "version": "v8.1.9",
             "source": {
@@ -3257,7 +3945,7 @@
     ],
     "packages-dev": [],
     "aliases": [],
-    "minimum-stability": "stable",
+    "minimum-stability": "dev",
     "stability-flags": {},
     "prefer-stable": true,
     "prefer-lowest": false,

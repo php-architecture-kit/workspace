@@ -21,7 +21,18 @@ final class HomeController extends AbstractController
                     ['label' => 'PHP', 'value' => PHP_VERSION],
                     ['label' => 'Symfony', 'value' => Kernel::VERSION],
                 ],
-                'packages' => [],
+                'packages' => [
+                    [
+                        'name' => 'uuid',
+                        'description' => 'Generate and inspect UUIDs (v1–v8, nil, max) through php-architecture-kit/uuid.',
+                        'url' => $this->generateUrl('uuid_page'),
+                    ],
+                    [
+                        'name' => 'lazy-operators',
+                        'description' => 'Build an expression tree from data with ExpressionBuilder, bind its inputs and evaluate it.',
+                        'url' => $this->generateUrl('lazy_operators_page'),
+                    ],
+                ],
             ],
         ]);
     }

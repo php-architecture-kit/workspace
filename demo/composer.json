@@ -3,7 +3,7 @@
     "description": "Symfony demo application showcasing PHP Architecture Kit packages.",
     "type": "project",
     "license": "MIT",
-    "minimum-stability": "stable",
+    "minimum-stability": "dev",
     "prefer-stable": true,
     "repositories": [
         {
@@ -19,12 +19,17 @@
         "ext-ctype": "*",
         "ext-iconv": "*",
         "pentatrion/vite-bundle": "^8.2",
+        "php-architecture-kit/clock": "^1.1",
+        "php-architecture-kit/lazy-operators": "^1.6",
+        "php-architecture-kit/uuid": "^2.0",
+        "ramsey/uuid": "^4.9",
         "symfony/console": "8.1.*",
         "symfony/dotenv": "8.1.*",
         "symfony/flex": "^2",
         "symfony/framework-bundle": "8.1.*",
         "symfony/runtime": "8.1.*",
         "symfony/twig-bundle": "8.1.*",
+        "symfony/uid": "8.1.*",
         "symfony/yaml": "8.1.*"
     },
     "config": {

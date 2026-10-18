@@ -21,3 +21,9 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+
+    # lazy-operators: the reflection-driven registry and the builder that reads it
+    PhpArchitecture\LazyOperators\Foundation\Registry\ExpressionRegistryInterface:
+        factory: ['PhpArchitecture\LazyOperators\Infrastructure\Registry\ExpressionRegistry', 'default']
+
+    PhpArchitecture\LazyOperators\Application\Builder\ExpressionBuilder: ~
