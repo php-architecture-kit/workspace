@@ -32,6 +32,11 @@ final class HomeController extends AbstractController
                         'description' => 'Build an expression tree from data with ExpressionBuilder, bind its inputs and evaluate it.',
                         'url' => $this->generateUrl('lazy_operators_page'),
                     ],
+                    [
+                        'name' => 'state-machine',
+                        'description' => 'Drive an ATM and an elevator: graph workflows that wait, time out and resume from a saved Execution.',
+                        'url' => $this->generateUrl('state_machine_page'),
+                    ],
                 ],
             ],
         ]);

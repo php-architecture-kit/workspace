@@ -137,4 +137,4 @@ this model, including the Task ↔ TaskHandler ↔ TransitionCondition resumptio
   `src/Shared/Framework/Infrastructure`, pages in `src/<Module>/Presentation`). Frontend is React +
   TSX in `demo/assets/`, built with Vite (`pentatrion/vite-bundle`); the root `package.json` declares
   npm workspaces (`demo`, `packages/*/assets`). To install, launch and verify it, follow
-  `.ai/skills/run-demo/SKILL.md`.
+  `.ai/skills/run-demo/SKILL.md`. Its functional tests run from `demo/` with `php bin/phpunit`.
