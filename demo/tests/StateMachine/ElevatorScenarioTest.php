@@ -52,13 +52,40 @@ final class ElevatorScenarioTest extends ScenarioTestCase
 
         $snapshot = $this->tick(1);
         self::assertSame('closed', $snapshot['panel']['car']['doors']);
+        self::assertSame(['demo.elevator.idle'], self::at($snapshot), 'no pointer of a reopened window is left behind');
     }
 
-    public function testCloseButtonShortensTheDoorWindow(): void
+    public function testCloseButtonWinsTheRaceAgainstTheDoorTimer(): void
     {
         $this->act('carCall', ['floor' => 0]);
         $snapshot = $this->act('closeButton');
         self::assertSame('closed', $snapshot['panel']['car']['doors']);
+        self::assertSame(['demo.elevator.idle', 'demo.elevator.door-timer'], self::at($snapshot), 'the losing timer still runs');
+
+        $snapshot = $this->tick(self::DOORS);
+        self::assertSame(['demo.elevator.idle'], self::at($snapshot), 'the race absorbs the late timer');
+    }
+
+    public function testEveryLapHasItsOwnRaceWinner(): void
+    {
+        // lap 1: "close" wins, its timer keeps running
+        $this->act('carCall', ['floor' => 0]);
+        $this->act('closeButton');
+
+        // lap 2 opens the doors before the old timer ends: the timer wins this time
+        $snapshot = $this->act('carCall', ['floor' => 0]);
+        self::assertSame('open', $snapshot['panel']['car']['doors']);
+        $snapshot = $this->tick(self::DOORS - 1);
+        self::assertSame('open', $snapshot['panel']['car']['doors'], 'the late timer of lap 1 does not close lap 2');
+        $snapshot = $this->tick(1);
+        self::assertSame('closed', $snapshot['panel']['car']['doors']);
+        self::assertSame(['demo.elevator.idle'], self::at($snapshot));
+
+        // lap 3: "close" wins again
+        $this->act('carCall', ['floor' => 0]);
+        $snapshot = $this->act('closeButton');
+        self::assertSame('closed', $snapshot['panel']['car']['doors']);
+        $snapshot = $this->tick(self::DOORS);
         self::assertSame(['demo.elevator.idle'], self::at($snapshot));
     }
 
@@ -98,7 +125,7 @@ final class ElevatorScenarioTest extends ScenarioTestCase
 
         $snapshot = $this->act('passengers', ['delta' => -3]);
         self::assertFalse($snapshot['panel']['car']['alarm']);
-        self::assertSame(['demo.elevator.doors'], self::at($snapshot));
+        self::assertSame(['demo.elevator.door-button', 'demo.elevator.door-timer'], self::at($snapshot), 'a new door window races again');
     }
 
     public function testStopHaltsTheRideUntilReleased(): void

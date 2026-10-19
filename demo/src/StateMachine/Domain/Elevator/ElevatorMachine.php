@@ -9,6 +9,7 @@ use PhpArchitecture\Demo\StateMachine\Domain\Shared\Step\StepNode;
 use PhpArchitecture\Demo\StateMachine\Domain\Shared\World;
 use PhpArchitecture\StateMachine\Foundation\Component\Await\AwaitStateComponent;
 use PhpArchitecture\StateMachine\Foundation\Component\Choice\ChoiceComponent;
+use PhpArchitecture\StateMachine\Foundation\Component\Race\RaceComponent;
 use PhpArchitecture\StateMachine\Foundation\Execution\Execution;
 use PhpArchitecture\StateMachine\Foundation\State\States;
 use PhpArchitecture\StateMachine\Foundation\Transition\Condition\Output\TransitionConditionDecision;
@@ -16,8 +17,8 @@ use PhpArchitecture\StateMachine\Foundation\Transition\Condition\Output\Transiti
 /**
  * One elevator car - a single Execution that never ends: idle, ride, doors, again.
  *
- * Every lap re-enters the same components (the 2-second ride, the 5-second door window),
- * and the Execution is persisted between every request.
+ * Every lap re-enters the same components (the 2-second ride, the race between the "close" button
+ * and the 5-second door timer), and the Execution is persisted between every request.
  */
 final class ElevatorMachine extends DemoStateMachine
 {
@@ -47,6 +48,8 @@ final class ElevatorMachine extends DemoStateMachine
             'alarm' => false,
             'next' => null,
             'rideStartedAt' => null,
+            'doorsOpenedAt' => null,
+            'doorWindow' => 'over',
         ]);
         $world->put(self::CALLS, ['hall' => [], 'car' => []]);
 
@@ -76,16 +79,20 @@ final class ElevatorMachine extends DemoStateMachine
             $car = $world->get(self::CAR);
             $world->put(self::CAR, ['floor' => $car['floor'] + ($car['direction'] === 'up' ? 1 : -1), 'moving' => false]);
         });
-        $openDoors = $this->step('demo.elevator.open-doors', 'Open doors', static function (World $world): void {
+        $openDoors = $this->step('demo.elevator.open-doors', 'Open doors', static function (World $world) use ($clock): void {
             $car = $world->get(self::CAR);
             $calls = $world->get(self::CALLS);
             [$hall, $carCalls] = ScanPolicy::serve($car['floor'], $car['direction'], $calls['hall'], $calls['car']);
             $world->put(self::CALLS, ['hall' => $hall, 'car' => $carCalls]);
-            $world->put(self::CAR, ['doors' => 'open', 'alarm' => false]);
+            $world->put(self::CAR, ['doors' => 'open', 'alarm' => false, 'doorsOpenedAt' => $clock->now()->getTimestamp(), 'doorWindow' => 'open']);
         });
+        $doorButton = $this->step('demo.elevator.door-button', 'Watch "close" button');
+        $closePressed = $this->step('demo.elevator.close-pressed', '"Close" pressed');
+        $doorTimer = $this->step('demo.elevator.door-timer', 'Door timer');
+        $timeUp = $this->step('demo.elevator.time-up', '5 s passed');
         $closeDoors = $this->step('demo.elevator.close-doors', 'Close doors', static function (World $world): void {
             $world->remove(self::CLOSE_BUTTON);
-            $world->put(self::CAR, ['doors' => 'closing']);
+            $world->put(self::CAR, ['doors' => 'closing', 'doorWindow' => 'over']);
         });
         $overload = $this->step('demo.elevator.overload', 'Overload', static function (World $world): void {
             $world->put(self::CAR, ['doors' => 'open', 'alarm' => true]);
@@ -133,12 +140,20 @@ final class ElevatorMachine extends DemoStateMachine
             ScanPolicy::HALT => [$choose, 'nothing ahead'],
         ]);
 
-        // the doors stay open for 5 seconds - shorter when "close" is pressed
+        // the doors stay open until the "close" button or the 5-second timer, whichever comes first;
+        // both branches always reach the race (the button branch also when the window is over),
+        // so the loser of every lap is absorbed and the next lap starts clean
+        $this->then($openDoors, $doorButton);
+        $this->then($openDoors, $doorTimer);
+        $this->when($doorButton, $closePressed, static fn (World $world): bool => $world->has(self::CLOSE_BUTTON)
+            || $world->value(self::CAR, 'doorWindow') !== 'open', '"close" pressed');
+        $this->when($doorTimer, $timeUp, static fn (World $world): bool => $clock->now()->getTimestamp()
+            >= $world->value(self::CAR, 'doorsOpenedAt') + self::DOORS_SECONDS, '5 s passed');
         $this->place(
-            AwaitStateComponent::create('elevator-doors', self::CLOSE_BUTTON, timeout: self::DOORS_SECONDS, clock: $this->clock),
-            'demo.elevator.doors', 'Doors open (5 s)',
-            ['at' => $openDoors],
-            ['run' => [$closeDoors, '"close" pressed'], 'expired' => [$closeDoors, '5 s passed']],
+            RaceComponent::create('elevator-doors', ['button', 'timer']),
+            'demo.elevator.doors', 'Race: first closes',
+            ['button' => $closePressed, 'timer' => $timeUp],
+            ['winner' => [$closeDoors, 'first wins']],
         );
         $this->routes($closeDoors, static fn (World $world): string => match (true) {
             $world->has(self::OBSTRUCTION) => 'obstructed',

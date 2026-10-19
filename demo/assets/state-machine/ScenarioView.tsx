@@ -19,8 +19,9 @@ const INTRO: Record<ScenarioProps['id'], ReactNode> = {
     ),
     elevator: (
         <>
-            One <code>Execution</code> that never ends: idle, ride, doors - again and again, every lap re-entering the same components. Call the car,
-            block the doors, overload it or press STOP. Time only moves when you let it.
+            One <code>Execution</code> that never ends: idle, ride, doors - again and again, every lap re-entering the same components. The doors
+            close on whichever comes first, the "close" button or the 5-second timer: a <code>RaceComponent</code> that absorbs the late loser of
+            every lap. Call the car, block the doors, overload it or press STOP. Time only moves when you let it.
         </>
     ),
 };
