@@ -107,9 +107,9 @@ final class ElevatorScenario implements Scenario
         $world = new World($session->execution->states);
         $car = $world->get(ElevatorMachine::CAR);
 
-        // how far the car got between two floors; the ride component expires after RIDE_SECONDS + 1 whole seconds
+        // how far the car got between two floors; the ride component expires after RIDE_SECONDS
         $progress = $car['moving'] && $car['rideStartedAt'] !== null
-            ? min(1, ($session->time->getTimestamp() - $car['rideStartedAt']) / (ElevatorMachine::RIDE_SECONDS + 1))
+            ? min(1, ($session->time->getTimestamp() - $car['rideStartedAt']) / ElevatorMachine::RIDE_SECONDS)
             : 0;
 
         return [

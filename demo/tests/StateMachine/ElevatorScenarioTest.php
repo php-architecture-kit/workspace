@@ -4,14 +4,12 @@ declare(strict_types=1);
 
 namespace PhpArchitecture\Demo\Tests\StateMachine;
 
-/**
- * Note on timing: AwaitStateComponent expires when "now > expiresAt", so with whole-second
- * ticks a 2 s ride ends on the 3rd second and the 5 s door window closes on the 6th.
- */
+use PhpArchitecture\Demo\StateMachine\Domain\Elevator\ElevatorMachine;
+
 final class ElevatorScenarioTest extends ScenarioTestCase
 {
-    private const int RIDE = 3;
-    private const int DOORS = 6;
+    private const int RIDE = ElevatorMachine::RIDE_SECONDS;
+    private const int DOORS = ElevatorMachine::DOORS_SECONDS;
 
     protected function scenario(): string
     {

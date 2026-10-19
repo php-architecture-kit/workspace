@@ -21,7 +21,7 @@
         "pentatrion/vite-bundle": "^8.2",
         "php-architecture-kit/clock": "^1.2",
         "php-architecture-kit/lazy-operators": "^1.6",
-        "php-architecture-kit/state-machine": "^1.7.3",
+        "php-architecture-kit/state-machine": "^1.8.0",
         "php-architecture-kit/uuid": "^2.0",
         "ramsey/uuid": "^4.9",
         "symfony/console": "8.1.*",
