@@ -16,7 +16,8 @@ const COMPONENT_NAMES: Record<string, string> = {
     AwaitStateComponent: 'AwaitState',
     AsyncComponent: 'Async',
     ForkComponent: 'Fork',
-    AwaitAllComponent: 'AwaitAll',
+    JoinComponent: 'Join',
+    RaceComponent: 'Race',
     ChoiceComponent: 'Choice',
 };
 

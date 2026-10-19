@@ -13,7 +13,7 @@ use PhpArchitecture\Demo\StateMachine\Domain\Shared\Step\StepNode;
 use PhpArchitecture\Demo\StateMachine\Domain\Shared\World;
 use PhpArchitecture\StateMachine\Foundation\Component\Async\AsyncComponent;
 use PhpArchitecture\StateMachine\Foundation\Component\Await\AwaitStateComponent;
-use PhpArchitecture\StateMachine\Foundation\Component\AwaitAll\AwaitAllComponent;
+use PhpArchitecture\StateMachine\Foundation\Component\Join\JoinComponent;
 use PhpArchitecture\StateMachine\Foundation\Component\Fork\ForkComponent;
 use PhpArchitecture\StateMachine\Foundation\Definition\Definition;
 use PhpArchitecture\StateMachine\Foundation\Execution\Execution;
@@ -198,7 +198,7 @@ final class AtmMachine extends DemoStateMachine
         // counting the notes and printing the receipt run in parallel pointers
         $this->place(ForkComponent::create('atm-dispense', ['cash', 'receipt']), 'demo.atm.fork', 'Fork',
             ['trigger' => $dispense], ['cash' => [$countCash, 'cash'], 'receipt' => [$printReceipt, 'receipt']]);
-        $this->place(AwaitAllComponent::create('atm-dispense', ['cash', 'receipt']), 'demo.atm.join', 'Await all',
+        $this->place(JoinComponent::create('atm-dispense', ['cash', 'receipt']), 'demo.atm.join', 'Join',
             ['cash' => $countCash, 'receipt' => $printReceipt], ['done' => [$presentCash, 'both done']]);
 
         $this->place(AwaitStateComponent::create('atm-take-cash', self::CASH_TAKEN, timeout: self::INPUT_TIMEOUT, clock: $this->clock),
