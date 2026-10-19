@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4827e2e4257f47913e29336846da8959",
+    "content-hash": "2b4cb7736aefd96d0e89785c3f9395c8",
     "packages": [
         {
             "name": "brick/math",
@@ -133,7 +133,7 @@
             "dist": {
                 "type": "path",
                 "url": "../packages/clock",
-                "reference": "6e09a0c5b2f72f7d70052c7272565c1e7c73de0e"
+                "reference": "059a097704c356468cdc88eeaf277387e032fb50"
             },
             "require": {
                 "php": "^8.0",
@@ -147,7 +147,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-main": "1.1.x-dev"
+                    "dev-main": "1.2.x-dev"
                 }
             },
             "autoload": {
@@ -463,11 +463,11 @@
             "dist": {
                 "type": "path",
                 "url": "../packages/state-machine",
-                "reference": "79ce8257a94dc6240e7f2d2b064146a35c9401f8"
+                "reference": "325d10005b81eb50b6bf55aae62831c165980a72"
             },
             "require": {
                 "php": "^8.4",
-                "php-architecture-kit/clock": "^1.0",
+                "php-architecture-kit/clock": "^1.2",
                 "php-architecture-kit/domain-core": "^1.0",
                 "php-architecture-kit/graph": "^1.1",
                 "php-architecture-kit/technical": "^1.0",

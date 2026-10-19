@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace PhpArchitecture\Demo\StateMachine\Application;
 
+use PhpArchitecture\Clock\ManualClock;
 use PhpArchitecture\Demo\StateMachine\Application\Exception\ActionRejected;
 use PhpArchitecture\Demo\StateMachine\Domain\Shared\DemoStateMachine;
 use PhpArchitecture\StateMachine\Foundation\Task\Bus\TaskBusInterface;
@@ -24,7 +25,7 @@ interface Scenario
      * A new session; the previous one is given when the user restarts, so long-lived
      * outside systems (the bank) can survive.
      */
-    public function newSession(DemoStateMachine $machine, SimulationClock $clock, ?ScenarioSession $previous): ScenarioSession;
+    public function newSession(DemoStateMachine $machine, ManualClock $clock, ?ScenarioSession $previous): ScenarioSession;
 
     /**
      * An outside actor acts: writes states of the Execution (or of the simulated world around it).

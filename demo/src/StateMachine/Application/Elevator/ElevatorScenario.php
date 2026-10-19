@@ -7,7 +7,7 @@ namespace PhpArchitecture\Demo\StateMachine\Application\Elevator;
 use PhpArchitecture\Demo\StateMachine\Application\Exception\ActionRejected;
 use PhpArchitecture\Demo\StateMachine\Application\Scenario;
 use PhpArchitecture\Demo\StateMachine\Application\ScenarioSession;
-use PhpArchitecture\Demo\StateMachine\Application\SimulationClock;
+use PhpArchitecture\Clock\ManualClock;
 use PhpArchitecture\Demo\StateMachine\Domain\Elevator\ElevatorMachine;
 use PhpArchitecture\Demo\StateMachine\Domain\Shared\DemoStateMachine;
 use PhpArchitecture\Demo\StateMachine\Domain\Shared\World;
@@ -34,7 +34,7 @@ final class ElevatorScenario implements Scenario
         return new ElevatorMachine($handlers, $clock, $taskBus);
     }
 
-    public function newSession(DemoStateMachine $machine, SimulationClock $clock, ?ScenarioSession $previous): ScenarioSession
+    public function newSession(DemoStateMachine $machine, ManualClock $clock, ?ScenarioSession $previous): ScenarioSession
     {
         $session = new ScenarioSession(Execution::create(), $clock->now());
         $session->note('actor', 'the elevator is switched on');

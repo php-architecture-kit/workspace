@@ -7,7 +7,7 @@ namespace PhpArchitecture\Demo\Tests\StateMachine;
 use PhpArchitecture\Demo\StateMachine\Application\ScenarioRunner;
 use PhpArchitecture\Demo\StateMachine\Presentation\View\GraphLayout;
 use PhpArchitecture\StateMachine\Foundation\Task\Bus\Default\DeferredTaskBus;
-use PhpArchitecture\Demo\StateMachine\Application\SimulationClock;
+use PhpArchitecture\Clock\ManualClock;
 use Psr\Container\ContainerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
@@ -20,7 +20,7 @@ final class GraphLayoutTest extends KernelTestCase
         $layout = new GraphLayout();
 
         foreach ($runner->scenarios() as $id => $scenario) {
-            $machine = $scenario->machine($handlers, new SimulationClock(new \DateTimeImmutable()), new DeferredTaskBus());
+            $machine = $scenario->machine($handlers, ManualClock::at(new \DateTimeImmutable()), new DeferredTaskBus());
             $positions = $layout->of($id);
 
             self::assertSame([], array_values(array_diff(array_keys($machine->boxes()), array_keys($positions))), "{$id}: boxes without a position");

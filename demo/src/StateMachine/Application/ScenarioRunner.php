@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace PhpArchitecture\Demo\StateMachine\Application;
 
 use DateTimeImmutable;
+use PhpArchitecture\Clock\ManualClock;
 use PhpArchitecture\Demo\StateMachine\Application\Exception\ActionRejected;
 use PhpArchitecture\Demo\StateMachine\Domain\Shared\DemoStateMachine;
 use PhpArchitecture\StateMachine\Foundation\Execution\ExecutionStatus;
@@ -59,7 +60,7 @@ final class ScenarioRunner
         $scenario = $this->scenarios[$scenarioId] ?? throw new RuntimeException("Unknown scenario '{$scenarioId}'.");
         $stored = $this->store->load($scenarioId);
 
-        $clock = new SimulationClock($stored?->time ?? new DateTimeImmutable('2026-01-05 09:00:00'));
+        $clock = ManualClock::at($stored?->time ?? new DateTimeImmutable('2026-01-05 09:00:00'));
         $taskBus = new DeferredTaskBus($clock);
         $machine = $scenario->machine($this->handlers, $clock, $taskBus);
 
@@ -67,7 +68,7 @@ final class ScenarioRunner
         if ($session === null || $action === self::ACTION_RESET) {
             $session = $scenario->newSession($machine, $clock, $stored);
         } elseif ($action === self::ACTION_TICK) {
-            $clock->advance(max(1, min(120, (int) ($payload['seconds'] ?? 1))));
+            $clock->advanceSeconds(max(1, min(120, (int) ($payload['seconds'] ?? 1))));
             $session->time = $clock->now();
         } elseif ($action !== null) {
             $scenario->act($action, $payload, $session);

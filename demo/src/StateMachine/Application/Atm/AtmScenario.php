@@ -7,7 +7,7 @@ namespace PhpArchitecture\Demo\StateMachine\Application\Atm;
 use PhpArchitecture\Demo\StateMachine\Application\Exception\ActionRejected;
 use PhpArchitecture\Demo\StateMachine\Application\Scenario;
 use PhpArchitecture\Demo\StateMachine\Application\ScenarioSession;
-use PhpArchitecture\Demo\StateMachine\Application\SimulationClock;
+use PhpArchitecture\Clock\ManualClock;
 use PhpArchitecture\Demo\StateMachine\Domain\Atm\AtmMachine;
 use PhpArchitecture\Demo\StateMachine\Domain\Atm\Bank\Bank;
 use PhpArchitecture\Demo\StateMachine\Domain\Atm\Bank\BankAnswer;
@@ -50,7 +50,7 @@ final class AtmScenario implements Scenario
         return new AtmMachine($handlers, $clock, $taskBus);
     }
 
-    public function newSession(DemoStateMachine $machine, SimulationClock $clock, ?ScenarioSession $previous): ScenarioSession
+    public function newSession(DemoStateMachine $machine, ManualClock $clock, ?ScenarioSession $previous): ScenarioSession
     {
         $bank = $previous?->data['bank'] ?? Bank::withDemoAccounts();
         $session = new ScenarioSession(Execution::create(), $clock->now(), [
