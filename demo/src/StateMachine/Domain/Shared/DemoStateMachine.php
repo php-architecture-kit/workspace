@@ -16,7 +16,6 @@ use PhpArchitecture\StateMachine\Foundation\Node\Identity\NodeId;
 use PhpArchitecture\StateMachine\Foundation\Pointer\Strategy\Default\AllPointersStepStrategy;
 use PhpArchitecture\StateMachine\Foundation\StateMachine;
 use PhpArchitecture\StateMachine\Foundation\Task\Bus\TaskBusInterface;
-use PhpArchitecture\StateMachine\Foundation\Transition\Transition;
 use Psr\Clock\ClockInterface;
 use Psr\Container\ContainerInterface;
 use ReflectionClass;
@@ -111,10 +110,10 @@ abstract class DemoStateMachine extends StateMachine
             $this->outputLabels["{$box}>{$node->id->toString()}"][] = $outputLabel;
         }
 
-        $before = array_keys($this->graph->vertexStore->getVertices());
+        $before = array_keys($this->getNodes());
         $this->addDefinition($component);
 
-        foreach (array_diff(array_keys($this->graph->vertexStore->getVertices()), $before) as $id) {
+        foreach (array_diff(array_keys($this->getNodes()), $before) as $id) {
             $this->display[(string) $id] = $box;
         }
 
@@ -134,7 +133,7 @@ abstract class DemoStateMachine extends StateMachine
     {
         return (string) preg_replace_callback(
             '/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/',
-            fn (array $match): string => ($this->graph->vertexStore->getVertices()[$match[0]] ?? null)?->name() ?? $match[0],
+            fn (array $match): string => ($this->getNodes()[$match[0]] ?? null)?->name() ?? $match[0],
             $text,
         );
     }
@@ -159,8 +158,7 @@ abstract class DemoStateMachine extends StateMachine
     public function connections(): array
     {
         $connections = [];
-        foreach ($this->graph->edgeStore->getEdges() as $edge) {
-            assert($edge instanceof Transition);
+        foreach ($this->getTransitions() as $edge) {
             $from = $this->displayOf($edge->input);
             $to = $this->displayOf($edge->output);
             if ($from === $to) {

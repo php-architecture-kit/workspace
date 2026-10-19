@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "69ebd019ce0df9aa92b3202831085727",
+    "content-hash": "f474a7e50ca21a06c140e20b3b9b6629",
     "packages": [
         {
             "name": "brick/math",
@@ -463,7 +463,7 @@
             "dist": {
                 "type": "path",
                 "url": "../packages/state-machine",
-                "reference": "46481b0a65e554bed659d617fe16ef6a4bd54d21"
+                "reference": "97ac78b46512040667a0b866cb43ece9d52844cb"
             },
             "require": {
                 "php": "^8.4",
@@ -494,7 +494,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-main": "1.8.x-dev"
+                    "dev-main": "1.9.x-dev"
                 }
             },
             "autoload": {
