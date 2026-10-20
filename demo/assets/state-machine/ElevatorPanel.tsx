@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import type { Act, ElevatorPanelData } from './types';
 
 const ROW_H = 56;
@@ -15,6 +16,13 @@ export default function ElevatorPanel({ panel, busy, act }: ElevatorPanelProps) 
 
     // while riding, the car is part of the way to the next floor (simulated time, not wall clock)
     const position = car.floor + (car.moving ? (car.direction === 'up' ? 1 : -1) * car.progress : 0);
+
+    // reaching the floor and opening the doors arrive in one response: open the doors only once the car stopped sliding
+    const previousPosition = useRef(position);
+    const arriving = previousPosition.current !== position && car.doors === 'open';
+    useEffect(() => {
+        previousPosition.current = position;
+    }, [position]);
 
     return (
         <div className="lift">
@@ -51,7 +59,7 @@ export default function ElevatorPanel({ panel, busy, act }: ElevatorPanelProps) 
 
                 <div className="lift-shaft">
                     <div
-                        className={['lift-car', `lift-car-${car.doors}`, car.halted ? 'lift-car-halted' : '', car.alarm ? 'lift-car-alarm' : ''].join(' ')}
+                        className={['lift-car', `lift-car-${car.doors}`, arriving ? 'lift-car-arriving' : '', car.halted ? 'lift-car-halted' : '', car.alarm ? 'lift-car-alarm' : ''].join(' ')}
                         style={{
                             top: (top - position) * ROW_H + 4,
                             height: ROW_H - 8,

@@ -1279,6 +1279,11 @@ button.lift-call-on {
     transform: translateX(85%);
 }
 
+/* the doors open after the car has reached the floor (the top transition of .lift-car) */
+.lift-car-arriving .lift-door {
+    transition-delay: 900ms;
+}
+
 .lift-car-halted,
 .lift-car-alarm {
     border-color: var(--pak-danger);
