@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace PhpArchitecture\Demo\StateMachine\Domain\Shared\Step;
 
 use Closure;
-use PhpArchitecture\Demo\StateMachine\Domain\Shared\World;
+use PhpArchitecture\StateMachine\Foundation\State\States;
 use PhpArchitecture\StateMachine\Foundation\Node\Node;
 
 /**
@@ -18,7 +18,7 @@ final class StepNode extends Node
 {
     /**
      * @param string                $label  short caption shown in the graph
-     * @param Closure(World): void  $effect
+     * @param Closure(States): void  $effect
      */
     public function __construct(
         string $name,

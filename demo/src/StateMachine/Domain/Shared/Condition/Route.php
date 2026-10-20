@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace PhpArchitecture\Demo\StateMachine\Domain\Shared\Condition;
 
 use Closure;
-use PhpArchitecture\Demo\StateMachine\Domain\Shared\World;
 use PhpArchitecture\StateMachine\Foundation\State\States;
 use PhpArchitecture\StateMachine\Foundation\Transition\Condition\Output\TransitionConditionDecision;
 
@@ -18,7 +17,7 @@ use PhpArchitecture\StateMachine\Foundation\Transition\Condition\Output\Transiti
  */
 final readonly class Route implements LabeledCondition
 {
-    /** @param Closure(World): ?string $decide */
+    /** @param Closure(States): ?string $decide */
     public function __construct(
         private Closure $decide,
         public string $branch,
@@ -28,7 +27,7 @@ final readonly class Route implements LabeledCondition
 
     public function check(States $states): TransitionConditionDecision
     {
-        $decision = ($this->decide)(new World($states));
+        $decision = ($this->decide)($states);
 
         return match ($decision) {
             null => TransitionConditionDecision::Wait,

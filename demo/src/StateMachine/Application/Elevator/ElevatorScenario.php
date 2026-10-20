@@ -10,7 +10,7 @@ use PhpArchitecture\Demo\StateMachine\Application\ScenarioSession;
 use PhpArchitecture\Clock\ManualClock;
 use PhpArchitecture\Demo\StateMachine\Domain\Elevator\ElevatorMachine;
 use PhpArchitecture\Demo\StateMachine\Domain\Shared\DemoStateMachine;
-use PhpArchitecture\Demo\StateMachine\Domain\Shared\World;
+use PhpArchitecture\StateMachine\Foundation\State\States;
 use PhpArchitecture\StateMachine\Foundation\Execution\Execution;
 use PhpArchitecture\StateMachine\Foundation\Task\Bus\TaskBusInterface;
 use Psr\Clock\ClockInterface;
@@ -45,9 +45,9 @@ final class ElevatorScenario implements Scenario
 
     public function act(string $action, array $payload, ScenarioSession $session): void
     {
-        $world = new World($session->execution->states);
-        $car = $world->get(ElevatorMachine::CAR);
-        $calls = $world->get(ElevatorMachine::CALLS);
+        $states = $session->execution->states;
+        $car = $states->getState(ElevatorMachine::CAR)?->values() ?? [];
+        $calls = $states->getState(ElevatorMachine::CALLS)?->values() ?? [];
 
         switch ($action) {
             case 'hallCall':
@@ -58,14 +58,14 @@ final class ElevatorScenario implements Scenario
                 }
                 $call = "{$floor}:{$direction}";
                 if (!in_array($call, $calls['hall'], true)) {
-                    $world->put(ElevatorMachine::CALLS, ['hall' => [...$calls['hall'], $call]]);
+                    $states->defineOrModifyState(ElevatorMachine::CALLS, ['hall' => [...$calls['hall'], $call]]);
                 }
                 $session->note('actor', sprintf('someone on floor %d presses %s', $floor, $direction === 'up' ? '▲' : '▼'));
                 break;
             case 'carCall':
                 $floor = $this->floor($payload);
                 if (!in_array($floor, $calls['car'], true)) {
-                    $world->put(ElevatorMachine::CALLS, ['car' => [...$calls['car'], $floor]]);
+                    $states->defineOrModifyState(ElevatorMachine::CALLS, ['car' => [...$calls['car'], $floor]]);
                 }
                 $session->note('actor', "a passenger presses {$floor} in the car");
                 break;
@@ -73,11 +73,11 @@ final class ElevatorScenario implements Scenario
                 if ($car['doors'] !== 'open') {
                     throw new ActionRejected('The doors are not open.');
                 }
-                $world->put(ElevatorMachine::CLOSE_BUTTON, ['pressed' => true]);
+                $states->defineOrModifyState(ElevatorMachine::CLOSE_BUTTON, ['pressed' => true]);
                 $session->note('actor', 'a passenger presses "close doors"');
                 break;
             case 'obstruction':
-                $this->toggle($world, ElevatorMachine::OBSTRUCTION, ($payload['on'] ?? false) === true);
+                $this->toggle($states, ElevatorMachine::OBSTRUCTION, ($payload['on'] ?? false) === true);
                 $session->note('actor', ($payload['on'] ?? false) === true ? 'something blocks the doors' : 'the doorway is clear');
                 break;
             case 'passengers':
@@ -85,11 +85,11 @@ final class ElevatorScenario implements Scenario
                     throw new ActionRejected('Passengers can only get in or out through open doors.');
                 }
                 $delta = (int) ($payload['delta'] ?? 0);
-                $world->put(ElevatorMachine::CAR, ['load' => max(0, $car['load'] + $delta)]);
+                $states->defineOrModifyState(ElevatorMachine::CAR, ['load' => max(0, $car['load'] + $delta)]);
                 $session->note('actor', $delta > 0 ? "{$delta} passenger(s) get in" : abs($delta) . ' passenger(s) get out');
                 break;
             case 'stop':
-                $this->toggle($world, ElevatorMachine::STOP, ($payload['on'] ?? false) === true);
+                $this->toggle($states, ElevatorMachine::STOP, ($payload['on'] ?? false) === true);
                 $session->note('actor', ($payload['on'] ?? false) === true ? 'STOP is pressed' : 'STOP is released');
                 break;
             default:
@@ -104,8 +104,8 @@ final class ElevatorScenario implements Scenario
 
     public function panel(ScenarioSession $session): array
     {
-        $world = new World($session->execution->states);
-        $car = $world->get(ElevatorMachine::CAR);
+        $states = $session->execution->states;
+        $car = $states->getState(ElevatorMachine::CAR)?->values() ?? [];
 
         // how far the car got between two floors; the ride component expires after RIDE_SECONDS
         $progress = $car['moving'] && $car['rideStartedAt'] !== null
@@ -114,9 +114,9 @@ final class ElevatorScenario implements Scenario
 
         return [
             'car' => $car + ['progress' => $progress],
-            'calls' => $world->get(ElevatorMachine::CALLS),
-            'stop' => $world->has(ElevatorMachine::STOP),
-            'obstruction' => $world->has(ElevatorMachine::OBSTRUCTION),
+            'calls' => $states->getState(ElevatorMachine::CALLS)?->values() ?? [],
+            'stop' => $states->getState(ElevatorMachine::STOP) !== null,
+            'obstruction' => $states->getState(ElevatorMachine::OBSTRUCTION) !== null,
             'floors' => ElevatorMachine::TOP_FLOOR + 1,
             'capacity' => ElevatorMachine::CAPACITY,
             'timing' => ['ride' => ElevatorMachine::RIDE_SECONDS, 'doors' => ElevatorMachine::DOORS_SECONDS],
@@ -134,8 +134,8 @@ final class ElevatorScenario implements Scenario
         return $floor;
     }
 
-    private function toggle(World $world, string $state, bool $on): void
+    private function toggle(States $states, string $state, bool $on): void
     {
-        $on ? $world->put($state, ['active' => true]) : $world->remove($state);
+        $on ? $states->defineOrModifyState($state, ['active' => true]) : $states->removeStateByName($state);
     }
 }

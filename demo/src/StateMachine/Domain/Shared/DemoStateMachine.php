@@ -14,6 +14,7 @@ use PhpArchitecture\StateMachine\Foundation\Definition\Definition;
 use PhpArchitecture\StateMachine\Foundation\Execution\Execution;
 use PhpArchitecture\StateMachine\Foundation\Node\Identity\NodeId;
 use PhpArchitecture\StateMachine\Foundation\Pointer\Strategy\Default\AllPointersStepStrategy;
+use PhpArchitecture\StateMachine\Foundation\State\States;
 use PhpArchitecture\StateMachine\Foundation\StateMachine;
 use PhpArchitecture\StateMachine\Foundation\Task\Bus\TaskBusInterface;
 use Psr\Clock\ClockInterface;
@@ -59,10 +60,10 @@ abstract class DemoStateMachine extends StateMachine
     /** Places the first pointer and the initial business state of a new Execution. */
     abstract public function start(Execution $execution): void;
 
-    /** @param null|Closure(World): void $effect */
+    /** @param null|Closure(States): void $effect */
     protected function step(string $name, string $label, ?Closure $effect = null): StepNode
     {
-        $node = new StepNode($name, $label, $effect ?? static function (World $world): void {
+        $node = new StepNode($name, $label, $effect ?? static function (States $states): void {
         });
         $this->addNode($node);
         $this->display[$node->id->toString()] = $name;
@@ -76,14 +77,14 @@ abstract class DemoStateMachine extends StateMachine
         $this->addTransition($from->id, $to->id);
     }
 
-    /** @param Closure(World): bool $predicate */
+    /** @param Closure(States): bool $predicate */
     protected function when(StepNode $from, StepNode $to, Closure $predicate, string $label): void
     {
         $this->addTransition($from->id, $to->id, new When($predicate, $label));
     }
 
     /**
-     * @param Closure(World): ?string                    $decide
+     * @param Closure(States): ?string                    $decide
      * @param array<string,array{0:StepNode,1:string}>    $branches branch => [target, label]
      */
     protected function routes(StepNode $from, Closure $decide, array $branches): void

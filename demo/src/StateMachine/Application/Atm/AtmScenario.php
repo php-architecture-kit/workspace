@@ -15,7 +15,7 @@ use PhpArchitecture\Demo\StateMachine\Domain\Atm\Task\AuthorizeWithdrawal;
 use PhpArchitecture\Demo\StateMachine\Domain\Atm\Task\ReverseWithdrawal;
 use PhpArchitecture\Demo\StateMachine\Domain\Atm\Task\VerifyPin;
 use PhpArchitecture\Demo\StateMachine\Domain\Shared\DemoStateMachine;
-use PhpArchitecture\Demo\StateMachine\Domain\Shared\World;
+use PhpArchitecture\StateMachine\Foundation\State\States;
 use PhpArchitecture\StateMachine\Foundation\Component\Async\AsyncTaskHandledNotifier;
 use PhpArchitecture\StateMachine\Foundation\Execution\Execution;
 use PhpArchitecture\StateMachine\Foundation\Task\Bus\TaskEnvelope;
@@ -66,14 +66,14 @@ final class AtmScenario implements Scenario
 
     public function act(string $action, array $payload, ScenarioSession $session): void
     {
-        $world = new World($session->execution->states);
-        $atm = $world->get(AtmMachine::ATM);
+        $states = $session->execution->states;
+        $atm = $states->getState(AtmMachine::ATM)?->values() ?? [];
 
         match ($action) {
-            'insertCard' => $this->insertCard($world, $atm, (string) ($payload['card'] ?? ''), $session),
-            'key' => $this->pressKey($world, $atm, $payload, $session),
-            'takeCard' => $this->take($world, $atm['cardSlot'] === 'ejected', AtmMachine::CARD_TAKEN, ['cardSlot' => 'empty'], 'customer takes the card', $session),
-            'takeCash' => $this->take($world, $atm['cashSlot'] === 'presented', AtmMachine::CASH_TAKEN, ['cashSlot' => 'empty'], 'customer takes the cash', $session),
+            'insertCard' => $this->insertCard($states, $atm, (string) ($payload['card'] ?? ''), $session),
+            'key' => $this->pressKey($states, $atm, $payload, $session),
+            'takeCard' => $this->take($states, $atm['cardSlot'] === 'ejected', AtmMachine::CARD_TAKEN, ['cardSlot' => 'empty'], 'customer takes the card', $session),
+            'takeCash' => $this->take($states, $atm['cashSlot'] === 'presented', AtmMachine::CASH_TAKEN, ['cashSlot' => 'empty'], 'customer takes the cash', $session),
             'bankAuto' => $session->data['bankAuto'] = (bool) ($payload['on'] ?? true),
             'bankAnswer' => $this->answer($session, (string) ($payload['task'] ?? ''), ($payload['decline'] ?? false) === true),
             'bankLose' => $this->lose($session, (string) ($payload['task'] ?? '')),
@@ -96,12 +96,12 @@ final class AtmScenario implements Scenario
 
     public function panel(ScenarioSession $session): array
     {
-        $world = new World($session->execution->states);
+        $states = $session->execution->states;
         $bank = $this->bank($session);
 
         return [
-            'atm' => $world->get(AtmMachine::ATM),
-            'card' => $world->get(AtmMachine::CARD),
+            'atm' => $states->getState(AtmMachine::ATM)?->values() ?? [],
+            'card' => $states->getState(AtmMachine::CARD)?->values() ?? [],
             'cards' => [
                 ...array_map(
                     static fn (string $number, array $account): array => ['number' => $number, 'label' => "{$account['holder']} (PIN {$account['pin']})"],
@@ -131,7 +131,7 @@ final class AtmScenario implements Scenario
     }
 
     /** @param array<string,mixed> $atm */
-    private function insertCard(World $world, array $atm, string $number, ScenarioSession $session): void
+    private function insertCard(States $states, array $atm, string $number, ScenarioSession $session): void
     {
         if ($atm['mode'] !== 'insert-card') {
             throw new ActionRejected('The card slot is not ready.');
@@ -142,12 +142,12 @@ final class AtmScenario implements Scenario
             throw new ActionRejected('Unknown card.');
         }
 
-        $world->put(AtmMachine::CARD, [
+        $states->defineOrModifyState(AtmMachine::CARD, [
             'number' => $number,
             'holder' => $account['holder'] ?? '?',
             'readable' => $account !== null,
         ]);
-        $world->put(AtmMachine::ATM, ['cardSlot' => 'inside']);
+        $states->defineOrModifyState(AtmMachine::ATM, ['cardSlot' => 'inside']);
         $session->note('actor', 'customer inserts ' . ($account === null ? 'a damaged card' : "the card of {$account['holder']}"));
     }
 
@@ -155,7 +155,7 @@ final class AtmScenario implements Scenario
      * @param array<string,mixed> $atm
      * @param array<string,mixed> $payload
      */
-    private function pressKey(World $world, array $atm, array $payload, ScenarioSession $session): void
+    private function pressKey(States $states, array $atm, array $payload, ScenarioSession $session): void
     {
         $type = (string) ($payload['type'] ?? '');
         $allowed = match ($atm['mode']) {
@@ -180,7 +180,7 @@ final class AtmScenario implements Scenario
             $key['receipt'] = ($payload['receipt'] ?? false) === true;
         }
 
-        $world->put(AtmMachine::KEYPAD, $key);
+        $states->defineOrModifyState(AtmMachine::KEYPAD, $key);
         $session->note('actor', match ($type) {
             'pin' => 'customer enters a PIN',
             'amount' => sprintf('customer asks for %d%s', $key['value'], $key['receipt'] ? ' with a receipt' : ''),
@@ -189,14 +189,14 @@ final class AtmScenario implements Scenario
     }
 
     /** @param array<string,mixed> $atmChanges */
-    private function take(World $world, bool $possible, string $state, array $atmChanges, string $note, ScenarioSession $session): void
+    private function take(States $states, bool $possible, string $state, array $atmChanges, string $note, ScenarioSession $session): void
     {
         if (!$possible) {
             throw new ActionRejected('There is nothing to take.');
         }
 
-        $world->put($state, ['at' => $session->time->format('H:i:s')]);
-        $world->put(AtmMachine::ATM, $atmChanges);
+        $states->defineOrModifyState($state, ['at' => $session->time->format('H:i:s')]);
+        $states->defineOrModifyState(AtmMachine::ATM, $atmChanges);
         $session->note('actor', $note);
     }
 
@@ -219,7 +219,7 @@ final class AtmScenario implements Scenario
             return;
         }
 
-        (new World($execution->states))->put(AtmMachine::BANK_REPLY, ['task' => $name, 'approved' => $answer->approved, 'reason' => $answer->reason]);
+        $execution->states->defineOrModifyState(AtmMachine::BANK_REPLY, ['task' => $name, 'approved' => $answer->approved, 'reason' => $answer->reason]);
         $bank->commit($envelope->task, $answer);
         $session->note('task', sprintf('bank answers %s: %s', $name, $answer->reason));
     }
